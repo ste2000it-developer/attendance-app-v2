@@ -9,12 +9,12 @@ const ProfilePage = lazy(() => import("../features/profile/ProfilePage"));
 
 function NavIcon({ section }: { section: Section }) {
   const common = {
-    width: 21,
-    height: 21,
+    width: 22,
+    height: 22,
     viewBox: "0 0 24 24",
     fill: "none",
     stroke: "currentColor",
-    strokeWidth: 1.8,
+    strokeWidth: 1.85,
     strokeLinecap: "round" as const,
     strokeLinejoin: "round" as const,
     "aria-hidden": true as const
@@ -23,11 +23,9 @@ function NavIcon({ section }: { section: Section }) {
   if (section === "home") {
     return <svg {...common}><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z" /></svg>;
   }
-
   if (section === "leave") {
     return <svg {...common}><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 3v4M17 3v4M3 10h18M8 14h4" /></svg>;
   }
-
   return <svg {...common}><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>;
 }
 
@@ -53,10 +51,16 @@ function Navigation({ active, onNavigate }: { active: Section; onNavigate: (sect
 function Brand() {
   return (
     <div className="brand">
-      <span className="brand-icon" aria-hidden="true">S</span>
+      <span className="brand-icon" aria-hidden="true">
+        <svg viewBox="0 0 40 40" width="32" height="32" fill="none">
+          <circle cx="20" cy="20" r="13.5" stroke="currentColor" strokeWidth="2.4" opacity=".7" />
+          <path d="M20 10.5v10l7 4" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="20" cy="20" r="2.3" fill="currentColor" />
+        </svg>
+      </span>
       <div>
-        <span className="brand-name">STE2000</span>
-        <span className="brand-subtitle">Workforce Management</span>
+        <span className="brand-name">STE2000<span className="brand-accent">.</span></span>
+        <span className="brand-subtitle">ระบบบันทึกเวลาทำงาน</span>
       </div>
     </div>
   );
@@ -78,17 +82,20 @@ export default function App() {
         <Brand />
         <p className="sidebar-heading">เมนูหลัก</p>
         <Navigation active={active} onNavigate={setActive} />
-        <p className="sidebar-footnote">Attendance V2 · UI Preview</p>
+        <div className="sidebar-footnote">
+          <span className="sidebar-footnote-dot" aria-hidden="true" />
+          Attendance V2 <span>· เวอร์ชันทดลอง</span>
+        </div>
       </aside>
 
       <div className="workspace">
         <header className="topbar">
           <div className="mobile-brand"><Brand /></div>
           <div className="topbar-context">
-            <span className="eyebrow">ATTENDANCE V2</span>
+            <span className="eyebrow">ATTENDANCE SYSTEM</span>
             <strong>{sectionName}</strong>
           </div>
-          <span className="preview-pill">ตัวอย่าง UI</span>
+          <span className="preview-pill"><span aria-hidden="true" /> ตัวอย่าง UI</span>
         </header>
 
         <main className="page-main" id="main-content">
