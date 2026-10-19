@@ -75,8 +75,8 @@ function Brand() {
   );
 }
 
-function SectionContent({ active }: { active: Section }): ReactNode {
-  if (active === "home") return <HomePage />;
+function SectionContent({ active, onOpenLeave }: { active: Section; onOpenLeave: () => void }): ReactNode {
+  if (active === "home") return <HomePage onOpenLeave={onOpenLeave} />;
   if (active === "leave") return <LeavePage />;
   return <ProfilePage />;
 }
@@ -109,7 +109,7 @@ export default function App() {
 
         <main className="page-main" id="main-content">
           <Suspense fallback={<div className="panel loading-panel">กำลังเปิดหน้า...</div>}>
-            <SectionContent active={active} />
+            <SectionContent active={active} onOpenLeave={() => setActive("leave")} />
           </Suspense>
         </main>
 

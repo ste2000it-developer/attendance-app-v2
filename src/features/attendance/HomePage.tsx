@@ -64,10 +64,38 @@ function TodayDate() {
   return <span className="daily-date">{thaiDateFormatter.format(date)}</span>;
 }
 
-export function HomePage() {
+/**
+ * The friendly face deliberately follows the original concept: pale rounded
+ * square, dark-blue faceplate, two cyan capsule eyes, a small smile and dot.
+ * It is vector-only (no network image) and stays readable at small sizes.
+ */
+function CompanionFace({ status }: { status: DemoStatus }) {
+  const smile = status === "ready" ? "M46 68 Q52 72 58 68"
+    : status === "working" ? "M44 66 Q52 76 60 66" : "M43 65 Q52 77 61 65";
+
+  return (
+    <span className={`daily-companion-face daily-companion-${status}`} aria-hidden="true">
+      <svg viewBox="0 0 104 104" width="104" height="104" fill="none" focusable="false">
+        <rect width="104" height="104" rx="24" fill="#E8F2F9" />
+        <rect x="12" y="10" width="80" height="84" rx="29" fill="#D5E8F5" />
+        <rect x="20" y="21" width="64" height="62" rx="24" fill="#174563" />
+        <g className="daily-companion-eyes">
+          <rect x="32" y="41" width="12" height="20" rx="6" fill="#A5E1FA" />
+          <rect x="60" y="41" width="12" height="20" rx="6" fill="#A5E1FA" />
+        </g>
+        <path d={smile} stroke="#A5E1FA" strokeWidth="2.7" strokeLinecap="round" />
+        <circle cx="87" cy="18" r="7" fill="#47BFA9" stroke="#E8F2F9" strokeWidth="3" />
+      </svg>
+    </span>
+  );
+}
+
+export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
   // All actions are in-memory previews, never production clock-in/out.
   const [checkInAt, setCheckInAt] = useState<Date | null>(null);
   const [checkOutAt, setCheckOutAt] = useState<Date | null>(null);
+  const [helperOpen, setHelperOpen] = useState(false);
+  const [helperTopic, setHelperTopic] = useState<"attendance" | "gps" | null>(null);
 
   const status: DemoStatus = !checkInAt ? "ready" : !checkOutAt ? "working" : "finished";
   const statusText = status === "ready"
@@ -78,6 +106,21 @@ export function HomePage() {
     : status === "working" ? "ทดลองบันทึกเวลาเข้างานแล้ว" : "ทดลองบันทึกเวลาครบแล้ว";
   const buttonText = status === "ready"
     ? "ทดลองเข้างาน" : status === "working" ? "ทดลองเลิกงาน" : "เริ่มทดลองใหม่";
+
+  const companionGreeting = status === "ready" ? "สวัสดีครับ!"
+    : status === "working" ? "เริ่มงานแล้วครับ!" : "เรียบร้อยแล้วครับ!";
+  const companionMessage = status === "ready"
+    ? "วันนี้พร้อมเริ่มงานหรือยังครับ? ผมอยู่ตรงนี้ถ้าต้องการความช่วยเหลือ"
+    : status === "working"
+      ? "ทดลองเข้างานแล้วครับ เมื่อทำงานเสร็จ ลองกดเลิกงานได้เลย"
+      : "ทดลองเลิกงานครบแล้วครับ ขอบคุณสำหรับวันนี้!";
+  const helpMessage = helperTopic === "attendance"
+    ? status === "ready"
+      ? "กดปุ่มสีเขียว “ทดลองเข้างาน” ด้านล่างได้เลยครับ ข้อมูลจะไม่ถูกบันทึกจริง"
+      : status === "working"
+        ? "ตอนนี้อยู่ในสถานะทดลองทำงาน กดปุ่มสีส้มเพื่อทดลองเลิกงานได้ครับ"
+        : "คุณทดลองครบแล้ว กด “เริ่มทดลองใหม่” เพื่อกลับไปจุดเริ่มต้นได้ครับ"
+    : "ขณะนี้ Attendance V2 ยังไม่ได้เชื่อม GPS จึงยังไม่ตรวจสอบตำแหน่งจริงครับ";
 
   function handleDemo() {
     if (status === "ready") {
@@ -93,13 +136,42 @@ export function HomePage() {
   return (
     <div className="daily-home">
       <header className="daily-intro">
-        <div>
-          <div className="daily-kicker"><span aria-hidden="true" /> ระบบบันทึกเวลาทำงาน</div>
-          <h1>สวัสดีครับ<span className="daily-hi-dot" aria-hidden="true">.</span></h1>
-          <p>เริ่มต้นวันทำงานอย่างง่าย ๆ</p>
+        <div className="daily-welcome">
+          <CompanionFace status={status} />
+          <div className="daily-welcome-copy">
+            <span className="daily-kicker">ผู้ช่วยของคุณ <span className="daily-assistant-demo">DEMO</span></span>
+            <h1 aria-live="polite">{companionGreeting}</h1>
+            <p aria-live="polite">{companionMessage}</p>
+            <button
+              type="button"
+              className="daily-helper-toggle"
+              aria-expanded={helperOpen}
+              aria-controls="daily-helper-options"
+              onClick={() => {
+                setHelperOpen((open) => !open);
+                setHelperTopic(null);
+              }}
+            >
+              {helperOpen ? "ปิดคำแนะนำ" : "ให้ผมช่วยไหม?"}
+              <span aria-hidden="true">{helperOpen ? "−" : "↗"}</span>
+            </button>
+          </div>
         </div>
         <TodayDate />
       </header>
+
+      {helperOpen && (
+        <section className="daily-helper-options" id="daily-helper-options" aria-label="คำแนะนำจากผู้ช่วย">
+          <strong>อยากให้ช่วยเรื่องไหนครับ?</strong>
+          <div className="daily-helper-actions">
+            <button type="button" onClick={() => setHelperTopic("attendance")}>วิธีตอกบัตร</button>
+            <button type="button" onClick={() => setHelperTopic("gps")}>ตำแหน่ง GPS</button>
+            <button type="button" onClick={onOpenLeave}>ไปหน้าการลา <span aria-hidden="true">↗</span></button>
+          </div>
+          {helperTopic && <p className="daily-helper-response" role="status">{helpMessage}</p>}
+          <p className="daily-helper-disclaimer">ผู้ช่วยเวอร์ชันทดลอง · แนะนำจากสถานะในหน้านี้ ยังไม่ใช่ AI สนทนา</p>
+        </section>
+      )}
 
       <section className="daily-focus" aria-labelledby="daily-focus-title">
         <div className="daily-clock-area">
