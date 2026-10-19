@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./HomePage.css";
 
 type DemoStatus = "ready" | "working" | "finished";
-type IconName = "arrow" | "pin" | "clock" | "reset" | "check";
+type IconName = "arrow" | "pin" | "clock" | "reset" | "check" | "close" | "calendar";
 
 const thaiDateFormatter = new Intl.DateTimeFormat("th-TH", {
   weekday: "long",
@@ -28,7 +28,9 @@ function Icon({ name, size = 22 }: { name: IconName; size?: number }) {
     pin: <><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="2.5" /></>,
     clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
     reset: <><path d="M20 7v5h-5" /><path d="M4 17v-5h5" /><path d="M6 9a7 7 0 0 1 12-2l2 5M4 12l2 5a7 7 0 0 0 12-2" /></>,
-    check: <path d="m5 12 4.5 4.5L19 7" />
+    check: <path d="m5 12 4.5 4.5L19 7" />,
+    close: <path d="M6 6l12 12M18 6 6 18" />,
+    calendar: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 3v4M17 3v4M3 10h18" /></>
   };
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
@@ -96,6 +98,52 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
   const [checkOutAt, setCheckOutAt] = useState<Date | null>(null);
   const [helperOpen, setHelperOpen] = useState(false);
   const [helperTopic, setHelperTopic] = useState<"attendance" | "gps" | null>(null);
+  const helperDialogRef = useRef<HTMLElement | null>(null);
+  const helperTriggerRef = useRef<HTMLButtonElement | null>(null);
+
+  // An accessible modal: focus enters the dialog, stays inside it, and
+  // returns to the opener. Escape and the backdrop both close it.
+  useEffect(() => {
+    if (!helperOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    helperDialogRef.current?.querySelector<HTMLButtonElement>(".daily-sheet-close")?.focus();
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setHelperOpen(false);
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+
+      const elements = Array.from(
+        helperDialogRef.current?.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
+        ) ?? []
+      );
+      if (!elements.length) return;
+      const first = elements[0];
+      const last = elements[elements.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+      helperTriggerRef.current?.focus();
+    };
+  }, [helperOpen]);
 
   const status: DemoStatus = !checkInAt ? "ready" : !checkOutAt ? "working" : "finished";
   const statusText = status === "ready"
@@ -143,17 +191,19 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
             <h1 aria-live="polite">{companionGreeting}</h1>
             <p aria-live="polite">{companionMessage}</p>
             <button
+              ref={helperTriggerRef}
               type="button"
               className="daily-helper-toggle"
+              aria-haspopup="dialog"
               aria-expanded={helperOpen}
-              aria-controls="daily-helper-options"
+              aria-controls="daily-helper-dialog"
               onClick={() => {
-                setHelperOpen((open) => !open);
                 setHelperTopic(null);
+                setHelperOpen(true);
               }}
             >
-              {helperOpen ? "ปิดคำแนะนำ" : "ให้ผมช่วยไหม?"}
-              <span aria-hidden="true">{helperOpen ? "−" : "↗"}</span>
+              ให้ผมช่วยไหม?
+              <Icon name="arrow" size={17} />
             </button>
           </div>
         </div>
@@ -161,16 +211,71 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
       </header>
 
       {helperOpen && (
-        <section className="daily-helper-options" id="daily-helper-options" aria-label="คำแนะนำจากผู้ช่วย">
-          <strong>อยากให้ช่วยเรื่องไหนครับ?</strong>
-          <div className="daily-helper-actions">
-            <button type="button" onClick={() => setHelperTopic("attendance")}>วิธีตอกบัตร</button>
-            <button type="button" onClick={() => setHelperTopic("gps")}>ตำแหน่ง GPS</button>
-            <button type="button" onClick={onOpenLeave}>ไปหน้าการลา <span aria-hidden="true">↗</span></button>
-          </div>
-          {helperTopic && <p className="daily-helper-response" role="status">{helpMessage}</p>}
-          <p className="daily-helper-disclaimer">ผู้ช่วยเวอร์ชันทดลอง · แนะนำจากสถานะในหน้านี้ ยังไม่ใช่ AI สนทนา</p>
-        </section>
+        <div
+          className="daily-sheet-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setHelperOpen(false);
+          }}
+        >
+          <section
+            ref={helperDialogRef}
+            className="daily-helper-sheet"
+            id="daily-helper-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="daily-sheet-title"
+            aria-describedby="daily-sheet-description"
+            tabIndex={-1}
+          >
+            <div className="daily-sheet-grip" aria-hidden="true" />
+            <header className="daily-sheet-head">
+              <div className="daily-sheet-identity">
+                <span className="daily-sheet-avatar"><CompanionFace status={status} /></span>
+                <div>
+                  <span className="daily-sheet-eyebrow">ผู้ช่วยประจำแอป · DEMO</span>
+                  <h2 id="daily-sheet-title">มีอะไรให้ผมช่วยไหมครับ?</h2>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="daily-sheet-close"
+                aria-label="ปิดผู้ช่วย"
+                onClick={() => setHelperOpen(false)}
+              >
+                <Icon name="close" size={22} />
+              </button>
+            </header>
+            <p className="daily-sheet-description" id="daily-sheet-description">
+              เลือกสิ่งที่ต้องการได้เลยครับ
+            </p>
+            <div className="daily-sheet-options">
+              <button type="button" onClick={() => setHelperTopic("attendance")}>
+                <span className="daily-sheet-option-icon"><Icon name="clock" size={21} /></span>
+                <span>วิธีตอกบัตร</span>
+                <Icon name="arrow" size={19} />
+              </button>
+              <button type="button" onClick={() => setHelperTopic("gps")}>
+                <span className="daily-sheet-option-icon"><Icon name="pin" size={21} /></span>
+                <span>แก้ปัญหา GPS</span>
+                <Icon name="arrow" size={19} />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setHelperOpen(false);
+                  onOpenLeave();
+                }}
+              >
+                <span className="daily-sheet-option-icon"><Icon name="calendar" size={21} /></span>
+                <span>ช่วยเรื่องการลา</span>
+                <Icon name="arrow" size={19} />
+              </button>
+            </div>
+            {helperTopic && <p className="daily-sheet-response" role="status">{helpMessage}</p>}
+            <p className="daily-sheet-footnote">ผู้ช่วยเวอร์ชันทดลอง · ยังไม่ใช่ AI สนทนาและยังไม่เชื่อมข้อมูลจริง</p>
+          </section>
+        </div>
       )}
 
       <section className="daily-focus" aria-labelledby="daily-focus-title">
