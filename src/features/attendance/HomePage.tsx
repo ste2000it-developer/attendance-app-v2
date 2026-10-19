@@ -218,21 +218,9 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
   const statusText = status === "ready"
     ? "ยังไม่ได้เข้างาน"
     : status === "working" ? "กำลังทำงาน" : "เลิกงานแล้ว";
-  const statusDescription = status === "ready"
-    ? "พร้อมเริ่มบันทึกเวลาวันนี้"
-    : status === "working" ? "ทดลองบันทึกเวลาเข้างานแล้ว" : "ทดลองบันทึกเวลาครบแล้ว";
   const buttonText = status === "ready"
     ? "ทดลองเข้างาน" : status === "working" ? "ทดลองเลิกงาน" : "เริ่มทดลองใหม่";
 
-  const companionGreeting = status === "ready" ? "สวัสดีครับ!"
-    : status === "working" ? "เริ่มงานแล้วครับ!" : "เรียบร้อยแล้วครับ!";
-  const companionMessage = geoPermission === "denied"
-    ? "ตำแหน่งถูกปิดกั้นอยู่ครับ ผมช่วยแนะนำวิธีแก้ได้"
-    : status === "ready"
-      ? "พร้อมเริ่มงานแล้วครับ กดปุ่มเข้างานด้านล่างได้เลย"
-      : status === "working"
-        ? "ทดลองเข้างานแล้วครับ เมื่อทำงานเสร็จกดเลิกงานได้เลย"
-        : "ทดลองเลิกงานครบแล้วครับ ขอบคุณสำหรับวันนี้!";
   const guideTitle = helperTopic === "attendance" ? "ช่วยตอกบัตร"
     : helperTopic === "gps" ? "ตรวจสอบตำแหน่ง" : "ช่วยเรื่องการลา";
   const guideDescription = helperTopic === "attendance"
@@ -259,44 +247,27 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
   return (
     <div className="daily-home">
       <header className="daily-intro">
-        <div className="daily-welcome">
-          <button
-            type="button"
-            className="daily-assistant-avatar-button"
-            aria-label="เปิดผู้ช่วยของคุณ"
-            aria-haspopup="dialog"
-            aria-expanded={helperOpen}
-            aria-controls="daily-helper-dialog"
-            onClick={(event) => {
-              helperOpenerRef.current = event.currentTarget;
-              setHelperTopic(null);
-              setHelperOpen(true);
-            }}
-          >
-            <CompanionFace status={status} />
-          </button>
-          <div className="daily-welcome-copy">
-            <span className="daily-kicker">ผู้ช่วยของคุณ <span className="daily-assistant-demo">DEMO</span></span>
-            <h1 aria-live="polite">{companionGreeting}</h1>
-            <p aria-live="polite">{companionMessage}</p>
-            <button
-              type="button"
-              className="daily-helper-toggle"
-              aria-haspopup="dialog"
-              aria-expanded={helperOpen}
-              aria-controls="daily-helper-dialog"
-              onClick={(event) => {
-                helperOpenerRef.current = event.currentTarget;
-                setHelperTopic(geoPermission === "denied" ? "gps" : null);
-                setHelperOpen(true);
-              }}
-            >
-              {geoPermission === "denied" ? "ช่วยแก้ปัญหาตำแหน่ง" : "ให้ผมช่วยไหม?"}
-              <Icon name="arrow" size={17} />
-            </button>
-          </div>
+        <div className="daily-intro-copy">
+          <h1>ลงเวลาทำงาน</h1>
+          <TodayDate />
         </div>
-        <TodayDate />
+        <button
+          type="button"
+          className="daily-assistant-launch"
+          aria-label={geoPermission === "denied" ? "เปิดผู้ช่วยแก้ไข GPS" : "เปิดผู้ช่วย"}
+          aria-haspopup="dialog"
+          aria-expanded={helperOpen}
+          aria-controls={helperOpen ? "daily-helper-dialog" : undefined}
+          onClick={(event) => {
+            helperOpenerRef.current = event.currentTarget;
+            setHelperTopic(geoPermission === "denied" ? "gps" : null);
+            setHelperOpen(true);
+          }}
+        >
+          <CompanionFace status={status} />
+          <span>ช่วยเหลือ</span>
+          {geoPermission === "denied" && <i className="daily-assistant-alert" aria-hidden="true" />}
+        </button>
       </header>
 
       {helperOpen && (
@@ -431,81 +402,57 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
         </div>
       )}
 
-      <section className="daily-focus" aria-labelledby="daily-focus-title">
+      <section className="daily-focus" aria-label="ตอกบัตรวันนี้">
         <div className="daily-clock-area">
-          <p className="daily-section-caption" id="daily-focus-title">เวลาปัจจุบัน</p>
+          <p className="daily-section-caption">เวลาปัจจุบัน</p>
           <LiveClock />
-          <p className="daily-clock-support"><span className="daily-live-dot" aria-hidden="true" /> เวลาจากอุปกรณ์ของคุณ</p>
         </div>
-
-        <div className="daily-action-area">
-          <div className={`daily-state daily-state-${status}`} role="status" aria-live="polite" aria-atomic="true">
-            <span className="daily-state-icon" aria-hidden="true">
-              <Icon name={status === "ready" ? "clock" : "check"} size={24} />
-            </span>
-            <div className="daily-state-copy">
-              <span>สถานะวันนี้</span>
-              <strong>{statusText}</strong>
-              <small>{statusDescription}</small>
-            </div>
-          </div>
-
-          <button
-            ref={demoActionRef}
-            type="button"
-            className={`daily-main-action daily-main-action-${status}`}
-            onClick={handleDemo}
-          >
-            <span>{buttonText}</span>
-            <span className="daily-action-icon">
-              <Icon name={status === "finished" ? "reset" : "arrow"} size={24} />
-            </span>
-          </button>
-          <p className="daily-demo-note">โหมดทดลอง · ไม่บันทึกข้อมูลจริง</p>
+        <div className={`daily-state daily-state-${status}`} role="status" aria-live="polite">
+          <span className="daily-status-dot" aria-hidden="true" />
+          <strong>{statusText}</strong>
         </div>
+        <button
+          ref={demoActionRef}
+          type="button"
+          className={`daily-main-action daily-main-action-${status}`}
+          onClick={handleDemo}
+        >
+          <span>{buttonText}</span>
+          <span className="daily-action-icon">
+            <Icon name={status === "finished" ? "reset" : "arrow"} size={24} />
+          </span>
+        </button>
+        <p className="daily-demo-note">โหมดทดลอง · ไม่บันทึกข้อมูลจริง</p>
       </section>
 
-      <section className="daily-records" aria-labelledby="daily-records-title">
-        <div className="daily-section-header">
-          <div>
-            <span className="daily-section-index">01 / TODAY</span>
-            <h2 id="daily-records-title">สรุปเวลาวันนี้</h2>
-          </div>
-          <span className="daily-preview-label">ข้อมูลทดลอง</span>
-        </div>
-
+      <section className="daily-records" aria-label="สรุปเวลาวันนี้">
         <div className="daily-record-grid">
           <div className="daily-record">
-            <span className={`daily-record-marker${checkInAt ? " is-complete" : ""}`} aria-hidden="true">
-              <Icon name={checkInAt ? "check" : "clock"} size={20} />
-            </span>
-            <div className="daily-record-content">
-              <span>เวลาเข้างาน</span>
-              <strong>{checkInAt ? shortTimeFormatter.format(checkInAt) : "--:--"}</strong>
-              <small>{checkInAt ? "ทดลองบันทึกแล้ว" : "ยังไม่มีข้อมูล"}</small>
-            </div>
+            <span>เข้างาน</span>
+            <strong>{checkInAt ? shortTimeFormatter.format(checkInAt) : "--:--"}</strong>
           </div>
           <div className="daily-record">
-            <span className={`daily-record-marker${checkOutAt ? " is-complete" : ""}`} aria-hidden="true">
-              <Icon name={checkOutAt ? "check" : "clock"} size={20} />
-            </span>
-            <div className="daily-record-content">
-              <span>เวลาเลิกงาน</span>
-              <strong>{checkOutAt ? shortTimeFormatter.format(checkOutAt) : "--:--"}</strong>
-              <small>{checkOutAt ? "ทดลองบันทึกแล้ว" : "ยังไม่มีข้อมูล"}</small>
-            </div>
+            <span>เลิกงาน</span>
+            <strong>{checkOutAt ? shortTimeFormatter.format(checkOutAt) : "--:--"}</strong>
           </div>
         </div>
       </section>
 
-      <section className="daily-place" aria-labelledby="daily-place-title">
-        <span className="daily-place-icon"><Icon name="pin" size={25} /></span>
-        <div className="daily-place-copy">
-          <h2 id="daily-place-title">สถานที่ทำงาน</h2>
-          <p>ระบบตรวจสอบตำแหน่ง GPS ยังไม่ได้เชื่อมต่อ</p>
-        </div>
-        <span className="daily-place-status">รอเชื่อมต่อ</span>
-      </section>
+      <button
+        type="button"
+        className={`daily-location-summary${geoPermission === "denied" ? " is-attention" : ""}`}
+        onClick={(event) => {
+          helperOpenerRef.current = event.currentTarget;
+          setHelperTopic("gps");
+          setHelperOpen(true);
+        }}
+        aria-haspopup="dialog"
+        aria-expanded={helperOpen}
+      >
+        <Icon name="pin" size={16} />
+        <span>{geoPermission === "denied" ? "ตำแหน่งถูกปิดกั้น · แตะเพื่อแก้ไข" : "GPS ยังไม่ได้เชื่อมต่อ · แตะเพื่อตรวจสอบ"}</span>
+        <Icon name="arrow" size={14} />
+      </button>
     </div>
   );
 }

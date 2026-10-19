@@ -1,71 +1,179 @@
-/* Attendance V2 / Everyday — open-canvas, typography-first design */
+/* Attendance Home · One-screen, action-first layout.
+   The preview keeps the existing assistant, but only one small launcher is visible. */
+.page-main.page-main-home {
+  height: calc(100dvh - 78px);
+  padding: clamp(16px, 3vh, 28px) clamp(22px, 3.5vw, 50px) clamp(14px, 2.4vh, 24px);
+  overflow-y: auto; /* Only small-height or accessibility zoom needs scrolling. */
+}
 .daily-home {
   --daily-ink: #1c3248;
-  --daily-muted: #617588;
-  --daily-line: #e3eaf0;
+  --daily-muted: #657c8e;
+  --daily-line: #e4ecf1;
   width: 100%;
-  max-width: 1000px;
+  height: 100%;
+  min-height: 0;
+  max-width: 660px;
   margin: 0 auto;
-  display: grid;
-  gap: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.65vh, 18px);
   color: var(--daily-ink);
 }
 .daily-intro {
-  display: flex;
-  justify-content: space-between;
-  align-items: end;
-  gap: 24px;
-  padding: 7px 0 35px;
-}
-.daily-kicker {
+  flex: none;
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: #426a8d;
-  font-size: 13px;
-  font-weight: 730;
+  justify-content: space-between;
+  gap: 14px;
 }
-/* The companion adds a distinct identity without turning Home into a chat UI. */
-.daily-welcome { display: flex; align-items: center; gap: 19px; min-width: 0; }
-.daily-welcome-copy { min-width: 0; flex: 1; }
-.daily-welcome-copy .daily-kicker { display: inline-flex; align-items: center; gap: 9px; color: #466980; }
-.daily-assistant-demo {
-  font-family: "Segoe UI", sans-serif;
-  font-size: 10px;
-  font-weight: 720;
-  letter-spacing: .045em;
-  padding: 3px 6px;
-  border-radius: 5px;
-  color: #526d7f;
-  background: #edf3f6;
+.daily-intro-copy { min-width: 0; }
+.daily-intro h1 {
+  margin: 0 0 3px;
+  color: #1b354c;
+  font-size: clamp(22px, 2.5vw, 28px);
+  line-height: 1.3;
+  font-weight: 800;
+  letter-spacing: -.035em;
 }
+.daily-date { display: block; font-size: 13px; color: #647b8f; line-height: 1.5; }
 .daily-companion-face {
-  width: 104px;
-  height: 104px;
-  display: block;
-  flex: none;
-  border-radius: 24px;
-  overflow: hidden;
+  display: block; width: 104px; height: 104px;
+  border-radius: 24px; overflow: hidden; flex: none;
 }
 .daily-companion-face svg { display: block; width: 100%; height: 100%; }
-.daily-welcome-copy h1 { margin-top: 5px; font-size: clamp(27px, 3.3vw, 36px); }
-.daily-welcome-copy p { max-width: 490px; font-size: 14px; line-height: 1.7; }
-.daily-helper-toggle {
-  min-height: 44px;
-  margin-top: 6px;
-  padding: 7px 0;
-  color: #215d80;
-  background: transparent;
-  border: 0;
-  font-size: 14px;
-  font-weight: 760;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+.daily-assistant-launch {
+  position: relative;
+  flex: none; min-width: 60px; min-height: 59px;
+  display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 3px;
+  border: 0; border-radius: 12px; background: transparent; color: #4f7189;
+  font-size: 11px; font-weight: 700; cursor: pointer; padding: 2px 4px;
 }
-.daily-helper-toggle:hover { color: #123f5b; }
-.daily-helper-toggle svg { transform: rotate(-35deg); }
+.daily-assistant-launch:hover { background: #eff5f9; }
+.daily-assistant-launch .daily-companion-face { width: 37px; height: 37px; border-radius: 10px; }
+.daily-assistant-alert {
+  position: absolute; width: 9px; height: 9px; right: 7px; top: 3px;
+  border-radius: 50%; background: #c77836; border: 2px solid #fff;
+}
+.daily-focus {
+  min-height: 215px;
+  flex: 1;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  gap: clamp(8px, 1.8vh, 17px);
+  text-align: center;
+}
+.daily-clock-area { min-width: 0; }
+.daily-section-caption { margin: 0 0 2px; font-size: 14px; color: #61798e; font-weight: 650; }
+.daily-clock {
+  display: flex; align-items: baseline; justify-content: center;
+  font-size: clamp(58px, 8.9vh, 88px);
+  font-variant-numeric: tabular-nums; font-weight: 765;
+  letter-spacing: -.04em; line-height: 1.11; color: #172f45; white-space: nowrap;
+}
+.daily-clock-colon {
+  display: inline-block; font-size: .68em; font-weight: 650;
+  letter-spacing: 0; margin: 0 .15em; vertical-align: .055em;
+}
+.daily-clock-second { margin-left: 4px; font-size: .33em; color: #8096a7; font-weight: 570; letter-spacing: 0; }
+.daily-state {
+  display: inline-flex; gap: 9px; align-items: center;
+  color: #38566f; font-size: 15px; font-weight: 700; line-height: 1.35;
+}
+.daily-status-dot { width: 9px; height: 9px; flex: none; border-radius: 50%; background: #8ea2b1; }
+.daily-state-working .daily-status-dot { background: #23845d; }
+.daily-state-finished .daily-status-dot { background: #3f779a; }
+.daily-main-action {
+  width: min(100%, 416px); min-height: 70px;
+  padding: 10px 12px 10px 22px;
+  border: 0; border-radius: 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  color: #fff; font-size: 21px; font-weight: 800;
+  text-align: left; cursor: pointer;
+  box-shadow: 0 7px 18px rgba(25, 57, 75, .09);
+}
+.daily-main-action span, .daily-main-action svg { color: #fff; }
+.daily-action-icon {
+  display: grid; place-items: center; flex: none;
+  width: 47px; height: 47px; border-radius: 12px;
+  background: rgba(255,255,255,.15);
+}
+.daily-main-action-ready { background: #176b48; }
+.daily-main-action-ready:hover { background: #105839; }
+.daily-main-action-working { background: #a44b12; }
+.daily-main-action-working:hover { background: #873b0d; }
+.daily-main-action-finished { background: #525f6e; }
+.daily-main-action-finished:hover { background: #414d5a; }
+.daily-main-action:focus-visible, .daily-assistant-launch:focus-visible,
+.daily-location-summary:focus-visible { outline: 3px solid #7cb0d6; outline-offset: 3px; }
+.daily-demo-note { margin: -1px 0 0; font-size: 12px; line-height: 1.35; color: #748898; }
+.daily-records { flex: none; width: 100%; padding-top: 11px; border-top: 1px solid var(--daily-line); }
+.daily-record-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 11px; }
+.daily-record {
+  min-width: 0; border-radius: 12px; border: 1px solid #e6edf2;
+  background: #f8fafb; padding: 12px 18px 10px;
+  display: grid; gap: 0;
+}
+.daily-record > span { font-size: 13px; font-weight: 630; color: #667c8e; }
+.daily-record strong {
+  color: #1f3c54; font-size: clamp(26px, 4vh, 34px); line-height: 1.28;
+  font-weight: 760; letter-spacing: -.035em; font-variant-numeric: tabular-nums;
+}
+.daily-location-summary {
+  flex: none; align-self: center; min-height: 28px; width: auto;
+  display: inline-flex; justify-content: center; align-items: center; gap: 7px;
+  padding: 3px 7px; background: transparent; border: 0; border-radius: 8px;
+  color: #698093; font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.daily-location-summary:hover { color: #245b80; background: #eff5f9; }
+.daily-location-summary.is-attention { color: #995a26; }
+@media (max-width: 800px) {
+  .page-main.page-main-home {
+    height: calc(100dvh - 72px - 95px - env(safe-area-inset-bottom));
+    padding: 10px 21px 4px; overflow-y: auto;
+  }
+  .daily-home { max-width: 560px; gap: clamp(6px, 1.35vh, 12px); }
+  .daily-focus { min-height: 190px; gap: clamp(7px, 1.35vh, 13px); }
+  .daily-clock { font-size: clamp(54px, 11.5vw, 75px); }
+  .daily-main-action { min-height: 67px; font-size: 20px; }
+  .daily-record { padding: 10px 14px 8px; }
+  .daily-record strong { font-size: clamp(25px, 5.1vw, 32px); }
+}
+@media (max-width: 430px) {
+  .daily-intro h1 { font-size: 21px; }
+  .daily-date { font-size: 12px; }
+  .daily-main-action { min-height: 64px; }
+  .daily-assistant-launch .daily-companion-face { width: 35px; height: 35px; }
+  .daily-record strong { font-size: clamp(24px, 6.4vw, 30px); }
+}
+@media (max-width: 800px) and (max-height: 730px) {
+  .page-main.page-main-home { padding-top: 8px; padding-bottom: 2px; }
+  .daily-home { gap: 6px; }
+  .daily-intro h1 { font-size: 20px; }
+  .daily-assistant-launch { min-height: 52px; }
+  .daily-assistant-launch .daily-companion-face { width: 32px; height: 32px; }
+  .daily-focus { min-height: 170px; gap: 7px; }
+  .daily-clock { font-size: clamp(49px, 11vw, 64px); }
+  .daily-section-caption { font-size: 13px; }
+  .daily-main-action { min-height: 59px; font-size: 19px; padding: 7px 9px 7px 18px; }
+  .daily-action-icon { width: 44px; height: 44px; }
+  .daily-records { padding-top: 7px; }
+  .daily-record { padding: 7px 12px; }
+  .daily-record strong { font-size: 26px; }
+  .daily-location-summary { min-height: 25px; font-size: 11px; }
+}
+@media (max-width: 800px) and (max-height: 580px) {
+  .daily-home { gap: 4px; }
+  .daily-focus { min-height: 148px; gap: 5px; }
+  .daily-clock { font-size: clamp(44px, 10.5vw, 56px); }
+  .daily-main-action { min-height: 54px; }
+  .daily-action-icon { width: 40px; height: 40px; }
+  .daily-record strong { font-size: 23px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .daily-main-action { transition: background-color .16s ease, transform .16s ease; }
+  .daily-main-action:active { transform: scale(.99); }
+}
+
 /* Responsive dialog: centered on desktop and anchored to the bottom on phones. */
 .daily-sheet-backdrop {
   position: fixed;
@@ -125,300 +233,6 @@
   color: #244d64; font-size: 14px;
 }
 .daily-sheet-footnote { margin: 18px 0 0; font-size: 12px; line-height: 1.65; color: #6b8192; }
-.daily-intro h1 {
-  margin: 10px 0 1px;
-  color: #182f45;
-  font-size: clamp(34px, 4.2vw, 44px);
-  letter-spacing: -.035em;
-  line-height: 1.35;
-  font-weight: 800;
-}
-.daily-hi-dot { color: #2c7da7; }
-.daily-intro p { margin: 0; font-size: 16px; color: #677b8d; line-height: 1.7; }
-.daily-date {
-  font-size: 14px;
-  font-weight: 650;
-  color: #586d80;
-  white-space: nowrap;
-  padding-bottom: 6px;
-}
-.daily-focus {
-  display: grid;
-  grid-template-columns: minmax(0, 1.17fr) minmax(310px, .83fr);
-  align-items: center;
-  gap: clamp(22px, 4vw, 58px);
-  padding: 44px 0 52px;
-  border-top: 1px solid var(--daily-line);
-  border-bottom: 1px solid var(--daily-line);
-}
-.daily-clock-area { min-width: 0; }
-.daily-section-caption {
-  margin: 0 0 6px;
-  color: #526b83;
-  font-size: 16px;
-  font-weight: 675;
-}
-.daily-clock {
-  font-size: clamp(56px, 6.4vw, 82px);
-  line-height: 1.18;
-  letter-spacing: -.04em;
-  color: #142e46;
-  font-weight: 740;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-  display: flex;
-  align-items: baseline;
-}
-.daily-clock-colon {
-  display: inline-block;
-  font-size: .68em;
-  color: inherit;
-  font-weight: 650;
-  letter-spacing: 0;
-  margin: 0 .15em;
-  vertical-align: .055em;
-}
-.daily-clock-second {
-  font-size: .36em;
-  letter-spacing: 0;
-  color: #8398a9;
-  font-weight: 550;
-  margin-left: 6px;
-}
-.daily-clock-support {
-  margin: 9px 0 0;
-  font-size: 13px;
-  color: #6b7f90;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-}
-.daily-live-dot {
-  display: block;
-  flex: none;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #208770;
-}
-.daily-action-area {
-  padding-left: clamp(20px, 3.5vw, 40px);
-  border-left: 1px solid var(--daily-line);
-  min-width: 0;
-}
-.daily-state {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  color: #344a5e;
-}
-.daily-state-icon {
-  flex: none;
-  width: 52px;
-  height: 52px;
-  display: grid;
-  place-items: center;
-  border-radius: 17px;
-  background: #edf2f6;
-  color: #3d6588;
-}
-.daily-state-working .daily-state-icon {
-  background: #e5f3e9;
-  color: #196645;
-}
-.daily-state-finished .daily-state-icon {
-  background: #e9f1f7;
-  color: #2c668e;
-}
-.daily-state-copy { display: grid; gap: 2px; }
-.daily-state-copy > span { color: #60768a; font-size: 13px; }
-.daily-state-copy strong {
-  font-size: 20px;
-  color: #20394f;
-  line-height: 1.4;
-  font-weight: 780;
-}
-.daily-state-copy small { font-size: 12px; color: #607589; line-height: 1.6; }
-.daily-main-action {
-  color: #fff;
-  width: 100%;
-  min-height: 72px;
-  border: 0;
-  border-radius: 16px;
-  padding: 11px 12px 11px 23px;
-  margin-top: 23px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 15px;
-  cursor: pointer;
-  text-align: left;
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: -.015em;
-  box-shadow: 0 8px 21px rgba(18,49,74,.10);
-}
-.daily-main-action svg, .daily-main-action span { color: #fff; }
-.daily-action-icon {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: rgba(255,255,255,.15);
-}
-.daily-main-action-ready { background: #176b48; }
-.daily-main-action-ready:hover { background: #105839; }
-.daily-main-action-working { background: #a44b12; }
-.daily-main-action-working:hover { background: #873b0d; }
-.daily-main-action-finished { background: #525f6e; }
-.daily-main-action-finished:hover { background: #414d5a; }
-.daily-main-action:focus-visible { outline: 3px solid #6da5d9; outline-offset: 4px; }
-.daily-demo-note {
-  font-size: 12px;
-  color: #697d90;
-  text-align: center;
-  margin: 11px 0 0;
-  line-height: 1.6;
-}
-.daily-records { padding: 33px 0 31px; }
-.daily-section-header { display: flex; justify-content: space-between; align-items: end; gap: 14px; }
-.daily-section-index {
-  display: block;
-  color: #567b99;
-  font-size: 11px;
-  letter-spacing: .1em;
-  font-weight: 790;
-  margin-bottom: 5px;
-}
-.daily-section-header h2 { margin: 0; font-size: 20px; color: #213a50; font-weight: 775; }
-.daily-preview-label { color: #708395; font-size: 12px; white-space: nowrap; }
-.daily-record-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0,1fr));
-  gap: 32px;
-  margin-top: 22px;
-}
-.daily-record {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  min-width: 0;
-  padding: 19px 0 21px;
-  border-top: 1px solid var(--daily-line);
-}
-.daily-record-marker {
-  flex: none;
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  border-radius: 13px;
-  color: #56748b;
-  background: #f0f4f6;
-}
-.daily-record-marker.is-complete { background: #e4f2ec; color: #1b7050; }
-.daily-record-content { display: grid; gap: 2px; }
-.daily-record-content > span { font-size: 14px; color: #60768a; font-weight: 630; }
-.daily-record-content strong {
-  color: #1c3950;
-  font-size: clamp(29px, 3.5vw, 36px);
-  line-height: 1.26;
-  font-weight: 750;
-  letter-spacing: -.05em;
-  font-variant-numeric: tabular-nums;
-}
-.daily-record-content small { font-size: 12px; color: #76899a; }
-.daily-place {
-  border-top: 1px solid var(--daily-line);
-  padding: 23px 0 10px;
-  display: flex;
-  gap: 14px;
-  align-items: center;
-}
-.daily-place-icon {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 46px;
-  height: 46px;
-  background: #edf3f7;
-  border-radius: 14px;
-  color: #336d96;
-}
-.daily-place-copy { flex: 1; min-width: 0; }
-.daily-place h2 { font-size: 16px; color: #253e54; margin: 0 0 3px; font-weight: 760; }
-.daily-place p { margin: 0; font-size: 13px; line-height: 1.65; color: #61778a; }
-.daily-place-status {
-  font-size: 12px;
-  color: #657e91;
-  border: 1px solid #e1e9ef;
-  border-radius: 9px;
-  padding: 8px 12px;
-  font-weight: 650;
-  white-space: nowrap;
-}
-@media (max-width: 850px) {
-  .daily-welcome { gap: 16px; }
-  .daily-home { max-width: 650px; }
-  .daily-intro { display: block; padding: 5px 0 27px; }
-  .daily-date { display: block; margin-top: 12px; padding: 0; white-space: normal; }
-  .daily-focus { grid-template-columns: minmax(0,1fr); gap: 0; padding: 27px 0 34px; }
-  .daily-clock-area { text-align: center; }
-  .daily-clock { justify-content: center; font-size: clamp(54px, 10vw, 75px); }
-  .daily-clock-support { justify-content: center; }
-  .daily-action-area {
-    padding-left: 0;
-    border-left: none;
-    width: min(100%, 430px);
-    justify-self: center;
-    margin-top: 39px;
-  }
-  .daily-record-grid { gap: 22px; }
-}
-@media (max-width: 500px) {
-  .daily-welcome { align-items: flex-start; gap: 13px; }
-  .daily-companion-face { width: 81px; height: 81px; border-radius: 19px; }
-  .daily-welcome-copy h1 { font-size: clamp(24px, 6.4vw, 30px); line-height: 1.3; }
-  .daily-welcome-copy p { font-size: 13px; }
-  .daily-intro { padding: 0 0 23px; }
-  .daily-kicker { font-size: 12px; }
-  .daily-intro h1 { font-size: 34px; }
-  .daily-intro p { font-size: 15px; }
-  .daily-date { font-size: 13px; }
-  .daily-focus { padding: 29px 0 33px; }
-  .daily-clock { font-size: clamp(49px, 11.5vw, 62px); margin-top: 7px; }
-  .daily-section-caption { font-size: 15px; }
-  .daily-clock-support { margin-top: 10px; }
-  .daily-action-area { margin-top: 37px; }
-  .daily-state-icon { width: 50px; height: 50px; }
-  .daily-main-action { min-height: 72px; font-size: 20px; margin-top: 20px; }
-  .daily-records { padding: 28px 0 22px; }
-  .daily-section-header h2 { font-size: 19px; }
-  .daily-record-grid { gap: 14px; margin-top: 17px; }
-  .daily-record { gap: 10px; padding: 16px 0 17px; }
-  .daily-record-marker { width: 35px; height: 35px; border-radius: 11px; }
-  .daily-record-marker svg { width: 18px; height: 18px; }
-  .daily-record-content > span { font-size: 13px; }
-  .daily-record-content strong { font-size: 29px; }
-  .daily-record-content small { font-size: 11px; }
-  .daily-place { padding: 20px 0 6px; }
-  .daily-place-status { display: none; }
-}
-@media (max-width: 360px) {
-  .daily-welcome { gap: 10px; }
-  .daily-companion-face { width: 70px; height: 70px; border-radius: 16px; }
-  .daily-welcome-copy h1 { font-size: 23px; }
-  .daily-clock { font-size: 47px; }
-  .daily-record-grid { gap: 8px; }
-  .daily-record-content strong { font-size: 25px; }
-  .daily-record-marker { display: none; }
-}
-@media (prefers-reduced-motion: no-preference) {
-  .daily-main-action { transition: background-color .15s ease, transform .15s ease; }
-  .daily-main-action:active { transform: scale(.99); }
-}
 
 /* The face blinks gently; respects users who reduce motion. */
 @media (prefers-reduced-motion: no-preference) {
@@ -466,25 +280,6 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-.daily-assistant-avatar-button {
-  border: 0;
-  padding: 0;
-  margin: 0;
-  border-radius: 24px;
-  background: transparent;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-  flex: none;
-}
-.daily-assistant-avatar-button:focus-visible { outline: 3px solid #639ed0; outline-offset: 4px; }
-@media (max-width: 500px) {
-  .daily-assistant-avatar-button { border-radius: 19px; }
-  .daily-intro .daily-welcome-copy h1 { font-size: clamp(23px, 6.4vw, 29px); }
-}
-@media (max-width: 360px) {
-  .daily-assistant-avatar-button { border-radius: 16px; }
-}
 
 /* Single annotated visual plus short readable instruction in assistant sheet. */
 .daily-guide-detail { display: grid; gap: 13px; }

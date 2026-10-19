@@ -107,7 +107,7 @@ export default function App() {
           <span className="preview-pill"><span aria-hidden="true" /> เวอร์ชันทดลอง</span>
         </header>
 
-        <main className="page-main" id="main-content">
+        <main className={`page-main${active === "home" ? " page-main-home" : ""}`} id="main-content">
           <Suspense fallback={<div className="panel loading-panel">กำลังเปิดหน้า...</div>}>
             <SectionContent active={active} onOpenLeave={() => setActive("leave")} />
           </Suspense>
