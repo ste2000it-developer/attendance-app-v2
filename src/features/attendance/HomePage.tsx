@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "./HomePage.css";
+import { GuideIllustration } from "./GuideIllustration";
+import type { GuideTopic } from "./GuideIllustration";
 
 type DemoStatus = "ready" | "working" | "finished";
 type IconName = "arrow" | "pin" | "clock" | "reset" | "check" | "close" | "calendar";
@@ -97,7 +99,7 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
   const [checkInAt, setCheckInAt] = useState<Date | null>(null);
   const [checkOutAt, setCheckOutAt] = useState<Date | null>(null);
   const [helperOpen, setHelperOpen] = useState(false);
-  const [helperTopic, setHelperTopic] = useState<"attendance" | "gps" | null>(null);
+  const [helperTopic, setHelperTopic] = useState<GuideTopic | null>(null);
   const helperDialogRef = useRef<HTMLElement | null>(null);
   const helperOpenerRef = useRef<HTMLButtonElement | null>(null);
 
@@ -162,13 +164,17 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
     : status === "working"
       ? "ทดลองเข้างานแล้วครับ เมื่อทำงานเสร็จ ลองกดเลิกงานได้เลย"
       : "ทดลองเลิกงานครบแล้วครับ ขอบคุณสำหรับวันนี้!";
-  const helpMessage = helperTopic === "attendance"
+  const guideTitle = helperTopic === "attendance" ? "วิธีตอกบัตร"
+    : helperTopic === "gps" ? "เปิดตำแหน่ง GPS" : "วิธีไปหน้าการลา";
+  const guideDescription = helperTopic === "attendance"
     ? status === "ready"
-      ? "กดปุ่มสีเขียว “ทดลองเข้างาน” ด้านล่างได้เลยครับ ข้อมูลจะไม่ถูกบันทึกจริง"
+      ? "แตะปุ่มสีเขียวเพื่อทดลองเข้างาน แล้วใช้ปุ่มสีส้มเพื่อทดลองเลิกงานครับ"
       : status === "working"
-        ? "ตอนนี้อยู่ในสถานะทดลองทำงาน กดปุ่มสีส้มเพื่อทดลองเลิกงานได้ครับ"
-        : "คุณทดลองครบแล้ว กด “เริ่มทดลองใหม่” เพื่อกลับไปจุดเริ่มต้นได้ครับ"
-    : "ขณะนี้ Attendance V2 ยังไม่ได้เชื่อม GPS จึงยังไม่ตรวจสอบตำแหน่งจริงครับ";
+        ? "เมื่อทำงานเสร็จ แตะปุ่มสีส้มเพื่อทดลองเลิกงานได้เลยครับ"
+        : "ลองกด “เริ่มทดลองใหม่” เพื่อดูขั้นตอนอีกครั้งได้ครับ"
+    : helperTopic === "gps"
+      ? "เปิดตำแหน่งในเครื่อง และอนุญาตให้เบราว์เซอร์เข้าถึงตำแหน่งครับ"
+      : "แตะเมนู “การลา” ที่แถบด้านล่างเพื่อเปิดหน้าการลาครับ";
 
   function handleDemo() {
     if (status === "ready") {
@@ -248,7 +254,7 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
                 <span className="daily-sheet-avatar"><CompanionFace status={status} /></span>
                 <div>
                   <span className="daily-sheet-eyebrow">ผู้ช่วยประจำแอป · DEMO</span>
-                  <h2 id="daily-sheet-title">มีอะไรให้ผมช่วยไหมครับ?</h2>
+                  <h2 id="daily-sheet-title">{helperTopic ? guideTitle : "มีอะไรให้ผมช่วยไหมครับ?"}</h2>
                 </div>
               </div>
               <button
@@ -261,32 +267,56 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
               </button>
             </header>
             <p className="daily-sheet-description" id="daily-sheet-description">
-              เลือกสิ่งที่ต้องการได้เลยครับ
+              {helperTopic ? "ดูจุดที่ทำเครื่องหมายไว้ในภาพได้เลยครับ" : "เลือกสิ่งที่ต้องการได้เลยครับ"}
             </p>
-            <div className="daily-sheet-options">
-              <button type="button" onClick={() => setHelperTopic("attendance")}>
-                <span className="daily-sheet-option-icon"><Icon name="clock" size={21} /></span>
-                <span>วิธีตอกบัตร</span>
-                <Icon name="arrow" size={19} />
-              </button>
-              <button type="button" onClick={() => setHelperTopic("gps")}>
-                <span className="daily-sheet-option-icon"><Icon name="pin" size={21} /></span>
-                <span>แก้ปัญหา GPS</span>
-                <Icon name="arrow" size={19} />
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setHelperOpen(false);
-                  onOpenLeave();
-                }}
-              >
-                <span className="daily-sheet-option-icon"><Icon name="calendar" size={21} /></span>
-                <span>ช่วยเรื่องการลา</span>
-                <Icon name="arrow" size={19} />
-              </button>
-            </div>
-            {helperTopic && <p className="daily-sheet-response" role="status">{helpMessage}</p>}
+            {helperTopic ? (
+              <div className="daily-guide-detail">
+                <div className="daily-guide-image">
+                  <GuideIllustration topic={helperTopic} status={status} />
+                  <span className="daily-guide-image-label">ภาพจำลอง</span>
+                </div>
+                <p className="daily-guide-caption">{guideDescription}</p>
+                {helperTopic === "gps" && (
+                  <p className="daily-guide-warning">หมายเหตุ: GPS ใน V2 ยังไม่ได้เชื่อมต่อจริง</p>
+                )}
+                {helperTopic === "leave" && (
+                  <div className="daily-guide-leave-actions">
+                    <p className="daily-guide-warning">หน้าการลายังเป็นตัวอย่าง UI ไม่ได้ส่งคำขอจริง</p>
+                    <button
+                      type="button"
+                      className="daily-guide-leave-button"
+                      onClick={() => {
+                        setHelperOpen(false);
+                        onOpenLeave();
+                      }}
+                    >
+                      ไปหน้าการลา <Icon name="arrow" size={19} />
+                    </button>
+                  </div>
+                )}
+                <button type="button" className="daily-guide-back" onClick={() => setHelperTopic(null)}>
+                  <span aria-hidden="true">←</span> กลับไปเลือกหัวข้อ
+                </button>
+              </div>
+            ) : (
+              <div className="daily-sheet-options">
+                <button type="button" onClick={() => setHelperTopic("attendance")}>
+                  <span className="daily-sheet-option-icon"><Icon name="clock" size={21} /></span>
+                  <span>วิธีตอกบัตร</span>
+                  <Icon name="arrow" size={19} />
+                </button>
+                <button type="button" onClick={() => setHelperTopic("gps")}>
+                  <span className="daily-sheet-option-icon"><Icon name="pin" size={21} /></span>
+                  <span>แก้ปัญหา GPS</span>
+                  <Icon name="arrow" size={19} />
+                </button>
+                <button type="button" onClick={() => setHelperTopic("leave")}>
+                  <span className="daily-sheet-option-icon"><Icon name="calendar" size={21} /></span>
+                  <span>ช่วยเรื่องการลา</span>
+                  <Icon name="arrow" size={19} />
+                </button>
+              </div>
+            )}
             <p className="daily-sheet-footnote">ผู้ช่วยเวอร์ชันทดลอง · ยังไม่ใช่ AI สนทนาและยังไม่เชื่อมข้อมูลจริง</p>
           </section>
         </div>
