@@ -465,3 +465,23 @@
   from { opacity: .75; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+.daily-assistant-avatar-button {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  border-radius: 24px;
+  background: transparent;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.daily-assistant-avatar-button:focus-visible { outline: 3px solid #639ed0; outline-offset: 4px; }
+@media (max-width: 500px) {
+  .daily-assistant-avatar-button { border-radius: 19px; }
+  .daily-intro .daily-welcome-copy h1 { font-size: clamp(23px, 6.4vw, 29px); }
+}
+@media (max-width: 360px) {
+  .daily-assistant-avatar-button { border-radius: 16px; }
+}

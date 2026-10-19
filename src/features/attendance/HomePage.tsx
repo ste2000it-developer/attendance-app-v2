@@ -99,7 +99,7 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
   const [helperOpen, setHelperOpen] = useState(false);
   const [helperTopic, setHelperTopic] = useState<"attendance" | "gps" | null>(null);
   const helperDialogRef = useRef<HTMLElement | null>(null);
-  const helperTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const helperOpenerRef = useRef<HTMLButtonElement | null>(null);
 
   // An accessible modal: focus enters the dialog, stays inside it, and
   // returns to the opener. Escape and the backdrop both close it.
@@ -141,7 +141,7 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
     return () => {
       window.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
-      helperTriggerRef.current?.focus();
+      helperOpenerRef.current?.focus();
     };
   }, [helperOpen]);
 
@@ -185,19 +185,33 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
     <div className="daily-home">
       <header className="daily-intro">
         <div className="daily-welcome">
-          <CompanionFace status={status} />
+          <button
+            type="button"
+            className="daily-assistant-avatar-button"
+            aria-label="เปิดผู้ช่วยของคุณ"
+            aria-haspopup="dialog"
+            aria-expanded={helperOpen}
+            aria-controls="daily-helper-dialog"
+            onClick={(event) => {
+              helperOpenerRef.current = event.currentTarget;
+              setHelperTopic(null);
+              setHelperOpen(true);
+            }}
+          >
+            <CompanionFace status={status} />
+          </button>
           <div className="daily-welcome-copy">
             <span className="daily-kicker">ผู้ช่วยของคุณ <span className="daily-assistant-demo">DEMO</span></span>
             <h1 aria-live="polite">{companionGreeting}</h1>
             <p aria-live="polite">{companionMessage}</p>
             <button
-              ref={helperTriggerRef}
               type="button"
               className="daily-helper-toggle"
               aria-haspopup="dialog"
               aria-expanded={helperOpen}
               aria-controls="daily-helper-dialog"
-              onClick={() => {
+              onClick={(event) => {
+                helperOpenerRef.current = event.currentTarget;
                 setHelperTopic(null);
                 setHelperOpen(true);
               }}
