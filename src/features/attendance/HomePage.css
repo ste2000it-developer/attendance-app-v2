@@ -1,306 +1,311 @@
-/* Minimal premium attendance screen. No image assets or heavyweight animation. */
-.atelier-home {
+/* Attendance V2 / Everyday — open-canvas, typography-first design */
+.daily-home {
+  --daily-ink: #1c3248;
+  --daily-muted: #617588;
+  --daily-line: #e3eaf0;
   width: 100%;
-  max-width: 870px;
+  max-width: 1000px;
   margin: 0 auto;
   display: grid;
-  gap: 18px;
+  gap: 0;
+  color: var(--daily-ink);
 }
-.atelier-intro {
+.daily-intro {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  gap: 18px;
-  padding: 3px 2px 3px;
+  align-items: end;
+  gap: 24px;
+  padding: 7px 0 35px;
 }
-.atelier-intro-kicker {
-  display: block;
-  font-size: 12px;
-  color: #57758d;
-  font-weight: 720;
-  letter-spacing: .035em;
+.daily-kicker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #426a8d;
+  font-size: 13px;
+  font-weight: 730;
 }
-.atelier-intro h1 {
-  margin: 5px 0 1px;
-  color: #172f48;
-  font-size: clamp(30px, 4vw, 38px);
+.daily-kicker > span {
+  width: 20px;
+  height: 3px;
+  border-radius: 9px;
+  background: #317eaf;
+}
+.daily-intro h1 {
+  margin: 10px 0 1px;
+  color: #182f45;
+  font-size: clamp(34px, 4.2vw, 44px);
   letter-spacing: -.035em;
   line-height: 1.35;
   font-weight: 800;
 }
-.atelier-greeting-mark { color: #27699b; }
-.atelier-intro p {
-  margin: 0;
-  color: #596f83;
-  font-size: 15px;
-  line-height: 1.7;
-}
-.atelier-date {
-  color: #4b657e;
-  background: #fff;
-  border: 1px solid #e0e8ed;
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-size: 13px;
-  font-weight: 670;
-  white-space: nowrap;
-}
-.atelier-attendance {
-  overflow: hidden;
-  border-radius: 23px;
-  background: #fff;
-  border: 1px solid #dce6ed;
-  box-shadow: 0 16px 46px rgba(16, 43, 68, .075);
-}
-.atelier-display {
-  color: #f7fbff;
-  background: #123451;
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  min-height: 240px;
-}
-.atelier-display::after {
-  content: "";
-  position: absolute;
-  right: -87px;
-  top: -94px;
-  width: 270px;
-  height: 270px;
-  border: 1px solid rgba(150, 198, 218, .14);
-  border-radius: 50%;
-  box-shadow: 0 0 0 55px rgba(149, 200, 220, .025), 0 0 0 110px rgba(149, 200, 220, .018);
-  pointer-events: none;
-  z-index: -1;
-}
-.atelier-display-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  padding: 25px 30px 0;
-}
-.atelier-display-header h2 {
-  color: #ebf5fb;
-  margin: 0;
-  font-size: 16px;
-  font-weight: 740;
-}
-.atelier-preview-label {
-  font-size: 12px;
-  color: #d4e7f1;
-  font-weight: 690;
-  border: 1px solid rgba(196, 224, 240, .3);
-  border-radius: 999px;
-  padding: 5px 12px;
-}
-.atelier-display-content {
-  text-align: center;
-  padding: 15px 22px 17px;
-}
-.atelier-clock-caption {
+.daily-hi-dot { color: #2c7da7; }
+.daily-intro p { margin: 0; font-size: 16px; color: #677b8d; line-height: 1.7; }
+.daily-date {
   font-size: 14px;
-  font-weight: 670;
-  color: #b7d4e4;
-  display: inline-flex;
+  font-weight: 650;
+  color: #586d80;
+  white-space: nowrap;
+  padding-bottom: 6px;
+}
+.daily-focus {
+  display: grid;
+  grid-template-columns: minmax(0, 1.17fr) minmax(310px, .83fr);
+  align-items: center;
+  gap: clamp(22px, 4vw, 58px);
+  padding: 44px 0 52px;
+  border-top: 1px solid var(--daily-line);
+  border-bottom: 1px solid var(--daily-line);
+}
+.daily-clock-area { min-width: 0; }
+.daily-section-caption {
+  margin: 0 0 6px;
+  color: #526b83;
+  font-size: 16px;
+  font-weight: 675;
+}
+.daily-clock {
+  font-size: clamp(66px, 8.2vw, 104px);
+  line-height: 1.16;
+  letter-spacing: -.07em;
+  color: #142e46;
+  font-weight: 740;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  display: flex;
+  align-items: baseline;
+}
+.daily-clock-colon { color: #35789b; }
+.daily-clock-second {
+  font-size: .41em;
+  letter-spacing: -.02em;
+  color: #8398a9;
+  font-weight: 550;
+  margin-left: 2px;
+}
+.daily-clock-support {
+  margin: 9px 0 0;
+  font-size: 13px;
+  color: #6b7f90;
+  display: flex;
   align-items: center;
   gap: 9px;
 }
-.atelier-live-point {
+.daily-live-dot {
+  display: block;
+  flex: none;
   width: 8px;
   height: 8px;
-  flex: none;
   border-radius: 50%;
-  background: #8ae0c7;
+  background: #208770;
 }
-.atelier-clock {
-  margin: 6px 0 0;
-  display: flex;
-  justify-content: center;
-  align-items: baseline;
-  font-size: clamp(62px, 8vw, 88px);
-  font-weight: 720;
-  line-height: 1.19;
-  letter-spacing: -.065em;
-  color: #fff;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
+.daily-action-area {
+  padding-left: clamp(20px, 3.5vw, 40px);
+  border-left: 1px solid var(--daily-line);
+  min-width: 0;
 }
-.atelier-clock-seconds {
-  margin-left: 4px;
-  color: #99d6df;
-  font-size: .47em;
-  letter-spacing: -.018em;
-  font-weight: 560;
-}
-.atelier-clock-explanation { margin: 3px 0 0; font-size: 12px; color: #bfd4e1; }
-.atelier-display-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 14px;
-  padding: 0 30px 20px;
-}
-.atelier-tick-bars { display: flex; align-items: end; gap: 6px; height: 12px; }
-.atelier-tick-bars i { display: block; width: 2px; height: 7px; background: #577c96; border-radius: 3px; }
-.atelier-tick-bars i:nth-child(3n) { height: 12px; background: #86afc4; }
-.atelier-tick-bars i:nth-child(5n) { height: 9px; }
-.atelier-display-id {
-  font-size: 10px;
-  color: #9bb5c5;
-  font-weight: 680;
-  letter-spacing: .13em;
-}
-.atelier-interaction {
-  padding: 25px 30px 26px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.atelier-state {
+.daily-state {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 13px;
-  min-width: min(100%, 300px);
+  color: #344a5e;
 }
-.atelier-state-symbol {
+.daily-state-icon {
+  flex: none;
+  width: 52px;
+  height: 52px;
   display: grid;
   place-items: center;
-  width: 49px;
-  height: 49px;
-  flex: none;
-  background: #eff3f7;
-  color: #3c617e;
-  border-radius: 15px;
+  border-radius: 17px;
+  background: #edf2f6;
+  color: #3d6588;
 }
-.atelier-state-working { background: #e5f4eb; color: #14613f; }
-.atelier-state-finished { background: #e8f0f7; color: #235d86; }
-.atelier-state-copy { display: grid; gap: 1px; text-align: left; }
-.atelier-state-copy > span { color: #6b7e90; font-size: 12px; font-weight: 630; }
-.atelier-state-copy strong { color: #19354e; font-weight: 780; font-size: 19px; line-height: 1.35; }
-.atelier-state-copy small { color: #63798b; font-size: 12px; line-height: 1.5; }
-.atelier-primary-action {
+.daily-state-working .daily-state-icon {
+  background: #e5f3e9;
+  color: #196645;
+}
+.daily-state-finished .daily-state-icon {
+  background: #e9f1f7;
+  color: #2c668e;
+}
+.daily-state-copy { display: grid; gap: 2px; }
+.daily-state-copy > span { color: #60768a; font-size: 13px; }
+.daily-state-copy strong {
+  font-size: 20px;
+  color: #20394f;
+  line-height: 1.4;
+  font-weight: 780;
+}
+.daily-state-copy small { font-size: 12px; color: #607589; line-height: 1.6; }
+.daily-main-action {
+  color: #fff;
+  width: 100%;
+  min-height: 72px;
+  border: 0;
+  border-radius: 16px;
+  padding: 11px 12px 11px 23px;
+  margin-top: 23px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 13px;
-  width: min(100%, 365px);
-  min-height: 68px;
-  padding: 9px 11px 9px 25px;
-  margin: 24px 0 0;
-  border: 0;
-  border-radius: 13px;
-  color: #fff;
+  gap: 15px;
   cursor: pointer;
   text-align: left;
   font-size: 20px;
   font-weight: 800;
-  letter-spacing: -.01em;
+  letter-spacing: -.015em;
+  box-shadow: 0 8px 21px rgba(18,49,74,.10);
 }
-.atelier-primary-action, .atelier-primary-action svg { color: #fff; }
-.atelier-action-arrow {
+.daily-main-action svg, .daily-main-action span { color: #fff; }
+.daily-action-icon {
   display: grid;
   place-items: center;
-  width: 47px;
-  height: 47px;
   flex: none;
-  border-radius: 10px;
-  background: rgba(255,255,255,.13);
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.15);
 }
-.atelier-action-not-started { background: #176b48; }
-.atelier-action-working { background: #a44b12; }
-.atelier-action-finished { background: #525f6e; }
-.atelier-action-not-started:hover { background: #105839; }
-.atelier-action-working:hover { background: #873b0d; }
-.atelier-action-finished:hover { background: #414d5a; }
-.atelier-primary-action:focus-visible { outline: 3px solid #80b7ec; outline-offset: 4px; }
-.atelier-simulation-note { font-size: 12px; color: #62788b; line-height: 1.65; margin: 11px 0 0; text-align: center; }
-.atelier-day-summary {
-  background: #fff;
-  border: 1px solid #e0e8ee;
-  border-radius: 17px;
-  padding: 20px 23px 22px;
+.daily-main-action-ready { background: #176b48; }
+.daily-main-action-ready:hover { background: #105839; }
+.daily-main-action-working { background: #a44b12; }
+.daily-main-action-working:hover { background: #873b0d; }
+.daily-main-action-finished { background: #525f6e; }
+.daily-main-action-finished:hover { background: #414d5a; }
+.daily-main-action:focus-visible { outline: 3px solid #6da5d9; outline-offset: 4px; }
+.daily-demo-note {
+  font-size: 12px;
+  color: #697d90;
+  text-align: center;
+  margin: 11px 0 0;
+  line-height: 1.6;
 }
-.atelier-summary-title {
-  color: #1f3b53;
-  font-size: 16px;
-  font-weight: 770;
+.daily-records { padding: 33px 0 31px; }
+.daily-section-header { display: flex; justify-content: space-between; align-items: end; gap: 14px; }
+.daily-section-index {
+  display: block;
+  color: #567b99;
+  font-size: 11px;
+  letter-spacing: .1em;
+  font-weight: 790;
+  margin-bottom: 5px;
+}
+.daily-section-header h2 { margin: 0; font-size: 20px; color: #213a50; font-weight: 775; }
+.daily-preview-label { color: #708395; font-size: 12px; white-space: nowrap; }
+.daily-record-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 32px;
+  margin-top: 22px;
+}
+.daily-record {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  align-items: flex-start;
+  gap: 14px;
+  min-width: 0;
+  padding: 19px 0 21px;
+  border-top: 1px solid var(--daily-line);
 }
-.atelier-summary-title span { color: #667e92; font-weight: 580; font-size: 12px; }
-.atelier-summary-steps { margin-top: 18px; display: grid; grid-template-columns: 1fr minmax(28px, .46fr) 1fr; align-items: center; gap: 0; }
-.atelier-summary-step { display: flex; align-items: center; gap: 13px; min-width: 0; }
-.atelier-summary-step:last-child { justify-content: flex-end; }
-.atelier-step-point {
+.daily-record-marker {
+  flex: none;
+  width: 42px;
+  height: 42px;
   display: grid;
   place-items: center;
-  border: 4px solid #eef2f5;
-  background: #a5b2be;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  flex: none;
+  border-radius: 13px;
+  color: #56748b;
+  background: #f0f4f6;
 }
-.atelier-step-point.is-complete { background: #258369; border-color: #e2f0eb; }
-.atelier-summary-step > div { display: grid; gap: 1px; }
-.atelier-step-name { color: #64798b; font-size: 13px; }
-.atelier-summary-step strong {
-  color: #24435d;
-  font-size: 27px;
-  font-weight: 780;
-  letter-spacing: -.035em;
+.daily-record-marker.is-complete { background: #e4f2ec; color: #1b7050; }
+.daily-record-content { display: grid; gap: 2px; }
+.daily-record-content > span { font-size: 14px; color: #60768a; font-weight: 630; }
+.daily-record-content strong {
+  color: #1c3950;
+  font-size: clamp(29px, 3.5vw, 36px);
+  line-height: 1.26;
+  font-weight: 750;
+  letter-spacing: -.05em;
   font-variant-numeric: tabular-nums;
 }
-.atelier-connecting-line { height: 1px; background: #e4ebf0; }
-.atelier-location { display: flex; align-items: center; gap: 15px; border-radius: 16px; border: 1px solid #e1e9ee; background: #fff; padding: 18px 21px; }
-.atelier-location-icon {
+.daily-record-content small { font-size: 12px; color: #76899a; }
+.daily-place {
+  border-top: 1px solid var(--daily-line);
+  padding: 23px 0 10px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.daily-place-icon {
+  flex: none;
   display: grid;
   place-items: center;
-  flex: none;
   width: 46px;
   height: 46px;
-  border-radius: 13px;
-  background: #ecf2f7;
-  color: #386d93;
+  background: #edf3f7;
+  border-radius: 14px;
+  color: #336d96;
 }
-.atelier-location-content { flex: 1; min-width: 0; }
-.atelier-location h2 { margin: 0 0 3px; font-size: 16px; font-weight: 760; color: #254157; }
-.atelier-location p { margin: 0; color: #61778a; font-size: 13px; line-height: 1.65; }
-.atelier-location-status { color: #526d81; background: #f2f6f8; border-radius: 7px; padding: 8px 10px; white-space: nowrap; font-size: 12px; font-weight: 620; }
-
-@media (max-width: 650px) {
-  .atelier-home { gap: 14px; }
-  .atelier-intro { display: block; padding: 0 2px 2px; }
-  .atelier-intro h1 { font-size: 32px; }
-  .atelier-intro p { font-size: 14px; }
-  .atelier-date { display: block; width: fit-content; margin-top: 12px; padding: 7px 10px; white-space: normal; }
-  .atelier-attendance { border-radius: 19px; }
-  .atelier-display { min-height: 0; }
-  .atelier-display-header { padding: 21px 19px 0; }
-  .atelier-display-content { padding: 20px 14px 22px; }
-  .atelier-clock { font-size: clamp(52px, 13vw, 70px); }
-  .atelier-display-footer { padding: 0 19px 18px; }
-  .atelier-interaction { padding: 23px 18px 24px; }
-  .atelier-primary-action { margin-top: 20px; min-height: 67px; width: min(100%, 380px); }
-  .atelier-day-summary { padding: 17px 17px 20px; }
-  .atelier-summary-steps { grid-template-columns: 1fr minmax(22px,.4fr) 1fr; }
-  .atelier-summary-step { gap: 8px; }
-  .atelier-summary-step strong { font-size: 24px; }
-  .atelier-location { padding: 17px; }
-  .atelier-location-status { display: none; }
+.daily-place-copy { flex: 1; min-width: 0; }
+.daily-place h2 { font-size: 16px; color: #253e54; margin: 0 0 3px; font-weight: 760; }
+.daily-place p { margin: 0; font-size: 13px; line-height: 1.65; color: #61778a; }
+.daily-place-status {
+  font-size: 12px;
+  color: #657e91;
+  border: 1px solid #e1e9ef;
+  border-radius: 9px;
+  padding: 8px 12px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+@media (max-width: 850px) {
+  .daily-home { max-width: 650px; }
+  .daily-intro { display: block; padding: 5px 0 27px; }
+  .daily-date { display: block; margin-top: 12px; padding: 0; white-space: normal; }
+  .daily-focus { grid-template-columns: minmax(0,1fr); gap: 0; padding: 27px 0 34px; }
+  .daily-clock-area { text-align: center; }
+  .daily-clock { justify-content: center; font-size: clamp(67px, 12vw, 90px); }
+  .daily-clock-support { justify-content: center; }
+  .daily-action-area {
+    padding-left: 0;
+    border-left: none;
+    width: min(100%, 430px);
+    justify-self: center;
+    margin-top: 39px;
+  }
+  .daily-record-grid { gap: 22px; }
+}
+@media (max-width: 500px) {
+  .daily-intro { padding: 0 0 23px; }
+  .daily-kicker { font-size: 12px; }
+  .daily-intro h1 { font-size: 34px; }
+  .daily-intro p { font-size: 15px; }
+  .daily-date { font-size: 13px; }
+  .daily-focus { padding: 29px 0 33px; }
+  .daily-clock { font-size: clamp(59px, 14vw, 75px); margin-top: 7px; }
+  .daily-section-caption { font-size: 15px; }
+  .daily-clock-support { margin-top: 10px; }
+  .daily-action-area { margin-top: 37px; }
+  .daily-state-icon { width: 50px; height: 50px; }
+  .daily-main-action { min-height: 72px; font-size: 20px; margin-top: 20px; }
+  .daily-records { padding: 28px 0 22px; }
+  .daily-section-header h2 { font-size: 19px; }
+  .daily-record-grid { gap: 14px; margin-top: 17px; }
+  .daily-record { gap: 10px; padding: 16px 0 17px; }
+  .daily-record-marker { width: 35px; height: 35px; border-radius: 11px; }
+  .daily-record-marker svg { width: 18px; height: 18px; }
+  .daily-record-content > span { font-size: 13px; }
+  .daily-record-content strong { font-size: 29px; }
+  .daily-record-content small { font-size: 11px; }
+  .daily-place { padding: 20px 0 6px; }
+  .daily-place-status { display: none; }
 }
 @media (max-width: 360px) {
-  .atelier-clock { font-size: 49px; }
-  .atelier-summary-step strong { font-size: 22px; }
-  .atelier-summary-step { gap: 6px; }
-  .atelier-step-point { width: 14px; height: 14px; border-width: 3px; }
-  .atelier-display-id { font-size: 9px; }
+  .daily-clock { font-size: 56px; }
+  .daily-record-grid { gap: 8px; }
+  .daily-record-content strong { font-size: 25px; }
+  .daily-record-marker { display: none; }
 }
 @media (prefers-reduced-motion: no-preference) {
-  .atelier-primary-action { transition: background-color .14s ease, transform .14s ease; }
-  .atelier-primary-action:active { transform: scale(.99); }
+  .daily-main-action { transition: background-color .15s ease, transform .15s ease; }
+  .daily-main-action:active { transform: scale(.99); }
 }
