@@ -65,9 +65,9 @@
   font-weight: 675;
 }
 .daily-clock {
-  font-size: clamp(66px, 8.2vw, 104px);
-  line-height: 1.16;
-  letter-spacing: -.07em;
+  font-size: clamp(56px, 6.4vw, 82px);
+  line-height: 1.18;
+  letter-spacing: -.04em;
   color: #142e46;
   font-weight: 740;
   font-variant-numeric: tabular-nums;
@@ -75,13 +75,21 @@
   display: flex;
   align-items: baseline;
 }
-.daily-clock-colon { color: #35789b; }
+.daily-clock-colon {
+  display: inline-block;
+  font-size: .68em;
+  color: inherit;
+  font-weight: 650;
+  letter-spacing: 0;
+  margin: 0 .15em;
+  vertical-align: .055em;
+}
 .daily-clock-second {
-  font-size: .41em;
-  letter-spacing: -.02em;
+  font-size: .36em;
+  letter-spacing: 0;
   color: #8398a9;
   font-weight: 550;
-  margin-left: 2px;
+  margin-left: 6px;
 }
 .daily-clock-support {
   margin: 9px 0 0;
@@ -263,7 +271,7 @@
   .daily-date { display: block; margin-top: 12px; padding: 0; white-space: normal; }
   .daily-focus { grid-template-columns: minmax(0,1fr); gap: 0; padding: 27px 0 34px; }
   .daily-clock-area { text-align: center; }
-  .daily-clock { justify-content: center; font-size: clamp(67px, 12vw, 90px); }
+  .daily-clock { justify-content: center; font-size: clamp(54px, 10vw, 75px); }
   .daily-clock-support { justify-content: center; }
   .daily-action-area {
     padding-left: 0;
@@ -281,7 +289,7 @@
   .daily-intro p { font-size: 15px; }
   .daily-date { font-size: 13px; }
   .daily-focus { padding: 29px 0 33px; }
-  .daily-clock { font-size: clamp(59px, 14vw, 75px); margin-top: 7px; }
+  .daily-clock { font-size: clamp(49px, 11.5vw, 62px); margin-top: 7px; }
   .daily-section-caption { font-size: 15px; }
   .daily-clock-support { margin-top: 10px; }
   .daily-action-area { margin-top: 37px; }
@@ -300,7 +308,7 @@
   .daily-place-status { display: none; }
 }
 @media (max-width: 360px) {
-  .daily-clock { font-size: 56px; }
+  .daily-clock { font-size: 47px; }
   .daily-record-grid { gap: 8px; }
   .daily-record-content strong { font-size: 25px; }
   .daily-record-marker { display: none; }
