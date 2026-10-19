@@ -14,8 +14,6 @@ concurrency:
 
 jobs:
   deploy:
-    # Do not try to publish until the owner switches the repository to Public.
-    if: ${{ github.event.repository.private == false }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
