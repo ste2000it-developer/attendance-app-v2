@@ -29,19 +29,28 @@ function NavIcon({ section }: { section: Section }) {
   return <svg {...common}><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>;
 }
 
-function Navigation({ active, onNavigate }: { active: Section; onNavigate: (section: Section) => void }) {
+function Navigation({ active, onNavigate, mobile = false }: {
+  active: Section;
+  onNavigate: (section: Section) => void;
+  mobile?: boolean;
+}) {
+  // DOM order matches the visual order for keyboard and screen-reader navigation.
+  const items = mobile
+    ? [navigation[1], navigation[0], navigation[2]]
+    : navigation;
+
   return (
-    <nav className="app-nav" aria-label="เมนูหลัก">
-      {navigation.map(({ id, label }) => (
+    <nav className="app-nav" aria-label={mobile ? "เมนูหลักบนมือถือ" : "เมนูหลัก"}>
+      {items.map(({ id, label }) => (
         <button
           key={id}
           type="button"
-          className={active === id ? "nav-link is-active" : "nav-link"}
+          className={`nav-link nav-link-${id}${active === id ? " is-active" : ""}`}
           aria-current={active === id ? "page" : undefined}
           onClick={() => onNavigate(id)}
         >
-          <NavIcon section={id} />
-          <span>{label}</span>
+          <span className="nav-icon-wrap"><NavIcon section={id} /></span>
+          <span className="nav-label">{label}</span>
         </button>
       ))}
     </nav>
@@ -105,7 +114,7 @@ export default function App() {
         </main>
 
         <div className="mobile-navigation">
-          <Navigation active={active} onNavigate={setActive} />
+          <Navigation active={active} onNavigate={setActive} mobile />
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 :root {
   font-family: "Noto Sans Thai", "Leelawadee UI", "Segoe UI", Tahoma, sans-serif;
   color: #253a50;
-  background: #f6f8fa;
+  background: #f5f8fa;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -10,7 +10,7 @@
   --ink: #253a50;
   --muted: #65778a;
   --surface: #ffffff;
-  --canvas: #f6f8fa;
+  --canvas: #f5f8fa;
   --line: #e4e9ee;
   --radius: 16px;
   --shadow: 0 4px 18px rgba(22, 45, 70, .035);
