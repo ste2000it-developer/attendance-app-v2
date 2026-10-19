@@ -34,6 +34,14 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: TypeScript check and build
         run: npm run build
+      - name: Verify GitHub Pages build output
+        run: |
+          test -f dist/index.html
+          if grep -q 'src/main.tsx' dist/index.html; then
+            echo "Vite source entrypoint was not compiled" >&2
+            exit 1
+          fi
+          grep -q '/attendance-app-v2/assets/' dist/index.html
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Upload static site
