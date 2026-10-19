@@ -209,8 +209,9 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
   // When a guide is opened or dismissed, put keyboard focus on its new controls.
   useEffect(() => {
     if (!helperOpen) return;
-    const selector = helperTopic ? ".daily-guide-back" : ".daily-sheet-options button";
-    helperDialogRef.current?.querySelector<HTMLButtonElement>(selector)?.focus();
+    // Keep focus at the beginning of the newly selected help topic.
+    const selector = helperTopic ? ".daily-sheet-identity h2" : ".daily-sheet-options button";
+    helperDialogRef.current?.querySelector<HTMLElement>(selector)?.focus();
   }, [helperTopic]);
 
   const status: DemoStatus = !checkInAt ? "ready" : !checkOutAt ? "working" : "finished";
@@ -322,7 +323,7 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
                 <span className="daily-sheet-avatar"><CompanionFace status={status} /></span>
                 <div>
                   <span className="daily-sheet-eyebrow">ผู้ช่วยประจำแอป · DEMO</span>
-                  <h2 id="daily-sheet-title">{helperTopic ? guideTitle : "มีอะไรให้ผมช่วยไหมครับ?"}</h2>
+                  <h2 id="daily-sheet-title" tabIndex={-1}>{helperTopic ? guideTitle : "มีอะไรให้ผมช่วยไหมครับ?"}</h2>
                 </div>
               </div>
               <button
