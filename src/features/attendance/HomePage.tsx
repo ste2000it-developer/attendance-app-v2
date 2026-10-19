@@ -110,7 +110,7 @@ export function HomePage() {
               <span className={`simple-state-dot simple-state-${status}`} aria-hidden="true" />
               <strong>{statusLabel}</strong>
             </div>
-            <button className="simple-action-button" type="button" onClick={handleAction}>
+            <button className={`simple-action-button simple-action-${status}`} type="button" onClick={handleAction}>
               {actionLabel}
               <Icon name={status === "finished" ? "rotate" : "arrow"} size={21} />
             </button>

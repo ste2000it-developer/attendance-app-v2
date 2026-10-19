@@ -152,11 +152,11 @@
   width: 100%;
   max-width: 400px;
   min-height: 60px;
-  background: #245a98;
+  background: #176B48;
   color: #fff;
   font-size: 18px;
   font-weight: 750;
-  border: 1px solid #245a98;
+  border: 1px solid transparent;
   border-radius: 12px;
   cursor: pointer;
   padding: 13px 18px 13px 23px;
@@ -165,8 +165,17 @@
   justify-content: space-between;
   gap: 15px;
 }
-.simple-action-button:hover { background: #1e4d85; }
-.simple-action-button:active { background: #173f70; }
+/* Clear status colors; text and icons remain white for readability. */
+.simple-action-button { color: #fff; border-color: transparent; }
+.simple-action-not-started { background: #176B48; }
+.simple-action-not-started:hover { background: #105839; }
+.simple-action-not-started:active { background: #0B452D; }
+.simple-action-working { background: #A44B12; }
+.simple-action-working:hover { background: #873B0D; }
+.simple-action-working:active { background: #722F08; }
+.simple-action-finished { background: #525F6E; }
+.simple-action-finished:hover { background: #414D5A; }
+.simple-action-finished:active { background: #35404B; }
 .simple-action-button:focus-visible { outline: 3px solid #86b9fb; outline-offset: 3px; }
 .simple-action-button svg { flex: none; }
 .simple-action-hint {
