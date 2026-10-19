@@ -1,0 +1,17 @@
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "Noto Sans Thai", "Segoe UI", Tahoma, sans-serif;
+  color: #172b40;
+  background: #f5f7fb;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --brand: #194773;
+  --brand-deep: #163a62;
+  --ink: #172b40;
+  --muted: #65768a;
+  --surface: #ffffff;
+  --canvas: #f5f7fb;
+  --line: #e5ebf1;
+  --radius: 16px;
+  --shadow: 0 4px 24px rgba(17, 45, 75, 0.035);
+}
