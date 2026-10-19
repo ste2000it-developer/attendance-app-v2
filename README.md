@@ -49,4 +49,19 @@ src/
 - ค่า Firebase web config เป็นข้อมูลการตั้งค่า client แต่ยังต้องควบคุมด้วย Firebase Auth และ Firestore Security Rules
 - ยังไม่มีระบบ Sign-in / Device binding / GPS / Auto checkout / OT / Leave approval / Export Excel
 - แอปจริง V1 ยังคงใช้ Repository แยกกัน ไม่ได้รับผลกระทบจาก V2
-- ยังไม่ได้ตั้งค่า Hosting, PWA install หรือ Deploy
+- ยังไม่ได้ตั้งค่า PWA install และยังไม่เปิดระบบจริง; เตรียม GitHub Pages workflow ไว้สำหรับเว็บทดลองเท่านั้น
+
+## GitHub Pages — เว็บทดลอง
+
+โครงสร้างนี้เตรียมไว้สำหรับเว็บไซต์ทดลองที่ `https://ste2000it-developer.github.io/attendance-app-v2/` **เมื่อ Deploy สำเร็จแล้วเท่านั้น**
+
+การเปิดเว็บครั้งแรกต้องทำจาก GitHub ด้วยบัญชีเจ้าของ:
+
+1. `Settings > General > Danger Zone > Change repository visibility > Make public` และยืนยัน (เนื้อหา Repository และประวัติ Commit จะเปิดเผยต่อสาธารณะ)
+2. `Settings > Pages > Build and deployment > Source > GitHub Actions`
+3. `Actions > Deploy Attendance V2 Preview > Run workflow` เลือก `main` แล้วกดเริ่ม
+4. เมื่อการ Deploy ผ่าน ให้เปิดลิงก์เว็บจากหน้า Pages หรือผลลัพธ์ของ Workflow
+
+ทุกครั้งที่มีการ Push โค้ดขึ้น `main` ใน Repository แบบ Public ระบบจะ Build และ Deploy อัตโนมัติ
+
+**ข้อควรระวัง:** หน้าเว็บทดลองจะเข้าถึงได้จากอินเทอร์เน็ต ไม่ใส่ข้อมูลบุคคล รหัสผ่าน หรือความลับใด ๆ ในไฟล์ที่เผยแพร่ ปัจจุบัน UI เป็นเพียงหน้าตัวอย่าง ไม่มีการเชื่อม Firebase Production
