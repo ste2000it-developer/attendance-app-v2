@@ -176,3 +176,71 @@ button:focus-visible { outline: 3px solid #77adff; outline-offset: 3px; }
 
 /* Space for natural thumb navigation without adding a floating Home button. */
 @media (max-width: 420px) { .page-main { padding-left: 21px; padding-right: 21px; } }
+
+/* Product finish — typography, navigation and content rhythm.
+   Scoped to shared chrome and content pages; Home's one-screen measurements are unchanged. */
+:root {
+  --ui-ink: #1d384e;
+  --ui-muted: #627a8b;
+  --ui-line: #e4ecf1;
+  --ui-accent: #205d81;
+}
+body { color: var(--ui-ink); }
+.sidebar { background: #f9fbfc; border-right-color: #e7edf1; }
+.sidebar-heading { margin-top: 38px; color: #7f94a4; font-weight: 780; }
+.nav-link { border-radius: 12px; color: #62788b; }
+.nav-link:hover { background: #edf3f7; color: #214c69; }
+.nav-link.is-active { background: #e6f0f6; color: #184a6c; }
+.topbar { border-bottom-color: #e9eef2; }
+.topbar-context .eyebrow { color: #8799a8; font-size: 10px; letter-spacing: .115em; }
+.topbar-context strong { color: #214057; }
+.preview-pill {
+  border: 1px solid #e4edf2; border-radius: 9px;
+  background: #f6f9fb; color: #59768b;
+}
+.page-main:not(.page-main-home) {
+  padding-top: clamp(27px, 3.7vw, 45px);
+  padding-bottom: 70px;
+}
+.page-content { gap: 25px; margin: 0 auto; }
+.page-heading { align-items: center; }
+.page-heading .eyebrow { font-size: 10px; color: #6787a0; font-weight: 800; }
+.page-heading h1 {
+  margin: 8px 0 5px; font-size: clamp(28px, 3vw, 33px);
+  color: #1c364d; letter-spacing: -.03em; line-height: 1.35; font-weight: 810;
+}
+.page-heading p { color: #657e91; font-size: 14px; line-height: 1.75; }
+.page-demo-tag {
+  display: inline-flex; align-items: center; justify-content: center;
+  flex: none; white-space: nowrap; border-radius: 8px; padding: 7px 10px;
+  border: 1px solid #e0e9ef; background: #f6f9fb;
+  font-size: 12px; line-height: 1.45; font-weight: 730; color: #607f91;
+}
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+.skip-link {
+  position: fixed; z-index: 300; top: -80px; left: 12px;
+  padding: 10px 16px; border-radius: 10px;
+  background: #173f5c; color: #fff; font-weight: 760;
+}
+.skip-link:focus-visible { top: 12px; }
+@media (max-width: 800px) {
+  .topbar { border-bottom-color: #e7edf2; }
+  .mobile-navigation { box-shadow: 0 -4px 22px rgba(21,53,79,.065); }
+  .mobile-navigation .nav-link:not(.nav-link-home).is-active .nav-icon-wrap { background: #e8f1f7; }
+  .page-main:not(.page-main-home) {
+    padding-top: 25px;
+    padding-bottom: calc(111px + env(safe-area-inset-bottom));
+  }
+  .page-content { gap: 21px; }
+  .page-heading { align-items: flex-start; gap: 11px; }
+  .page-heading h1 { font-size: 29px; }
+  .page-heading p { font-size: 14px; }
+  .page-demo-tag { align-self: flex-start; }
+}
+@media (max-width: 420px) {
+  .page-heading h1 { font-size: 28px; }
+  .page-heading p { font-size: 13px; }
+}

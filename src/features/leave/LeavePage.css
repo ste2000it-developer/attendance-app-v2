@@ -1,58 +1,114 @@
-.leave-v2 { max-width: 800px; }
+/* Leave · aligned with the calm, action-first Attendance V2 visual system. */
+.leave-v2 { width: 100%; max-width: 780px; }
 .leave-draft-panel {
-  padding: clamp(20px, 4vw, 32px);
-  background: #fff; border: 1px solid #e1eaf0; border-radius: 20px;
+  padding: clamp(22px, 3.8vw, 31px);
+  background: #fff;
+  border: 1px solid #e4ebf0;
+  border-radius: 20px;
+  box-shadow: 0 9px 30px rgba(20,48,72,.035);
 }
-.leave-draft-heading { display: flex; gap: 14px; align-items: center; margin-bottom: 26px; }
+.leave-draft-heading {
+  display: flex; align-items: center; gap: 15px;
+  border-bottom: 1px solid #e9eef2;
+  padding-bottom: 21px; margin-bottom: 23px;
+}
 .leave-draft-mark {
-  display: grid; place-items: center; width: 49px; height: 49px;
-  border-radius: 15px; flex: none; background: #eaf3f8; color: #2e7197; font-size: 25px;
+  flex: none; width: 48px; height: 48px;
+  display: grid; place-items: center;
+  border-radius: 14px; background: #eaf2f8; color: #255c80;
 }
-.leave-draft-heading h2 { margin: 0 0 4px; font-size: 20px; color: #223e55; }
-.leave-draft-heading p { margin: 0; font-size: 14px; color: #607587; line-height: 1.7; }
-.leave-draft-form { display: grid; gap: 21px; }
-.leave-draft-field { display: grid; gap: 9px; min-width: 0; }
-.leave-draft-field label { color: #29445a; font-size: 15px; font-weight: 735; }
-.leave-draft-field label span { color: #ad542d; }
+.leave-draft-heading-copy { min-width: 0; }
+.leave-draft-step { font-size: 11px; font-weight: 780; letter-spacing: .08em; color: #507995; }
+.leave-draft-heading h2 {
+  font-size: 19px; line-height: 1.45; letter-spacing: -.015em;
+  margin: 3px 0 2px; color: #1f3c53; font-weight: 780;
+}
+.leave-draft-heading p { margin: 0; font-size: 13px; color: #708596; line-height: 1.65; }
+.leave-draft-form { display: grid; gap: 20px; }
+.leave-draft-field { min-width: 0; display: grid; gap: 8px; }
+.leave-draft-field label { font-size: 14px; font-weight: 740; color: #2a465d; }
+.leave-draft-field label span { color: #b45e42; }
 .leave-draft-field :is(input, select, textarea) {
   width: 100%; min-width: 0; min-height: 51px;
-  font: inherit; font-size: 15px; color: #24435d;
-  border: 1px solid #cadbe5; background: #fff; border-radius: 12px;
-  padding: 12px 13px; outline: none;
+  padding: 11px 14px; border: 1px solid #d9e3ea; border-radius: 11px;
+  background-color: #fff; color: #273f54;
+  font: inherit; font-size: 15px; line-height: 1.55;
+  transition: border-color .15s ease, box-shadow .15s ease;
 }
-.leave-draft-field textarea { resize: vertical; min-height: 110px; }
+.leave-draft-field :is(input, select, textarea)::placeholder { color: #96a7b3; }
+.leave-draft-field select {
+  appearance: none;
+  padding-right: 43px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23576e82' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center; background-size: 18px;
+  cursor: pointer;
+}
+.leave-draft-field select:has(option:first-child:checked) { color: #75899a; }
+.leave-draft-field input[type="date"] { color-scheme: light; }
+.leave-draft-field textarea { resize: vertical; min-height: 91px; }
 .leave-draft-field :is(input, select, textarea):focus-visible {
-  border-color: #397eab; outline: 3px solid #d8eaf6;
+  border-color: #4385ae; outline: 3px solid #dcebf5; outline-offset: 0;
 }
-.leave-draft-field :is(input, select, textarea)[aria-invalid="true"] { border-color: #c66a50; }
-.leave-draft-field small { color: #ad3f32; font-size: 13px; line-height: 1.6; }
-.leave-draft-date-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; }
-.leave-draft-actions { display: flex; gap: 13px; align-items: center; flex-wrap: wrap; margin-top: 3px; }
+.leave-draft-field :is(input, select, textarea)[aria-invalid="true"] {
+  border-color: #be735d; background-color: #fffbf9;
+}
+.leave-draft-field small { color: #af493e; font-size: 12px; font-weight: 640; line-height: 1.6; }
+.leave-draft-date-grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px;
+}
+.leave-draft-actions {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 2px;
+}
 .leave-draft-submit {
-  min-height: 54px; min-width: 220px; padding: 13px 20px;
-  background: #205d81; color: #fff; font-size: 16px; font-weight: 760;
-  border: 0; border-radius: 13px; cursor: pointer;
-  display: inline-flex; justify-content: space-between; align-items: center; gap: 22px;
+  min-height: 54px; min-width: 230px;
+  border: 0; border-radius: 12px; padding: 13px 18px;
+  display: inline-flex; justify-content: space-between; align-items: center; gap: 17px;
+  background: #205d81; color: #fff;
+  font-size: 15px; font-weight: 775; cursor: pointer;
 }
-.leave-draft-submit:hover { background: #164562; }
-.leave-draft-clear { min-height: 50px; padding: 12px 17px; border: 0; border-radius: 11px; background: transparent; color: #5e7688; cursor: pointer; font-size: 14px; font-weight: 680; }
-.leave-draft-clear:hover { background: #f0f4f6; }
+.leave-draft-submit:hover { background: #184a6a; }
+.leave-draft-clear {
+  min-height: 48px; padding: 12px 17px;
+  border: 0; border-radius: 11px; background: transparent;
+  color: #647b8d; font-size: 14px; font-weight: 680; cursor: pointer;
+}
+.leave-draft-clear:hover { background: #f1f5f7; color: #2f546d; }
+.leave-draft-disclaimer {
+  display: flex; align-items: flex-start; gap: 9px;
+  margin: -6px 2px 0; color: #6b8090; font-size: 12px; line-height: 1.75;
+}
+.leave-draft-disclaimer svg { flex: none; margin-top: 2px; }
 .leave-draft-result {
-  display: flex; gap: 14px; padding: 22px; border-radius: 19px;
-  background: #edf7f1; border: 1px solid #d2e9db; color: #1a6749;
+  display: flex; align-items: flex-start; gap: 15px;
+  border: 1px solid #d5e6dc; border-radius: 18px;
+  background: #f1f8f3; color: #215c43; padding: 23px 25px;
 }
-.leave-draft-result-mark { flex: none; display: grid; place-items: center; width: 37px; height: 37px; border-radius: 50%; background: #d1eadd; font-size: 20px; }
-.leave-draft-result h2 { margin: 2px 0 5px; color: #235840; font-size: 18px; }
-.leave-draft-result p { margin: 0; font-size: 13px; color: #45715d; line-height: 1.7; }
-.leave-draft-result dl { margin: 15px 0 0; display: grid; gap: 10px; }
-.leave-draft-result dl > div { display: grid; grid-template-columns: 90px minmax(0,1fr); gap: 12px; }
-.leave-draft-result dt { color: #527963; font-size: 13px; }
-.leave-draft-result dd { margin: 0; color: #244c39; font-size: 14px; overflow-wrap: anywhere; white-space: pre-wrap; }
-@media (max-width: 540px) {
-  .leave-draft-date-grid { grid-template-columns: minmax(0,1fr); gap: 18px; }
+.leave-draft-result-mark {
+  display: grid; place-items: center; flex: none;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: #dcefe1; font-size: 19px; font-weight: 760;
+}
+.leave-draft-result-content { min-width: 0; flex: 1; }
+.leave-draft-result h2 { margin: 3px 0 3px; font-size: 18px; color: #275a43; }
+.leave-draft-result p { margin: 0; line-height: 1.6; color: #567e65; font-size: 13px; }
+.leave-draft-result dl { display: grid; gap: 11px; margin: 18px 0 0; }
+.leave-draft-result dl > div {
+  display: grid; grid-template-columns: 100px minmax(0,1fr);
+  gap: 12px; padding-top: 10px; border-top: 1px solid #dcece2;
+}
+.leave-draft-result dt { color: #60816e; font-size: 13px; }
+.leave-draft-result dd {
+  margin: 0; color: #244f3b; font-size: 14px;
+  overflow-wrap: anywhere; white-space: pre-wrap;
+}
+@media (max-width: 600px) {
+  .leave-draft-panel { padding: 20px; border-radius: 17px; }
+  .leave-draft-heading { margin-bottom: 18px; padding-bottom: 17px; }
+  .leave-draft-form { gap: 16px; }
+  .leave-draft-date-grid { grid-template-columns: minmax(0,1fr); gap: 16px; }
   .leave-draft-actions { display: grid; grid-template-columns: minmax(0,1fr); }
-  .leave-draft-submit { width: 100%; }
+  .leave-draft-submit { width: 100%; min-width: 0; }
   .leave-draft-clear { justify-self: center; }
-  .leave-draft-result { padding: 17px; gap: 10px; }
-  .leave-draft-result dl > div { grid-template-columns: 74px minmax(0,1fr); }
+  .leave-draft-result { padding: 18px; gap: 11px; }
+  .leave-draft-result dl > div { grid-template-columns: 82px minmax(0,1fr); }
 }

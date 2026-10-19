@@ -87,6 +87,7 @@ export default function App() {
 
   return (
     <div className="app-frame">
+      <a href="#main-content" className="skip-link">ข้ามไปเนื้อหาหลัก</a>
       <aside className="sidebar">
         <Brand />
         <p className="sidebar-heading">เมนูหลัก</p>
@@ -101,7 +102,7 @@ export default function App() {
         <header className="topbar">
           <div className="mobile-brand"><Brand /></div>
           <div className="topbar-context">
-            <span className="eyebrow">WORKFORCE EXPERIENCE</span>
+            <span className="eyebrow">ATTENDANCE V2</span>
             <strong>{sectionName}</strong>
           </div>
           <span className="preview-pill"><span aria-hidden="true" /> เวอร์ชันทดลอง</span>

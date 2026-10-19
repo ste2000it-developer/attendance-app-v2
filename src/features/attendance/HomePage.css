@@ -373,3 +373,15 @@
 .daily-geo-help .daily-guide-image { margin-top: 5px; }
 .daily-guide-leave-actions { gap: 13px; }
 /* Avoid changing Home's clock-in button styles. */
+
+/* Micro-finishes only: keep the locked clock, action sizing and medium mascot intact. */
+.daily-assistant-launch { transition: background-color .16s ease; }
+.daily-record { border-color: #e6edf2; background: #f9fbfc; }
+.daily-sheet-close:focus-visible, .daily-sheet-options > button:focus-visible,
+.daily-guide-primary:focus-visible, .daily-guide-back:focus-visible {
+  outline: 3px solid #8bb8d3; outline-offset: 3px;
+}
+.daily-helper-sheet { scrollbar-gutter: stable; }
+@media (max-width: 800px) {
+  .daily-helper-sheet { scrollbar-gutter: auto; }
+}
