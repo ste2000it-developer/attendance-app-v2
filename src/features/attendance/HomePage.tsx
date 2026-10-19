@@ -102,6 +102,59 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
   const [helperTopic, setHelperTopic] = useState<GuideTopic | null>(null);
   const helperDialogRef = useRef<HTMLElement | null>(null);
   const helperOpenerRef = useRef<HTMLButtonElement | null>(null);
+  const demoActionRef = useRef<HTMLButtonElement | null>(null);
+  const returnToActionRef = useRef(false);
+  const [geoPermission, setGeoPermission] = useState<PermissionState | "unknown">("unknown");
+  const [geoResult, setGeoResult] = useState<"idle" | "checking" | "ready" | "denied" | "timeout" | "unavailable" | "error">("idle");
+
+  // Permission status can be read without requesting someone's location.
+  // Actual coordinates are never stored; the browser only asks when clicked.
+  useEffect(() => {
+    if (!navigator.permissions?.query) return;
+    let active = true;
+    let permission: PermissionStatus | null = null;
+    const sync = () => { if (active && permission) setGeoPermission(permission.state); };
+    navigator.permissions.query({ name: "geolocation" }).then((result) => {
+      if (!active) return;
+      permission = result;
+      sync();
+      result.addEventListener?.("change", sync);
+    }).catch(() => { /* Some browsers don't support permissions.query. */ });
+    return () => {
+      active = false;
+      permission?.removeEventListener?.("change", sync);
+    };
+  }, []);
+
+  function testLocation() {
+    if (!window.isSecureContext || !navigator.geolocation) {
+      setGeoResult("unavailable");
+      return;
+    }
+    setGeoResult("checking");
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        setGeoResult("ready");
+        setGeoPermission("granted");
+      },
+      (error) => {
+        if (error.code === 1) {
+          setGeoResult("denied");
+          setGeoPermission("denied");
+        } else if (error.code === 3) {
+          setGeoResult("timeout");
+        } else {
+          setGeoResult("error");
+        }
+      },
+      { enableHighAccuracy: false, timeout: 12000, maximumAge: 0 }
+    );
+  }
+
+  function guideToAttendance() {
+    returnToActionRef.current = true;
+    setHelperOpen(false);
+  }
 
   // An accessible modal: focus enters the dialog, stays inside it, and
   // returns to the opener. Escape and the backdrop both close it.
@@ -143,7 +196,13 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
     return () => {
       window.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
-      helperOpenerRef.current?.focus();
+      if (returnToActionRef.current) {
+        returnToActionRef.current = false;
+        demoActionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+        demoActionRef.current?.focus({ preventScroll: true });
+      } else {
+        helperOpenerRef.current?.focus();
+      }
     };
   }, [helperOpen]);
 
@@ -166,13 +225,15 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
 
   const companionGreeting = status === "ready" ? "สวัสดีครับ!"
     : status === "working" ? "เริ่มงานแล้วครับ!" : "เรียบร้อยแล้วครับ!";
-  const companionMessage = status === "ready"
-    ? "วันนี้พร้อมเริ่มงานหรือยังครับ? ผมอยู่ตรงนี้ถ้าต้องการความช่วยเหลือ"
-    : status === "working"
-      ? "ทดลองเข้างานแล้วครับ เมื่อทำงานเสร็จ ลองกดเลิกงานได้เลย"
-      : "ทดลองเลิกงานครบแล้วครับ ขอบคุณสำหรับวันนี้!";
-  const guideTitle = helperTopic === "attendance" ? "วิธีตอกบัตร"
-    : helperTopic === "gps" ? "เปิดตำแหน่ง GPS" : "วิธีไปหน้าการลา";
+  const companionMessage = geoPermission === "denied"
+    ? "ตำแหน่งถูกปิดกั้นอยู่ครับ ผมช่วยแนะนำวิธีแก้ได้"
+    : status === "ready"
+      ? "พร้อมเริ่มงานแล้วครับ กดปุ่มเข้างานด้านล่างได้เลย"
+      : status === "working"
+        ? "ทดลองเข้างานแล้วครับ เมื่อทำงานเสร็จกดเลิกงานได้เลย"
+        : "ทดลองเลิกงานครบแล้วครับ ขอบคุณสำหรับวันนี้!";
+  const guideTitle = helperTopic === "attendance" ? "ช่วยตอกบัตร"
+    : helperTopic === "gps" ? "ตรวจสอบตำแหน่ง" : "ช่วยเรื่องการลา";
   const guideDescription = helperTopic === "attendance"
     ? status === "ready"
       ? "แตะปุ่มสีเขียวเพื่อทดลองเข้างาน แล้วใช้ปุ่มสีส้มเพื่อทดลองเลิกงานครับ"
@@ -180,8 +241,8 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
         ? "เมื่อทำงานเสร็จ แตะปุ่มสีส้มเพื่อทดลองเลิกงานได้เลยครับ"
         : "ลองกด “เริ่มทดลองใหม่” เพื่อดูขั้นตอนอีกครั้งได้ครับ"
     : helperTopic === "gps"
-      ? "เปิดตำแหน่งในเครื่อง และอนุญาตให้เบราว์เซอร์เข้าถึงตำแหน่งครับ"
-      : "แตะเมนู “การลา” ที่แถบด้านล่างเพื่อเปิดหน้าการลาครับ";
+      ? "กดปุ่มตรวจสอบด้านล่าง ผมจะลองอ่านตำแหน่งจากเบราว์เซอร์ให้ครับ"
+      : "ผมเปิดแบบฟอร์มการลาให้ได้ และช่วยตรวจว่ากรอกครบหรือไม่ครับ";
 
   function handleDemo() {
     if (status === "ready") {
@@ -225,11 +286,11 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
               aria-controls="daily-helper-dialog"
               onClick={(event) => {
                 helperOpenerRef.current = event.currentTarget;
-                setHelperTopic(null);
+                setHelperTopic(geoPermission === "denied" ? "gps" : null);
                 setHelperOpen(true);
               }}
             >
-              ให้ผมช่วยไหม?
+              {geoPermission === "denied" ? "ช่วยแก้ปัญหาตำแหน่ง" : "ให้ผมช่วยไหม?"}
               <Icon name="arrow" size={17} />
             </button>
           </div>
@@ -274,30 +335,73 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
               </button>
             </header>
             <p className="daily-sheet-description" id="daily-sheet-description">
-              {helperTopic ? "ดูจุดที่ทำเครื่องหมายไว้ในภาพได้เลยครับ" : "เลือกสิ่งที่ต้องการได้เลยครับ"}
+              {helperTopic ? "ผมช่วยทำขั้นตอนถัดไปได้เลยครับ" : "เลือกสิ่งที่ต้องการได้เลยครับ"}
             </p>
             {helperTopic ? (
               <div className="daily-guide-detail">
-                <div className="daily-guide-image">
-                  <GuideIllustration topic={helperTopic} status={status} />
-                  <span className="daily-guide-image-label">ภาพจำลอง</span>
-                </div>
                 <p className="daily-guide-caption">{guideDescription}</p>
+                {helperTopic === "attendance" && (
+                  <>
+                    <div className="daily-guide-state">
+                      <Icon name="clock" size={21} />
+                      <div><span>สถานะตอนนี้ (ทดลอง)</span><strong>{statusText}</strong></div>
+                    </div>
+                    <button type="button" className="daily-guide-primary" onClick={guideToAttendance}>
+                      ไปที่ปุ่ม “{buttonText}” <Icon name="arrow" size={20} />
+                    </button>
+                    <p className="daily-guide-warning">ผมจะพาไปยังปุ่ม ไม่กดตอกบัตรแทนคุณ เพื่อป้องกันการกดโดยไม่ได้ตั้งใจครับ</p>
+                  </>
+                )}
                 {helperTopic === "gps" && (
-                  <p className="daily-guide-warning">หมายเหตุ: GPS ใน V2 ยังไม่ได้เชื่อมต่อจริง</p>
+                  <>
+                    <div className={`daily-geo-result daily-geo-result-${geoResult}`} role="status" aria-live="polite">
+                      <Icon name="pin" size={22} />
+                      <div>
+                        <strong>{geoResult === "checking" ? "กำลังตรวจสอบ..."
+                          : geoResult === "ready" ? "เบราว์เซอร์อ่านตำแหน่งได้แล้ว"
+                          : geoResult === "denied" || geoPermission === "denied" ? "เบราว์เซอร์ไม่ได้รับอนุญาต"
+                          : geoResult === "timeout" ? "รอตำแหน่งนานเกินไป"
+                          : geoResult === "unavailable" ? "อุปกรณ์หรือหน้านี้ยังไม่รองรับ"
+                          : geoResult === "error" ? "ยังอ่านตำแหน่งไม่ได้"
+                          : "พร้อมให้ลองตรวจสอบ"}</strong>
+                        <span>{geoResult === "ready"
+                          ? "ผ่านการตรวจเบื้องต้น แต่ระบบตอกบัตรยังไม่ได้ใช้ GPS จริง"
+                          : geoResult === "denied" || geoPermission === "denied"
+                          ? "ต้องอนุญาตตำแหน่งในเบราว์เซอร์หรือการตั้งค่าเครื่องก่อนครับ"
+                          : geoResult === "timeout"
+                          ? "ลองเปิดตำแหน่งของเครื่องและตรวจสัญญาณอีกครั้ง"
+                          : geoResult === "unavailable"
+                          ? "ควรเปิดแอปผ่าน HTTPS และใช้อุปกรณ์ที่รองรับตำแหน่ง"
+                          : geoResult === "error"
+                          ? "ลองเปิดตำแหน่งในเครื่องหรือเปลี่ยนไปอยู่จุดที่รับสัญญาณได้"
+                          : "จะขอสิทธิ์ตำแหน่งเฉพาะเมื่อคุณกดปุ่มตรวจสอบ"}</span>
+                      </div>
+                    </div>
+                    <button type="button" className="daily-guide-primary"
+                      disabled={geoResult === "checking"} onClick={testLocation}>
+                      {geoResult === "checking" ? "กำลังตรวจสอบ" : geoResult === "idle" ? "ตรวจสอบตำแหน่งตอนนี้" : "ลองตรวจสอบอีกครั้ง"}
+                      <Icon name="arrow" size={20} />
+                    </button>
+                    {(geoResult === "denied" || geoPermission === "denied" || geoResult === "timeout" || geoResult === "error") && (
+                      <div className="daily-geo-help">
+                        <strong>ยังไม่ได้ใช่ไหมครับ?</strong>
+                        <p>เปิดตำแหน่งในตั้งค่าเครื่อง และอนุญาต Location ให้เว็บไซต์นี้ในเบราว์เซอร์ จากนั้นกดตรวจสอบอีกครั้ง</p>
+                        <div className="daily-guide-image">
+                          <GuideIllustration topic="gps" status={status} />
+                          <span className="daily-guide-image-label">ภาพจำลอง</span>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
                 {helperTopic === "leave" && (
                   <div className="daily-guide-leave-actions">
-                    <p className="daily-guide-warning">หน้าการลายังเป็นตัวอย่าง UI ไม่ได้ส่งคำขอจริง</p>
-                    <button
-                      type="button"
-                      className="daily-guide-leave-button"
-                      onClick={() => {
-                        setHelperOpen(false);
-                        onOpenLeave();
-                      }}
-                    >
-                      ไปหน้าการลา <Icon name="arrow" size={19} />
+                    <p className="daily-guide-warning">ผมจะเปิดแบบฟอร์มทดลองให้ แล้วช่วยตรวจช่องที่กรอกก่อนแสดงตัวอย่างใบลา ข้อมูลจะไม่ถูกส่งครับ</p>
+                    <button type="button" className="daily-guide-primary" onClick={() => {
+                      setHelperOpen(false);
+                      onOpenLeave();
+                    }}>
+                      เปิดแบบฟอร์มการลา <Icon name="arrow" size={20} />
                     </button>
                   </div>
                 )}
@@ -309,18 +413,15 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
               <div className="daily-sheet-options">
                 <button type="button" onClick={() => setHelperTopic("attendance")}>
                   <span className="daily-sheet-option-icon"><Icon name="clock" size={21} /></span>
-                  <span>วิธีตอกบัตร</span>
-                  <Icon name="arrow" size={19} />
+                  <span>พาไปตอกบัตร</span><Icon name="arrow" size={19} />
                 </button>
                 <button type="button" onClick={() => setHelperTopic("gps")}>
                   <span className="daily-sheet-option-icon"><Icon name="pin" size={21} /></span>
-                  <span>แก้ปัญหา GPS</span>
-                  <Icon name="arrow" size={19} />
+                  <span>ตรวจสอบ GPS</span><Icon name="arrow" size={19} />
                 </button>
                 <button type="button" onClick={() => setHelperTopic("leave")}>
                   <span className="daily-sheet-option-icon"><Icon name="calendar" size={21} /></span>
-                  <span>ช่วยเรื่องการลา</span>
-                  <Icon name="arrow" size={19} />
+                  <span>ช่วยกรอกใบลา</span><Icon name="arrow" size={19} />
                 </button>
               </div>
             )}
@@ -349,6 +450,7 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
           </div>
 
           <button
+            ref={demoActionRef}
             type="button"
             className={`daily-main-action daily-main-action-${status}`}
             onClick={handleDemo}
