@@ -69,7 +69,7 @@ function Brand() {
       </span>
       <div>
         <span className="brand-name">STE2000<span className="brand-accent">.</span></span>
-        <span className="brand-subtitle">ระบบบันทึกเวลาทำงาน</span>
+        <span className="brand-subtitle">Workforce · Attendance</span>
       </div>
     </div>
   );
@@ -101,10 +101,10 @@ export default function App() {
         <header className="topbar">
           <div className="mobile-brand"><Brand /></div>
           <div className="topbar-context">
-            <span className="eyebrow">ATTENDANCE SYSTEM</span>
+            <span className="eyebrow">WORKFORCE EXPERIENCE</span>
             <strong>{sectionName}</strong>
           </div>
-          <span className="preview-pill"><span aria-hidden="true" /> ตัวอย่าง UI</span>
+          <span className="preview-pill"><span aria-hidden="true" /> เวอร์ชันทดลอง</span>
         </header>
 
         <main className="page-main" id="main-content">
