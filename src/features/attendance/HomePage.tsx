@@ -147,6 +147,13 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
     };
   }, [helperOpen]);
 
+  // When a guide is opened or dismissed, put keyboard focus on its new controls.
+  useEffect(() => {
+    if (!helperOpen) return;
+    const selector = helperTopic ? ".daily-guide-back" : ".daily-sheet-options button";
+    helperDialogRef.current?.querySelector<HTMLButtonElement>(selector)?.focus();
+  }, [helperTopic]);
+
   const status: DemoStatus = !checkInAt ? "ready" : !checkOutAt ? "working" : "finished";
   const statusText = status === "ready"
     ? "ยังไม่ได้เข้างาน"
