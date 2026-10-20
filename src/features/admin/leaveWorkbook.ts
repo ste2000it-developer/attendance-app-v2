@@ -1,7 +1,7 @@
 /**
- * Minimal standards-compliant XLSX export (Office Open XML / ZIP STORE).
- * No dependency and no network calls. All user-supplied values are written as
- * inline strings (never formulas) to avoid spreadsheet formula injection.
+ * Leave forms are exported as separate worksheets in one real XLSX file.
+ * OOXML / ZIP STORE requires no external dependencies or network calls.
+ * All dynamic values are inline strings, never spreadsheet formulas.
  */
 import type { AdminLeaveRequest } from "./LeaveManagerPreview";
 
@@ -79,88 +79,208 @@ function xlsxZip(files: {name:string;data:string}[]): Uint8Array {
   return result;
 }
 
+
+type RowData = { height: number; cells: Map<number,string> };
+type FormData = { xml: string };
+type SheetStyle = 0|1|2|3|4|5|6|7|8|9|10;
+
+function leaveSheetXml(
+  item: AdminLeaveRequest,
+  typeLabel: (type: AdminLeaveRequest["type"]) => string,
+  statusLabels: Record<Status,string>
+): string {
+  const rows = new Map<number, RowData>();
+  const merges:string[]=[];
+  const heights = new Map<number,number>([
+    [1,29],[2,29],[3,24],[4,13],[5,31],[6,13],[7,30],[8,34],[9,30],
+    [10,13],[11,28],[12,32],[13,33],[14,33],[15,13],[16,28],
+    [17,25],[18,25],[19,25],[20,25],[21,13],[22,28],[23,26],[24,26],
+    [25,13],[26,28],[27,32],[28,32],[29,30],[30,25],[31,25],[32,12],[33,27]
+  ]);
+  function put(row:number, col:number, text:string, style:SheetStyle) {
+    let record=rows.get(row);
+    if (!record) {
+      record={height:heights.get(row)??22,cells:new Map<number,string>()};
+      rows.set(row,record);
+    }
+    record.cells.set(col,cell(columnLetters(col),row,text,style));
+  }
+  function field(firstRow:number,firstCol:number,lastRow:number,lastCol:number,text:string,style:SheetStyle) {
+    if(firstRow>lastRow||firstCol>lastCol) throw new Error("Invalid merge range");
+    for(let row=firstRow;row<=lastRow;row++)
+      for(let col=firstCol;col<=lastCol;col++)
+        put(row,col,row===firstRow&&col===firstCol?text:"",style);
+    if(firstRow!==lastRow||firstCol!==lastCol)
+      merges.push('<mergeCell ref="'+columnLetters(firstCol)+firstRow+':'+columnLetters(lastCol)+lastRow+'"/>');
+  }
+  const statusStyle:SheetStyle = item.status==="approved"?8:item.status==="rejected"?9:7;
+  const decisionText = item.status==="pending"?"รอพิจารณา":statusLabels[item.status];
+  field(1,0,2,7,"ใบลาพนักงาน",1);
+  field(3,0,3,7,"ATTENDANCE V2  |  แบบฟอร์มใบลา  |  ข้อมูลตัวอย่าง",2);
+  field(5,0,5,1,"เลขที่ใบลา",4);
+  field(5,2,5,4,item.id,5);
+  field(5,5,5,5,"สถานะ",4);
+  field(5,6,5,7,statusLabels[item.status],statusStyle);
+
+  field(7,0,7,1,"รหัสพนักงาน",4);
+  field(7,2,7,7,item.employeeCode,5);
+  field(8,0,8,1,"ชื่อ–นามสกุล",4);
+  field(8,2,8,7,item.employeeName,5);
+  field(9,0,9,1,"แผนก",4);
+  field(9,2,9,7,item.department,5);
+
+  field(11,0,11,7,"รายละเอียดการลา",3);
+  field(12,0,12,1,"ประเภทการลา",4);
+  field(12,2,12,7,typeLabel(item.type),5);
+  field(13,0,13,1,"วันเริ่มลา",4);
+  field(13,2,13,3,dmy(item.startDate),5);
+  field(13,4,13,5,"วันสิ้นสุด",4);
+  field(13,6,13,7,dmy(item.endDate),5);
+  field(14,0,14,1,"จำนวนวัน",4);
+  field(14,2,14,3,String(countDays(item.startDate,item.endDate))+" วัน",5);
+  field(14,4,14,5,"วันที่ยื่น",4);
+  field(14,6,14,7,dmy(item.submittedDate),5);
+
+  field(16,0,16,7,"เหตุผลการลา",3);
+  field(17,0,20,7,item.reason||"ไม่ได้ระบุเหตุผล",6);
+
+  field(22,0,22,7,"เอกสารแนบ",3);
+  field(23,0,24,7,item.attachment ? "ชื่อไฟล์: "+item.attachment+" (ไฟล์ตัวอย่าง ไม่ได้แนบเอกสารจริง)" : "ไม่มีเอกสารแนบ",6);
+
+  field(26,0,26,7,"ผลการพิจารณา",3);
+  field(27,0,27,1,"ผลการอนุมัติ",4);
+  field(27,2,27,7,decisionText,statusStyle);
+  field(28,0,28,1,"วันที่พิจารณา",4);
+  field(28,2,28,7,item.decisionDate?dmy(item.decisionDate):"ยังไม่ได้พิจารณา",5);
+  field(29,0,31,1,"หมายเหตุ",4);
+  field(29,2,31,7,item.decisionNote||"ไม่มีหมายเหตุ",6);
+
+  field(33,0,33,7,"เอกสารนี้เป็นข้อมูลทดลองจาก Attendance V2 — ไม่ใช่ใบลาที่อนุมัติจริง",10);
+
+  const sheetData = Array.from({length:33},(_,i)=>{
+    const row=i+1,record=rows.get(row);
+    const height=heights.get(row)??22;
+    const content=record?Array.from(record.cells.entries()).sort((a,b)=>a[0]-b[0]).map(pair=>pair[1]).join(""):"";
+    return '<row r="'+row+'" ht="'+height+'" customHeight="1">'+content+'</row>';
+  }).join("");
+  const widths=[12,14,17,14,12,14,17,19];
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'+
+    '<sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>'+
+    '<dimension ref="A1:H33"/>'+
+    '<sheetViews><sheetView workbookViewId="0" showGridLines="0"/></sheetViews>'+
+    '<sheetFormatPr defaultRowHeight="22"/>'+
+    '<cols>'+widths.map((w,i)=>'<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+w+'" customWidth="1"/>').join("")+'</cols>'+
+    '<sheetData>'+sheetData+'</sheetData>'+
+    '<mergeCells count="'+merges.length+'">'+merges.join("")+'</mergeCells>'+
+    '<printOptions horizontalCentered="1"/>'+
+    '<pageMargins left="0.3" right="0.3" top="0.35" bottom="0.35" header="0.15" footer="0.15"/>'+
+    '<pageSetup paperSize="9" orientation="portrait" fitToWidth="1" fitToHeight="1"/>'+
+    '</worksheet>';
+}
+function makeStyles():string {
+  const font=(body:string,size:number)=>'<font>'+body+'<sz val="'+size+'"/><name val="Tahoma"/></font>';
+  const white='<color rgb="FFFFFFFF"/>';
+  const title='<color rgb="FF204B69"/>';
+  const muted='<color rgb="FF627D91"/>';
+  const standard='<color rgb="FF234761"/>';
+  const fills=[
+    '<fill><patternFill patternType="none"/></fill>',
+    '<fill><patternFill patternType="gray125"/></fill>',
+    '<fill><patternFill patternType="solid"><fgColor rgb="FF205D81"/><bgColor indexed="64"/></patternFill></fill>',
+    '<fill><patternFill patternType="solid"><fgColor rgb="FFEAF3F8"/><bgColor indexed="64"/></patternFill></fill>',
+    '<fill><patternFill patternType="solid"><fgColor rgb="FFF5F8FA"/><bgColor indexed="64"/></patternFill></fill>',
+    '<fill><patternFill patternType="solid"><fgColor rgb="FFFBF1DC"/><bgColor indexed="64"/></patternFill></fill>',
+    '<fill><patternFill patternType="solid"><fgColor rgb="FFE8F5EC"/><bgColor indexed="64"/></patternFill></fill>',
+    '<fill><patternFill patternType="solid"><fgColor rgb="FFFAEBEA"/><bgColor indexed="64"/></patternFill></fill>'
+  ];
+  const fonts=[
+    font(standard,11),font('<b/>'+white,19),font(muted,10),
+    font('<b/>'+title,11),font('<b/>'+muted,10),
+    font('<b/><color rgb="FF94651C"/>',11),
+    font('<b/><color rgb="FF24734D"/>',11),
+    font('<b/><color rgb="FFA9544B"/>',11),
+    font(muted,9)
+  ];
+  const edge='<border><left/><right/><top/><bottom style="hair"><color rgb="FFE2EAF0"/></bottom><diagonal/></border>';
+  function xf(fontId:number,fillId:number,borderId:number,alignment:string) {
+    return '<xf numFmtId="0" fontId="'+fontId+'" fillId="'+fillId+'" borderId="'+borderId+
+      '" xfId="0" applyAlignment="1"><alignment '+alignment+'/></xf>';
+  }
+  const styles=[
+    xf(0,0,0,'vertical="center"'),
+    xf(1,2,0,'horizontal="center" vertical="center"'),
+    xf(2,3,0,'horizontal="center" vertical="center"'),
+    xf(3,3,0,'vertical="center" indent="1"'),
+    xf(4,4,1,'vertical="center" indent="1" wrapText="1"'),
+    xf(0,0,1,'vertical="center" indent="1" wrapText="1"'),
+    xf(0,0,1,'vertical="top" indent="1" wrapText="1"'),
+    xf(5,5,1,'horizontal="center" vertical="center"'),
+    xf(6,6,1,'horizontal="center" vertical="center"'),
+    xf(7,7,1,'horizontal="center" vertical="center"'),
+    xf(8,3,0,'horizontal="center" vertical="center"')
+  ];
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'+
+    '<fonts count="'+fonts.length+'">'+fonts.join("")+'</fonts>'+
+    '<fills count="'+fills.length+'">'+fills.join("")+'</fills>'+
+    '<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border>'+edge+'</borders>'+
+    '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'+
+    '<cellXfs count="'+styles.length+'">'+styles.join("")+'</cellXfs>'+
+    '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>'+
+    '</styleSheet>';
+}
+
 export function exportLeaveWorkbook(
   requests: AdminLeaveRequest[],
   typeLabel: (type: AdminLeaveRequest["type"]) => string,
   statusLabels: Record<Status,string>
 ): void {
-  const headers=["เลขที่ใบลา","รหัสพนักงาน","ชื่อ–นามสกุล","แผนก","ประเภทการลา","วันเริ่มลา","วันสิ้นสุด","จำนวนวัน","วันที่ยื่น","สถานะ","วันที่พิจารณา","เหตุผลการลา","หมายเหตุการพิจารณา","เอกสารแนบ"];
-  const widths=[18,18,30,24,33,17,17,14,17,18,19,47,47,28];
-  const rows: (string | number)[][]=[...requests]
-    .sort((a,b)=>b.submittedDate.localeCompare(a.submittedDate)||a.id.localeCompare(b.id))
-    .map(item=>[
-      item.id,item.employeeCode,item.employeeName,item.department,typeLabel(item.type),
-      dmy(item.startDate),dmy(item.endDate),countDays(item.startDate,item.endDate),
-      dmy(item.submittedDate),statusLabels[item.status],dmy(item.decisionDate),
-      item.reason,item.decisionNote,item.attachment??""
-    ]);
-  const title='รายงานใบลาพนักงานทั้งหมด';
-  const summary='รวม '+requests.length+' รายการ   |   รออนุมัติ '+requests.filter(r=>r.status==="pending").length+
-    '   |   อนุมัติ '+requests.filter(r=>r.status==="approved").length+
-    '   |   ไม่อนุมัติ '+requests.filter(r=>r.status==="rejected").length;
-  const titleRow='<row r="1" ht="34" customHeight="1">'+cell("A",1,title,1)+'</row>';
-  const noteRow='<row r="2" ht="25" customHeight="1">'+cell("A",2,"Attendance V2 · ข้อมูลตัวอย่าง ยังไม่เชื่อม Firebase",4)+'</row>';
-  const sumRow='<row r="3" ht="26" customHeight="1">'+cell("A",3,summary,4)+'</row>';
-  const headings='<row r="5" ht="32" customHeight="1">'+headers.map((val,i)=>cell(columnLetters(i),5,val,2)).join("")+'</row>';
-  const contents=rows.map((row,index)=>'<row r="'+(index+6)+'" ht="27" customHeight="1">'+
-    row.map((val,i)=>cell(columnLetters(i),index+6,val,index%2===0?0:3)).join("")+'</row>').join("");
-  const sheet='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
-    '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'+
-    '<dimension ref="A1:N'+Math.max(5,rows.length+5)+'"/>'+
-    '<sheetViews><sheetView workbookViewId="0"/></sheetViews>'+
-    '<sheetFormatPr defaultRowHeight="22"/>'+
-    '<cols>'+widths.map((width,i)=>'<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+width+'" customWidth="1"/>').join("")+'</cols>'+
-    '<sheetData>'+titleRow+noteRow+sumRow+headings+contents+'</sheetData>'+
-    '<mergeCells count="3"><mergeCell ref="A1:N1"/><mergeCell ref="A2:N2"/><mergeCell ref="A3:N3"/></mergeCells>'+
-    '<autoFilter ref="A5:N'+Math.max(5,rows.length+5)+'"/>'+
-    '<pageMargins left="0.3" right="0.3" top="0.5" bottom="0.5" header="0.2" footer="0.2"/>'+
-    '</worksheet>';
-  const styles='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
-    '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'+
-    '<fonts count="3"><font><sz val="11"/><name val="Arial"/></font>'+
-    '<font><b/><sz val="16"/><color rgb="FF204B69"/><name val="Arial"/></font>'+
-    '<font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Arial"/></font></fonts>'+
-    '<fills count="4"><fill><patternFill patternType="none"/></fill>'+
-    '<fill><patternFill patternType="gray125"/></fill>'+
-    '<fill><patternFill patternType="solid"><fgColor rgb="FF205D81"/><bgColor indexed="64"/></patternFill></fill>'+
-    '<fill><patternFill patternType="solid"><fgColor rgb="FFF3F8FB"/><bgColor indexed="64"/></patternFill></fill></fills>'+
-    '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'+
-    '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'+
-    '<cellXfs count="5">'+
-    '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"><alignment vertical="center" wrapText="1"/></xf>'+
-    '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0"><alignment vertical="center"/></xf>'+
-    '<xf numFmtId="0" fontId="2" fillId="2" borderId="0" xfId="0"><alignment vertical="center" wrapText="1"/></xf>'+
-    '<xf numFmtId="0" fontId="0" fillId="3" borderId="0" xfId="0"><alignment vertical="center" wrapText="1"/></xf>'+
-    '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"><alignment vertical="center"/></xf></cellXfs>'+
-    '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+  // One leave form per worksheet, all forms in a single workbook.
+  const items=[...requests].sort((a,b)=>b.submittedDate.localeCompare(a.submittedDate)||a.id.localeCompare(b.id));
+  if(items.length===0) throw new Error("No leave requests to export");
+  const sheetList=items.map((item,index)=>({
+    title:"ใบลา "+String(index+1).padStart(3,"0"),
+    id:index+1,
+    xml:leaveSheetXml(item,typeLabel,statusLabels)
+  }));
+  const worksheetFiles=sheetList.map(sheet=>({name:"xl/worksheets/sheet"+sheet.id+".xml",data:sheet.xml}));
+  const workbookSheets=sheetList.map(sheet=>
+    '<sheet name="'+escapeXml(sheet.title)+'" sheetId="'+sheet.id+'" r:id="rId'+sheet.id+'"/>'
+  ).join("");
+  const overrides=sheetList.map(sheet=>
+    '<Override PartName="/xl/worksheets/sheet'+sheet.id+'.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+  ).join("");
+  const relationships=sheetList.map(sheet=>
+    '<Relationship Id="rId'+sheet.id+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet'+sheet.id+'.xml"/>'
+  ).join("");
   const files=[
     {name:"[Content_Types].xml",data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
       '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'+
       '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'+
       '<Default Extension="xml" ContentType="application/xml"/>'+
       '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'+
-      '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'+
       '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'+
-      '</Types>'},
+      overrides+'</Types>'},
     {name:"_rels/.rels",data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
       '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
       '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'},
     {name:"xl/workbook.xml",data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
       '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'+
-      '<sheets><sheet name="รายการใบลาทั้งหมด" sheetId="1" r:id="rId1"/></sheets></workbook>'},
+      '<bookViews><workbookView activeTab="0"/></bookViews><sheets>'+workbookSheets+'</sheets></workbook>'},
     {name:"xl/_rels/workbook.xml.rels",data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
-      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
-      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'+
-      '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'},
-    {name:"xl/worksheets/sheet1.xml",data:sheet},
-    {name:"xl/styles.xml",data:styles}
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+relationships+
+      '<Relationship Id="rId'+(items.length+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'+
+      '</Relationships>'},
+    {name:"xl/styles.xml",data:makeStyles()},
+    ...worksheetFiles
   ];
   const zip=xlsxZip(files);
   const blob=new Blob([zip.slice().buffer],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
   const url=URL.createObjectURL(blob);
   const link=document.createElement("a");
   link.href=url;
-  link.download="Attendance-V2-Leave-All-"+new Date().toISOString().slice(0,10)+".xlsx";
+  link.download="Attendance-V2-Leave-Forms-"+new Date().toISOString().slice(0,10)+".xlsx";
   document.body.appendChild(link);
   link.click();
   link.remove();
