@@ -1,6 +1,8 @@
 import { useState } from "react";
 import EmployeeManagerPreview from "./EmployeeManagerPreview";
 import type { EmployeeRecord } from "./EmployeeManagerPreview";
+import LeaveManagerPreview, { createDemoLeaveRequests } from "./LeaveManagerPreview";
+import type { AdminLeaveRequest } from "./LeaveManagerPreview";
 import "./AdminPreviewPage.css";
 
 const tabs = [
@@ -31,8 +33,18 @@ function AdminIcon({ name, size = 21 }: {name: string; size?: number}) {
 }
 
 export default function AdminPreviewPage() {
-  const [active, setActive] = useState<Tab>("overview");
+  const [active, setActive] = useState<Tab>(() => {
+    const requested = new URLSearchParams(window.location.search).get("section");
+    return tabs.some(tab => tab.id === requested) ? requested as Tab : "overview";
+  });
   const [demoEmployees, setDemoEmployees] = useState<EmployeeRecord[]>([]);
+  const [demoLeaveRequests, setDemoLeaveRequests] = useState<AdminLeaveRequest[]>(createDemoLeaveRequests);
+  function navigate(next: Tab) {
+    setActive(next);
+    const url = new URL(window.location.href);
+    url.searchParams.set("section", next);
+    window.history.replaceState(null, "", url);
+  }
   const selected = active === "overview" ? null : screens[active];
 
   return (
@@ -46,7 +58,7 @@ export default function AdminPreviewPage() {
         <nav className="admin-preview-nav" aria-label="เมนูแอดมิน">
           {tabs.map(t=>(
             <button key={t.id} type="button" className={active===t.id?"is-active":""}
-              aria-current={active===t.id?"page":undefined} onClick={()=>setActive(t.id)}>
+              aria-current={active===t.id?"page":undefined} onClick={()=>navigate(t.id)}>
               <AdminIcon name={t.id}/>{t.label}
             </button>
           ))}
@@ -62,7 +74,7 @@ export default function AdminPreviewPage() {
         <div className="admin-preview-mobile-nav" role="navigation" aria-label="เมนูแอดมินบนมือถือ">
           {tabs.map(t=>(
             <button key={t.id} className={active===t.id?"is-active":""} type="button"
-              aria-current={active===t.id?"page":undefined} onClick={()=>setActive(t.id)}>{t.label}</button>
+              aria-current={active===t.id?"page":undefined} onClick={()=>navigate(t.id)}>{t.label}</button>
           ))}
         </div>
 
@@ -91,7 +103,7 @@ export default function AdminPreviewPage() {
                 <div className="admin-preview-panel-head"><h3>งานจัดการหลัก</h3><p>เลือกเมนูเพื่อดูโครงสร้างหน้าจอต้นแบบ</p></div>
                 <div className="admin-preview-shortcuts">
                   {(["people","leave","report","settings"] as const).map(id=>(
-                    <button key={id} type="button" onClick={()=>setActive(id)}>
+                    <button key={id} type="button" onClick={()=>navigate(id)}>
                       <span><AdminIcon name={id}/></span>
                       <strong>{screens[id].title}</strong>
                       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
@@ -102,6 +114,8 @@ export default function AdminPreviewPage() {
             </>
           ) : active === "people" ? (
             <EmployeeManagerPreview employees={demoEmployees} onChange={setDemoEmployees} />
+          ) : active === "leave" ? (
+            <LeaveManagerPreview requests={demoLeaveRequests} onChange={setDemoLeaveRequests} />
           ) : (
             <section className="admin-preview-panel admin-preview-empty">
               <span className="admin-preview-empty-icon"><AdminIcon name={active} size={30}/></span>
