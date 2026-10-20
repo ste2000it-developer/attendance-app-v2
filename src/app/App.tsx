@@ -86,7 +86,7 @@ export default function App() {
   const sectionName = navigation.find((item) => item.id === active)?.label || "";
 
   return (
-    <div className="app-frame">
+    <div className={`app-frame${active === "profile" ? " app-frame-profile" : ""}`}>
       <a href="#main-content" className="skip-link">ข้ามไปเนื้อหาหลัก</a>
       <aside className="sidebar">
         <Brand />
@@ -108,7 +108,7 @@ export default function App() {
           <span className="preview-pill"><span aria-hidden="true" /> เวอร์ชันทดลอง</span>
         </header>
 
-        <main className={`page-main${active === "home" ? " page-main-home" : ""}`} id="main-content">
+        <main className={`page-main${active === "home" ? " page-main-home" : active === "profile" ? " page-main-profile" : ""}`} id="main-content">
           <Suspense fallback={<div className="panel loading-panel">กำลังเปิดหน้า...</div>}>
             <SectionContent active={active} onOpenLeave={() => setActive("leave")} />
           </Suspense>
