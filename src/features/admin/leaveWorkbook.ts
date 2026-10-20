@@ -83,149 +83,165 @@ function xlsxZip(files: {name:string;data:string}[]): Uint8Array {
 type RowData = { height: number; cells: Map<number,string> };
 type SheetStyle = 0|1|2|3|4|5|6|7|8|9|10;
 
+/**
+ * Compact printable leave form: 1 sheet = 1 leave request.
+ * White space replaces heavy grid borders; section bars and status carry hierarchy.
+ */
 function leaveSheetXml(
   item: AdminLeaveRequest,
   typeLabel: (type: AdminLeaveRequest["type"]) => string,
   statusLabels: Record<Status,string>
 ): string {
-  const rows = new Map<number, RowData>();
+  const rows = new Map<number,{height:number;cells:Map<number,string>}>();
   const merges:string[]=[];
+  const reasonHeight=Math.max(57,Math.min(126,Math.ceil((item.reason||"").length/82)*18+14));
+  const noteHeight=Math.max(43,Math.min(114,Math.ceil((item.decisionNote||"").length/70)*18+12));
   const heights = new Map<number,number>([
-    [1,29],[2,29],[3,24],[4,13],[5,31],[6,13],[7,30],[8,34],[9,30],
-    [10,13],[11,28],[12,32],[13,33],[14,33],[15,13],[16,28],
-    [17,25],[18,25],[19,25],[20,25],[21,13],[22,28],[23,26],[24,26],
-    [25,13],[26,28],[27,32],[28,32],[29,30],[30,25],[31,25],[32,12],[33,27]
+    [1,6],[2,38],[3,20],[4,9],[5,24],[6,29],[7,30],[8,30],
+    [9,9],[10,24],[11,30],[12,29],[13,29],[14,9],[15,24],
+    [16,Math.ceil(reasonHeight/3)],[17,Math.floor(reasonHeight/3)],[18,reasonHeight-Math.ceil(reasonHeight/3)-Math.floor(reasonHeight/3)],
+    [19,30],[20,9],[21,24],[22,30],
+    [23,Math.ceil(noteHeight/2)],[24,Math.floor(noteHeight/2)],[25,10],[26,23]
   ]);
-  function put(row:number, col:number, text:string, style:SheetStyle) {
+  function put(row:number,col:number,value:string,style:number) {
     let record=rows.get(row);
-    if (!record) {
-      record={height:heights.get(row)??22,cells:new Map<number,string>()};
+    if(!record){
+      record={height:heights.get(row)??22,cells:new Map()};
       rows.set(row,record);
     }
-    record.cells.set(col,cell(columnLetters(col),row,text,style));
+    record.cells.set(col,cell(columnLetters(col),row,value,style));
   }
-  function field(firstRow:number,firstCol:number,lastRow:number,lastCol:number,text:string,style:SheetStyle) {
-    if(firstRow>lastRow||firstCol>lastCol) throw new Error("Invalid merge range");
+  function area(firstRow:number,firstCol:number,lastRow:number,lastCol:number,value:string,style:number) {
     for(let row=firstRow;row<=lastRow;row++)
       for(let col=firstCol;col<=lastCol;col++)
-        put(row,col,row===firstRow&&col===firstCol?text:"",style);
+        put(row,col,row===firstRow&&col===firstCol?value:"",style);
     if(firstRow!==lastRow||firstCol!==lastCol)
       merges.push('<mergeCell ref="'+columnLetters(firstCol)+firstRow+':'+columnLetters(lastCol)+lastRow+'"/>');
   }
-  const statusStyle:SheetStyle = item.status==="approved"?8:item.status==="rejected"?9:7;
-  const decisionText = item.status==="pending"?"รอพิจารณา":statusLabels[item.status];
-  field(1,0,2,7,"ใบลาพนักงาน",1);
-  field(3,0,3,7,"ATTENDANCE V2  |  แบบฟอร์มใบลา  |  ข้อมูลตัวอย่าง",2);
-  field(5,0,5,1,"เลขที่ใบลา",4);
-  field(5,2,5,4,item.id,5);
-  field(5,5,5,5,"สถานะ",4);
-  field(5,6,5,7,statusLabels[item.status],statusStyle);
+  const decision=item.status==="pending"?"รอพิจารณา":statusLabels[item.status];
+  const decisionStyle=item.status==="approved"?8:item.status==="rejected"?9:7;
 
-  field(7,0,7,1,"รหัสพนักงาน",4);
-  field(7,2,7,7,item.employeeCode,5);
-  field(8,0,8,1,"ชื่อ–นามสกุล",4);
-  field(8,2,8,7,item.employeeName,5);
-  field(9,0,9,1,"แผนก",4);
-  field(9,2,9,7,item.department,5);
+  // Brand and document heading
+  area(1,0,1,7,"",13);
+  area(2,0,2,5,"ใบลาพนักงาน",1);
+  area(2,6,2,7,"ATTENDANCE V2",11);
+  area(3,0,3,7,"แบบฟอร์มการลา  /  LEAVE REQUEST",2);
 
-  field(11,0,11,7,"รายละเอียดการลา",3);
-  field(12,0,12,1,"ประเภทการลา",4);
-  field(12,2,12,7,typeLabel(item.type),5);
-  field(13,0,13,1,"วันเริ่มลา",4);
-  field(13,2,13,3,dmy(item.startDate),5);
-  field(13,4,13,5,"วันสิ้นสุด",4);
-  field(13,6,13,7,dmy(item.endDate),5);
-  field(14,0,14,1,"จำนวนวัน",4);
-  field(14,2,14,3,String(countDays(item.startDate,item.endDate))+" วัน",5);
-  field(14,4,14,5,"วันที่ยื่น",4);
-  field(14,6,14,7,dmy(item.submittedDate),5);
+  area(5,0,5,7,"ข้อมูลพนักงาน",3);
+  area(6,0,6,1,"เลขที่ใบลา",4);
+  area(6,2,6,3,item.id,12);
+  area(6,4,6,5,"สถานะ",4);
+  area(6,6,6,7,statusLabels[item.status],decisionStyle);
+  area(7,0,7,1,"ชื่อ–นามสกุล",4);
+  area(7,2,7,7,item.employeeName,5);
+  area(8,0,8,1,"รหัสพนักงาน",4);
+  area(8,2,8,3,item.employeeCode,5);
+  area(8,4,8,5,"แผนก",4);
+  area(8,6,8,7,item.department,5);
 
-  field(16,0,16,7,"เหตุผลการลา",3);
-  field(17,0,20,7,item.reason||"ไม่ได้ระบุเหตุผล",6);
+  area(10,0,10,7,"รายละเอียดการลา",3);
+  area(11,0,11,1,"ประเภทการลา",4);
+  area(11,2,11,7,typeLabel(item.type),5);
+  area(12,0,12,1,"ตั้งแต่วันที่",4);
+  area(12,2,12,3,dmy(item.startDate),5);
+  area(12,4,12,5,"ถึงวันที่",4);
+  area(12,6,12,7,dmy(item.endDate),5);
+  area(13,0,13,1,"จำนวนวัน",4);
+  area(13,2,13,3,String(countDays(item.startDate,item.endDate))+" วัน",5);
+  area(13,4,13,5,"วันที่ยื่น",4);
+  area(13,6,13,7,dmy(item.submittedDate),5);
 
-  field(22,0,22,7,"เอกสารแนบ",3);
-  field(23,0,24,7,item.attachment ? "ชื่อไฟล์: "+item.attachment+" (ไฟล์ตัวอย่าง ไม่ได้แนบเอกสารจริง)" : "ไม่มีเอกสารแนบ",6);
+  area(15,0,15,7,"เหตุผลการลา",3);
+  area(16,0,18,7,item.reason||"—",6);
+  area(19,0,19,1,"เอกสารแนบ",4);
+  area(19,2,19,7,item.attachment ? item.attachment+" (ชื่อไฟล์ตัวอย่าง)" : "ไม่มีเอกสารแนบ",5);
 
-  field(26,0,26,7,"ผลการพิจารณา",3);
-  field(27,0,27,1,"ผลการอนุมัติ",4);
-  field(27,2,27,7,decisionText,statusStyle);
-  field(28,0,28,1,"วันที่พิจารณา",4);
-  field(28,2,28,7,item.decisionDate?dmy(item.decisionDate):"ยังไม่ได้พิจารณา",5);
-  field(29,0,31,1,"หมายเหตุ",4);
-  field(29,2,31,7,item.decisionNote||"ไม่มีหมายเหตุ",6);
+  area(21,0,21,7,"ผลการพิจารณา",3);
+  area(22,0,22,1,"ผลการอนุมัติ",4);
+  area(22,2,22,3,decision,decisionStyle);
+  area(22,4,22,5,"วันที่พิจารณา",4);
+  area(22,6,22,7,item.decisionDate?dmy(item.decisionDate):"—",5);
+  area(23,0,24,1,"หมายเหตุ",4);
+  area(23,2,24,7,item.decisionNote||"—",6);
 
-  field(33,0,33,7,"เอกสารนี้เป็นข้อมูลทดลองจาก Attendance V2 — ไม่ใช่ใบลาที่อนุมัติจริง",10);
+  area(26,0,26,7,"ATTENDANCE V2  •  เอกสารตัวอย่างสำหรับทดสอบระบบ  •  ไม่ใช่เอกสารอนุมัติจริง",10);
 
-  const sheetData = Array.from({length:33},(_,i)=>{
-    const row=i+1,record=rows.get(row);
-    const height=heights.get(row)??22;
-    const content=record?Array.from(record.cells.entries()).sort((a,b)=>a[0]-b[0]).map(pair=>pair[1]).join(""):"";
-    return '<row r="'+row+'" ht="'+height+'" customHeight="1">'+content+'</row>';
+  const rowXml=Array.from({length:26},(_,index)=>{
+    const row=index+1, record=rows.get(row);
+    const body=record ? [...record.cells.entries()].sort((a,b)=>a[0]-b[0]).map(pair=>pair[1]).join("") : "";
+    return '<row r="'+row+'" ht="'+(heights.get(row)??20)+'" customHeight="1">'+body+'</row>';
   }).join("");
-  const widths=[12,14,17,14,12,14,17,19];
+  const widths=[12,12,15,13,12,13,15,18];
   return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
     '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'+
     '<sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>'+
-    '<dimension ref="A1:H33"/>'+
+    '<dimension ref="A1:H26"/>'+
     '<sheetViews><sheetView workbookViewId="0" showGridLines="0"/></sheetViews>'+
-    '<sheetFormatPr defaultRowHeight="22"/>'+
+    '<sheetFormatPr defaultRowHeight="20"/>'+
     '<cols>'+widths.map((w,i)=>'<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+w+'" customWidth="1"/>').join("")+'</cols>'+
-    '<sheetData>'+sheetData+'</sheetData>'+
+    '<sheetData>'+rowXml+'</sheetData>'+
     '<mergeCells count="'+merges.length+'">'+merges.join("")+'</mergeCells>'+
     '<printOptions horizontalCentered="1"/>'+
-    '<pageMargins left="0.3" right="0.3" top="0.35" bottom="0.35" header="0.15" footer="0.15"/>'+
+    '<pageMargins left="0.35" right="0.35" top="0.38" bottom="0.38" header="0.14" footer="0.14"/>'+
     '<pageSetup paperSize="9" orientation="portrait" fitToWidth="1" fitToHeight="1"/>'+
     '</worksheet>';
 }
 function makeStyles():string {
-  const font=(body:string,size:number)=>'<font>'+body+'<sz val="'+size+'"/><name val="Tahoma"/></font>';
+  const font=(content:string,size:number)=>'<font>'+content+'<sz val="'+size+'"/><name val="Tahoma"/></font>';
+  const ink='<color rgb="FF28465A"/>';
+  const navy='<color rgb="FF164563"/>';
+  const muted='<color rgb="FF748B9C"/>';
   const white='<color rgb="FFFFFFFF"/>';
-  const title='<color rgb="FF204B69"/>';
-  const muted='<color rgb="FF627D91"/>';
-  const standard='<color rgb="FF234761"/>';
+  const fonts=[
+    font(ink,10.5),
+    font('<b/>'+navy,17),
+    font(muted,9),
+    font('<b/>'+navy,10),
+    font('<b/>'+muted,10),
+    font('<b/><color rgb="FF996B25"/>',10),
+    font('<b/><color rgb="FF287651"/>',10),
+    font('<b/><color rgb="FFA4554D"/>',10),
+    font(muted,8.5)
+  ];
   const fills=[
     '<fill><patternFill patternType="none"/></fill>',
     '<fill><patternFill patternType="gray125"/></fill>',
-    '<fill><patternFill patternType="solid"><fgColor rgb="FF205D81"/><bgColor indexed="64"/></patternFill></fill>',
-    '<fill><patternFill patternType="solid"><fgColor rgb="FFEAF3F8"/><bgColor indexed="64"/></patternFill></fill>',
-    '<fill><patternFill patternType="solid"><fgColor rgb="FFF5F8FA"/><bgColor indexed="64"/></patternFill></fill>',
-    '<fill><patternFill patternType="solid"><fgColor rgb="FFFBF1DC"/><bgColor indexed="64"/></patternFill></fill>',
-    '<fill><patternFill patternType="solid"><fgColor rgb="FFE8F5EC"/><bgColor indexed="64"/></patternFill></fill>',
-    '<fill><patternFill patternType="solid"><fgColor rgb="FFFAEBEA"/><bgColor indexed="64"/></patternFill></fill>'
+    '<fill><patternFill patternType="solid"><fgColor rgb="FF164563"/><bgColor indexed="64"/></patternFill></fill>',
+    '<fill><patternFill patternType="solid"><fgColor rgb="FFEAF2F7"/><bgColor indexed="64"/></patternFill></fill>',
+    '<fill><patternFill patternType="solid"><fgColor rgb="FFF8FAFC"/><bgColor indexed="64"/></patternFill></fill>',
+    '<fill><patternFill patternType="solid"><fgColor rgb="FFFEF4E5"/><bgColor indexed="64"/></patternFill></fill>',
+    '<fill><patternFill patternType="solid"><fgColor rgb="FFEAF6EF"/><bgColor indexed="64"/></patternFill></fill>',
+    '<fill><patternFill patternType="solid"><fgColor rgb="FFFBEDEC"/><bgColor indexed="64"/></patternFill></fill>'
   ];
-  const fonts=[
-    font(standard,11),font('<b/>'+white,19),font(muted,10),
-    font('<b/>'+title,11),font('<b/>'+muted,10),
-    font('<b/><color rgb="FF94651C"/>',11),
-    font('<b/><color rgb="FF24734D"/>',11),
-    font('<b/><color rgb="FFA9544B"/>',11),
-    font(muted,9)
-  ];
-  const edge='<border><left/><right/><top/><bottom style="hair"><color rgb="FFE2EAF0"/></bottom><diagonal/></border>';
-  function xf(fontId:number,fillId:number,borderId:number,alignment:string) {
+  const bottom='<border><left/><right/><top/><bottom style="hair"><color rgb="FFE1E9EF"/></bottom><diagonal/></border>';
+  const borders='<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border>'+bottom+'</borders>';
+  function format(fontId:number,fillId:number,borderId:number,alignment:string) {
     return '<xf numFmtId="0" fontId="'+fontId+'" fillId="'+fillId+'" borderId="'+borderId+
-      '" xfId="0" applyAlignment="1"><alignment '+alignment+'/></xf>';
+      '" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment '+alignment+'/></xf>';
   }
-  const styles=[
-    xf(0,0,0,'vertical="center"'),
-    xf(1,2,0,'horizontal="center" vertical="center"'),
-    xf(2,3,0,'horizontal="center" vertical="center"'),
-    xf(3,3,0,'vertical="center" indent="1"'),
-    xf(4,4,1,'vertical="center" indent="1" wrapText="1"'),
-    xf(0,0,1,'vertical="center" indent="1" wrapText="1"'),
-    xf(0,0,1,'vertical="top" indent="1" wrapText="1"'),
-    xf(5,5,1,'horizontal="center" vertical="center"'),
-    xf(6,6,1,'horizontal="center" vertical="center"'),
-    xf(7,7,1,'horizontal="center" vertical="center"'),
-    xf(8,3,0,'horizontal="center" vertical="center"')
+  const formats=[
+    format(0,0,0,'vertical="center"'),
+    format(1,0,0,'vertical="center"'),
+    format(2,0,0,'vertical="center"'),
+    format(3,3,0,'vertical="center" indent="1"'),
+    format(4,0,1,'vertical="center" indent="1" wrapText="1"'),
+    format(0,0,1,'vertical="center" indent="1" wrapText="1"'),
+    format(0,4,0,'vertical="center" indent="1" wrapText="1"'),
+    format(5,5,0,'horizontal="center" vertical="center"'),
+    format(6,6,0,'horizontal="center" vertical="center"'),
+    format(7,7,0,'horizontal="center" vertical="center"'),
+    format(8,3,0,'horizontal="center" vertical="center"'),
+    format(3,0,0,'horizontal="right" vertical="center"'),
+    format(3,0,1,'vertical="center" indent="1"'),
+    format(0,2,0,'vertical="center"')
   ];
   return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
     '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'+
     '<fonts count="'+fonts.length+'">'+fonts.join("")+'</fonts>'+
     '<fills count="'+fills.length+'">'+fills.join("")+'</fills>'+
-    '<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border>'+edge+'</borders>'+
+    borders+
     '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'+
-    '<cellXfs count="'+styles.length+'">'+styles.join("")+'</cellXfs>'+
+    '<cellXfs count="'+formats.length+'">'+formats.join("")+'</cellXfs>'+
     '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>'+
     '</styleSheet>';
 }
