@@ -4,7 +4,7 @@ import { GuideIllustration } from "./GuideIllustration";
 import type { GuideTopic } from "./GuideIllustration";
 
 type DemoStatus = "ready" | "working" | "finished";
-type IconName = "arrow" | "pin" | "clock" | "reset" | "check" | "close" | "calendar";
+type IconName = "chevron-right" | "chevron-left" | "pin" | "clock" | "reset" | "check" | "close" | "calendar";
 
 const thaiDateFormatter = new Intl.DateTimeFormat("th-TH", {
   weekday: "long",
@@ -26,7 +26,8 @@ const shortTimeFormatter = new Intl.DateTimeFormat("en-GB", {
 
 function Icon({ name, size = 22 }: { name: IconName; size?: number }) {
   const shapes = {
-    arrow: <><path d="M4 12h16" /><path d="m14 6 6 6-6 6" /></>,
+    "chevron-right": <path d="m9 6 6 6-6 6" />,
+    "chevron-left": <path d="m15 6-6 6 6 6" />,
     pin: <><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="2.5" /></>,
     clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
     reset: <><path d="M20 7v5h-5" /><path d="M4 17v-5h5" /><path d="M6 9a7 7 0 0 1 12-2l2 5M4 12l2 5a7 7 0 0 0 12-2" /></>,
@@ -36,7 +37,7 @@ function Icon({ name, size = 22 }: { name: IconName; size?: number }) {
   };
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.9" strokeLinecap="round"
+      stroke="currentColor" strokeWidth={name.startsWith("chevron") ? 2.6 : 1.9} strokeLinecap="round"
       strokeLinejoin="round" aria-hidden="true">{shapes[name]}</svg>
   );
 }
@@ -319,7 +320,7 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
                       <div><span>สถานะตอนนี้ (ทดลอง)</span><strong>{statusText}</strong></div>
                     </div>
                     <button type="button" className="daily-guide-primary" onClick={guideToAttendance}>
-                      ไปที่ปุ่ม “{buttonText}” <Icon name="arrow" size={20} />
+                      ไปที่ปุ่ม “{buttonText}” <Icon name="chevron-right" size={20} />
                     </button>
                     <p className="daily-guide-warning">ผมจะพาไปยังปุ่ม ไม่กดตอกบัตรแทนคุณ เพื่อป้องกันการกดโดยไม่ได้ตั้งใจครับ</p>
                   </>
@@ -352,7 +353,7 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
                     <button type="button" className="daily-guide-primary"
                       disabled={geoResult === "checking"} onClick={testLocation}>
                       {geoResult === "checking" ? "กำลังตรวจสอบ" : geoResult === "idle" ? "ตรวจสอบตำแหน่งตอนนี้" : "ลองตรวจสอบอีกครั้ง"}
-                      <Icon name="arrow" size={20} />
+                      <Icon name="chevron-right" size={20} />
                     </button>
                     {(geoResult === "denied" || geoPermission === "denied" || geoResult === "timeout" || geoResult === "error") && (
                       <div className="daily-geo-help">
@@ -373,27 +374,27 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
                       setHelperOpen(false);
                       onOpenLeave();
                     }}>
-                      เปิดแบบฟอร์มการลา <Icon name="arrow" size={20} />
+                      เปิดแบบฟอร์มการลา <Icon name="chevron-right" size={20} />
                     </button>
                   </div>
                 )}
                 <button type="button" className="daily-guide-back" onClick={() => setHelperTopic(null)}>
-                  <span aria-hidden="true">←</span> กลับไปเลือกหัวข้อ
+                  <Icon name="chevron-left" size={18} /> กลับไปเลือกหัวข้อ
                 </button>
               </div>
             ) : (
               <div className="daily-sheet-options">
                 <button type="button" onClick={() => setHelperTopic("attendance")}>
                   <span className="daily-sheet-option-icon"><Icon name="clock" size={21} /></span>
-                  <span>พาไปตอกบัตร</span><Icon name="arrow" size={19} />
+                  <span>พาไปตอกบัตร</span><Icon name="chevron-right" size={19} />
                 </button>
                 <button type="button" onClick={() => setHelperTopic("gps")}>
                   <span className="daily-sheet-option-icon"><Icon name="pin" size={21} /></span>
-                  <span>ตรวจสอบ GPS</span><Icon name="arrow" size={19} />
+                  <span>ตรวจสอบ GPS</span><Icon name="chevron-right" size={19} />
                 </button>
                 <button type="button" onClick={() => setHelperTopic("leave")}>
                   <span className="daily-sheet-option-icon"><Icon name="calendar" size={21} /></span>
-                  <span>ช่วยกรอกใบลา</span><Icon name="arrow" size={19} />
+                  <span>ช่วยกรอกใบลา</span><Icon name="chevron-right" size={19} />
                 </button>
               </div>
             )}
@@ -419,7 +420,7 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
         >
           <span>{buttonText}</span>
           <span className="daily-action-icon">
-            <Icon name={status === "finished" ? "reset" : "arrow"} size={24} />
+            <Icon name={status === "finished" ? "reset" : "chevron-right"} size={24} />
           </span>
         </button>
         <p className="daily-demo-note">โหมดทดลอง · ไม่บันทึกข้อมูลจริง</p>
@@ -451,7 +452,7 @@ export function HomePage({ onOpenLeave }: { onOpenLeave: () => void }) {
       >
         <Icon name="pin" size={16} />
         <span>{geoPermission === "denied" ? "ตำแหน่งถูกปิดกั้น · แตะเพื่อแก้ไข" : "GPS ยังไม่ได้เชื่อมต่อ · แตะเพื่อตรวจสอบ"}</span>
-        <Icon name="arrow" size={14} />
+        <Icon name="chevron-right" size={14} />
       </button>
     </div>
   );

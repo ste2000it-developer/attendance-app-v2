@@ -319,7 +319,7 @@
   display: inline-flex; align-items: center; gap: 9px;
 }
 .daily-guide-back:hover { color: #163c57; }
-.daily-guide-back > span { font-size: 20px; line-height: 1; }
+.daily-guide-back > svg { flex: none; }
 .daily-guide-leave-actions { display: grid; gap: 10px; }
 .daily-guide-leave-button {
   width: 100%; min-height: 51px; border: 0; border-radius: 12px;
