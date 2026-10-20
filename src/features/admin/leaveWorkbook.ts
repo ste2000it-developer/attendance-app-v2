@@ -80,8 +80,6 @@ function xlsxZip(files: {name:string;data:string}[]): Uint8Array {
 }
 
 
-type RowData = { height: number; cells: Map<number,string> };
-type SheetStyle = 0|1|2|3|4|5|6|7|8|9|10;
 
 /**
  * Compact printable leave form: 1 sheet = 1 leave request.
@@ -191,7 +189,6 @@ function makeStyles():string {
   const ink='<color rgb="FF28465A"/>';
   const navy='<color rgb="FF164563"/>';
   const muted='<color rgb="FF748B9C"/>';
-  const white='<color rgb="FFFFFFFF"/>';
   const fonts=[
     font(ink,10.5),
     font('<b/>'+navy,17),
