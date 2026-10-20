@@ -16,7 +16,7 @@ type Tab = typeof tabs[number]["id"];
 
 const screens: Record<Exclude<Tab,"overview">, { title: string; detail: string; icon: string }> = {
   people: { title: "จัดการพนักงาน", detail: "เพิ่มพนักงาน กำหนดแผนก ตำแหน่ง สิทธิ์ และข้อมูลบัตรพนักงาน", icon: "people" },
-  leave: { title: "จัดการคำขอลา", detail: "ตรวจสอบใบลาและสถานะการพิจารณาของพนักงาน", icon: "calendar" },
+  leave: { title: "จัดการคำขอลา", detail: "อนุมัติคำขอ ดูประวัติการลา และส่งออกใบลาทั้งหมดเป็น Excel", icon: "calendar" },
   report: { title: "รายงานการทำงาน", detail: "สรุปเวลาเข้างาน ออกงาน และ OT เมื่อเชื่อมข้อมูลจริง", icon: "chart" },
   settings: { title: "ตั้งค่าระบบ", detail: "กำหนดสถานที่ทำงาน วันหยุด และสิทธิ์ผู้ใช้งาน", icon: "settings" }
 };

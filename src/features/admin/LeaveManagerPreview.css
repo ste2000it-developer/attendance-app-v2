@@ -1,75 +1,57 @@
-/* Attendance V2 Admin · PC/iPad-first leave management preview. No backend. */
-.leave-admin { display:grid; gap:19px; min-width:0; color:#294b63; }
-.leave-admin button, .leave-admin input, .leave-admin textarea { font:inherit; }
-.leave-admin button { cursor:pointer; }
-.leave-admin button:focus-visible, .leave-admin input:focus-visible,.leave-admin textarea:focus-visible,
-.leave-admin-modal button:focus-visible,.leave-admin-modal textarea:focus-visible { outline:3px solid #9bcee8; outline-offset:2px; }
-.leave-admin-summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
-.leave-admin-summary > div { display:flex; align-items:center; gap:13px; min-width:0; padding:17px; border-radius:15px; background:#fff; border:1px solid #e3edf2; }
-.leave-admin-summary-icon { display:grid;place-items:center;flex:none;width:43px;height:43px;border-radius:12px;background:#eaf3f8;color:#326c90; }
-.leave-admin-summary-icon.is-pending { color:#a6792f; background:#fbf4e6; }
-.leave-admin-summary-icon.is-approved { color:#268469; background:#eaf6f0; }
-.leave-admin-summary-icon.is-rejected { color:#a8615c; background:#f9eeee; }
-.leave-admin-summary > div > div { display:grid; gap:4px; min-width:0; }
-.leave-admin-summary > div > div span { font-size:12px;color:#708a9d;line-height:1.4;font-weight:700;white-space:nowrap; }
-.leave-admin-summary > div > div strong { font-size:26px;font-weight:825;color:#22475f;line-height:1.1;font-variant-numeric:tabular-nums; }
-.leave-admin-section { min-width:0; border:1px solid #e4ecf1; border-radius:16px; overflow:hidden; background:#fff; }
-.leave-admin-head { display:flex;align-items:center;justify-content:space-between;gap:15px;padding:22px 24px 18px; }
-.leave-admin-heading-line { display:flex;align-items:center;flex-wrap:wrap;gap:10px; }
-.leave-admin-heading-line h3 { color:#224158;font-size:18px;font-weight:810;margin:0;letter-spacing:-.015em; }
-.leave-admin-heading-line > span { border-radius:7px;padding:5px 8px;color:#427391;background:#eaf3f8;font-size:10px;font-weight:790;white-space:nowrap; }
-.leave-admin-head p { margin:5px 0 0; color:#7d94a4;font-size:12px;line-height:1.6; }
-.leave-admin-count { color:#597e95;background:#f1f6f9;border-radius:8px;padding:7px 12px;white-space:nowrap;font-size:12px;font-weight:780; }
-.leave-admin-filter-panel { padding:0 24px 16px; display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;align-items:end; }
-.leave-admin-search { position:relative;display:block;min-width:0;grid-column:span 2; }
-.leave-admin-search > svg { position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#839eaf;pointer-events:none; }
-.leave-admin-search input { width:100%;height:45px;padding:0 12px 0 43px;background:#fafcfd;border:1px solid #dce6ed;border-radius:10px;color:#335971;font-size:13px; }
-.leave-admin-search input::placeholder { color:#96aab7; }
-.leave-admin-search input:focus { outline:3px solid #d6e9f3;border-color:#84b0c9;background:#fff; }
-.leave-admin-filter-panel > .preview-select { min-width:0; }
-.leave-admin-date { grid-column:span 2;position:relative;min-width:0; }
-.leave-admin-date .preview-date-trigger { padding-right:41px; }
-.leave-admin-clear-date { position:absolute;right:45px;bottom:10px;width:25px;height:25px;display:grid;place-items:center;border:0;border-radius:7px;color:#8a9fab;background:#e9f1f5;cursor:pointer; }
-.leave-admin-clear-date:hover { background:#d9eaf2;color:#296585; }
-.leave-admin-toolbar { min-height:47px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px 15px;border-top:1px solid #f0f3f5;background:#fbfcfd;padding:10px 24px; }
-.leave-admin-toolbar > span { display:inline-flex;align-items:center;gap:7px;color:#8097a8;font-size:11px;line-height:1.5; }
-.leave-admin-toolbar > span svg { color:#7897aa;flex:none; }
-.leave-admin-toolbar > button { display:flex;align-items:center;gap:6px;border:0;border-radius:8px;padding:7px 10px;color:#386f91;background:#eaf4fa;font-size:11px;font-weight:765;cursor:pointer; }
-.leave-admin-toolbar > button:hover { background:#deecf4; }
-.leave-admin-date-error { margin:0;padding:12px 24px;color:#a55045;background:#fff5f2;border-top:1px solid #f5dcd6;font-size:12px;line-height:1.7; }
-.leave-admin-table-wrap { overflow-x:auto; }
-.leave-admin-table { width:100%;min-width:850px;border-collapse:collapse;table-layout:fixed;text-align:left; }
-.leave-admin-table th:nth-child(1) { width:25%; }
-.leave-admin-table th:nth-child(2) { width:22%; }
-.leave-admin-table th:nth-child(3) { width:26%; }
-.leave-admin-table th:nth-child(4) { width:15%; }
-.leave-admin-table th:nth-child(5) { width:12%; }
-.leave-admin-table thead { border-top:1px solid #eaf0f4;border-bottom:1px solid #e6eef2;background:#f7fafc; }
-.leave-admin-table th { padding:13px 17px;color:#758d9d;font-size:11px;font-weight:785;white-space:nowrap; }
-.leave-admin-table td { vertical-align:middle;border-bottom:1px solid #ecf1f4;padding:17px; }
-.leave-admin-table tbody tr:nth-child(even) { background:#fcfdfe; }
-.leave-admin-table tbody tr:hover { background:#f4f9fc; }
-.leave-admin-table tbody tr:last-child td { border-bottom:0; }
-.leave-admin-table td > strong { display:block;color:#294b62;font-size:13px;font-weight:780;line-height:1.6;overflow-wrap:anywhere; }
-.leave-admin-table td:first-child > strong { font-size:14px; }
-.leave-admin-table td > span:not(.leave-admin-status) { display:block;margin-top:2px;color:#879cab;font-size:11px;line-height:1.6;overflow-wrap:anywhere; }
-.leave-admin-status { display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:8px;font-size:11px;font-weight:760;white-space:nowrap; }
-.leave-admin-status::before { content:"";flex:none;width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.7; }
-.leave-admin-status.is-pending { color:#9a712f;background:#fcf4e6; }
-.leave-admin-status.is-approved { color:#267956;background:#eaf6ef; }
-.leave-admin-status.is-rejected { color:#a85c54;background:#faeeee; }
-.leave-admin-view { display:inline-flex;align-items:center;justify-content:center;gap:4px;min-height:39px;border:1px solid #d9e7ef;border-radius:9px;padding:9px 11px;background:#fff;color:#2a6387;font-size:11px;font-weight:770;white-space:nowrap;cursor:pointer; }
-.leave-admin-view:hover { background:#eaf5fa;border-color:#b8d5e5; }
-.leave-admin-card-list { display:none; }
-.leave-admin-empty { padding:55px 20px 61px;border-top:1px solid #e9eff3;display:grid;justify-items:center;text-align:center;gap:12px; }
-.leave-admin-empty > span { width:64px;height:64px;border-radius:18px;background:#edf5f9;color:#6291ac;display:grid;place-items:center; }
-.leave-admin-empty > strong { margin-top:3px;color:#2a5067;font-size:16px;font-weight:790; }
-.leave-admin-empty p { margin:0;color:#8095a5;font-size:12px;line-height:1.7; }
-.leave-admin-empty button { border:1px solid #cfe3ef;background:#eef7fb;color:#2b698c;border-radius:9px;padding:10px 14px;font-size:12px;font-weight:750;cursor:pointer; }
-.leave-admin-footer-note { margin:0;padding:13px 24px;border-top:1px solid #edf1f4;background:#fbfcfd;color:#8297a5;font-size:11px;line-height:1.7; }
-.leave-admin-feedback { display:flex;align-items:center;gap:10px;padding:11px 14px;background:#f0f8f5;border:1px solid #d3eadf;color:#347e60;font-size:12px;line-height:1.5;border-radius:10px; }
-.leave-admin-feedback > span { flex:1; }
-.leave-admin-feedback > button { display:grid;place-items:center;flex:none;width:27px;height:27px;border:0;border-radius:7px;background:transparent;color:inherit;cursor:pointer; }
+/* Attendance V2 Admin: single-purpose leave approval, history and Excel export. */
+.leave-simple {display:grid;gap:15px;min-width:0;color:#294b63;}
+.leave-simple button {font:inherit;cursor:pointer;}
+.leave-simple-top {display:flex;align-items:center;justify-content:space-between;gap:18px;}
+.leave-simple-top > div {min-width:0;}
+.leave-simple-eyebrow {font-size:10px;letter-spacing:.075em;color:#5a86a0;font-weight:780;}
+.leave-simple-top h3 {margin:4px 0 4px;color:#214358;font-weight:820;font-size:20px;line-height:1.35;}
+.leave-simple-top p {margin:0;color:#7991a2;font-size:12px;line-height:1.65;}
+.leave-simple-export {flex:none;min-height:44px;border:0;border-radius:11px;background:#205d81;color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:10px 17px;font-size:13px;font-weight:780;}
+.leave-simple-export:hover {background:#154c6e;}
+.leave-simple-export:disabled {background:#9eb4c0;cursor:not-allowed;}
+.leave-simple-note {display:flex;align-items:flex-start;gap:8px;color:#66869b;background:#eff6fa;border:1px solid #dceaf2;border-radius:10px;padding:10px 13px;font-size:11px;line-height:1.6;}
+.leave-simple-note svg {flex:none;margin-top:1px;}
+.leave-simple-section {background:#fff;border:1px solid #e1ebf1;border-radius:16px;overflow:hidden;min-width:0;}
+.leave-simple-tabs {display:flex;gap:9px;padding:17px 20px 0;border-bottom:1px solid #eaf0f4;}
+.leave-simple-tabs button {margin-bottom:-1px;display:flex;align-items:center;gap:9px;padding:12px 16px;min-height:44px;color:#6a8497;border:0;border-bottom:3px solid transparent;background:transparent;font-size:13px;font-weight:740;white-space:nowrap;}
+.leave-simple-tabs button:hover {color:#205d81;}
+.leave-simple-tabs button.is-active {color:#205d81;border-bottom-color:#205d81;font-weight:800;}
+.leave-simple-tabs button > span {border-radius:99px;padding:2px 7px;background:#f0f4f7;color:#597e94;font-size:11px;font-weight:800;line-height:1.5;}
+.leave-simple-tabs button.is-active > span {background:#e5f1f8;color:#245f82;}
+.leave-simple-heading {display:flex;align-items:center;justify-content:space-between;gap:15px;padding:20px 22px;}
+.leave-simple-heading h4 {margin:0 0 3px;color:#25475d;font-size:17px;font-weight:800;}
+.leave-simple-heading p {margin:0;color:#8598a6;font-size:12px;line-height:1.65;}
+.leave-simple-heading > span {white-space:nowrap;background:#f0f6f9;color:#5c7f95;border-radius:8px;padding:7px 9px;font-size:11px;font-weight:770;}
+.leave-simple-table-scroll {width:100%;overflow:visible;}
+.leave-simple-table {width:100%;border-collapse:collapse;table-layout:auto;text-align:left;}
+.leave-simple-table th {background:#f7fafb;padding:13px 16px;color:#71899b;border-top:1px solid #e8eff3;border-bottom:1px solid #e9eff3;font-size:11px;font-weight:780;white-space:nowrap;}
+.leave-simple-table th:last-child {width:139px;}
+.leave-simple-table td {padding:16px;border-bottom:1px solid #edf2f5;vertical-align:middle;color:#405d74;font-size:12px;}
+.leave-simple-table tbody tr:nth-child(even) {background:#fcfdfe;}
+.leave-simple-table tbody tr:last-child td {border-bottom:0;}
+.leave-simple-table tbody tr:hover {background:#f5f9fc;}
+.leave-simple-table td > strong {display:block;font-size:13px;color:#294b62;font-weight:770;line-height:1.55;}
+.leave-simple-table td:first-child > strong {font-size:14px;}
+.leave-simple-table td > small {display:block;font-size:11px;color:#8299a8;line-height:1.7;margin-top:2px;overflow-wrap:anywhere;}
+.leave-simple-table td:last-child {width:139px;white-space:nowrap;text-align:right;}
+.leave-simple-open {border:1px solid #d4e5ee;border-radius:9px;min-height:40px;padding:10px 12px;color:#246589;background:#f7fbfd;display:inline-flex;align-items:center;justify-content:center;gap:5px;font-size:12px;font-weight:785;white-space:nowrap;}
+.leave-simple-open:hover {background:#e9f5fa;border-color:#afcfe0;}
+.leave-simple-cards {display:none;}
+.leave-admin-status {display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:8px;font-size:11px;font-weight:760;white-space:nowrap;}
+.leave-admin-status::before {content:"";flex:none;width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.7;}
+.leave-admin-status.is-pending {color:#9a712f;background:#fcf4e6;}
+.leave-admin-status.is-approved {color:#267956;background:#eaf6ef;}
+.leave-admin-status.is-rejected {color:#a85c54;background:#faeeee;}
+.leave-admin-feedback {display:flex;align-items:center;gap:10px;padding:11px 14px;background:#f0f8f5;border:1px solid #d3eadf;color:#347e60;font-size:12px;line-height:1.5;border-radius:10px;}
+.leave-admin-feedback > span {flex:1;}
+.leave-admin-feedback > button {display:grid;place-items:center;flex:none;width:27px;height:27px;border:0;border-radius:7px;background:transparent;color:inherit;}
+.leave-simple-error {margin:0;padding:11px 14px;background:#fff2f0;color:#a55045;border:1px solid #efcdc8;border-radius:10px;font-size:12px;}
+.leave-admin-empty {padding:55px 20px 61px;border-top:1px solid #e9eff3;display:grid;justify-items:center;text-align:center;gap:12px;}
+.leave-admin-empty > span {width:64px;height:64px;border-radius:18px;background:#edf5f9;color:#6291ac;display:grid;place-items:center;}
+.leave-admin-empty > strong {margin-top:3px;color:#2a5067;font-size:16px;font-weight:790;}
+.leave-admin-empty p {margin:0;color:#8095a5;font-size:12px;line-height:1.7;text-align:center;}
+.leave-admin-modal button {cursor:pointer;}
+.leave-admin-modal button:focus-visible,.leave-simple button:focus-visible,.leave-admin-modal textarea:focus-visible {outline:3px solid #9bcee8;outline-offset:2px;}
 
 /* Custom details modal, with fixed action bar and scrollable details. */
 .leave-admin-backdrop { position:fixed;inset:0;z-index:350;display:grid;place-items:center;background:rgba(17,37,53,.54);padding:20px; }
@@ -120,79 +102,52 @@
 .leave-admin-primary.is-reject { border-color:#a45b54;background:#a45b54; }
 .leave-admin-primary.is-reject:hover { background:#914d47; }
 
-@media(max-width:1250px) {
- .leave-admin-table-wrap { display:none; }
- .leave-admin-card-list { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:16px;border-top:1px solid #e9eff3; }
- .leave-admin-card { min-width:0;display:grid;gap:14px;border:1px solid #e2edf2;border-radius:13px;padding:16px;background:#fff; }
- .leave-admin-card-top { display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px; }
- .leave-admin-card-top > div { display:grid;gap:5px;min-width:0; }
- .leave-admin-card-top strong { color:#24465e;font-size:14px;font-weight:800;line-height:1.4; }
- .leave-admin-card-top small { color:#8299a8;font-size:11px; }
- .leave-admin-card-details { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px; }
- .leave-admin-card-details > div { display:grid;gap:4px;align-content:start;min-width:0; }
- .leave-admin-card-details small { color:#8a9daa;font-size:11px; }
- .leave-admin-card-details strong { color:#3d617a;font-size:12px;font-weight:750;line-height:1.6;overflow-wrap:anywhere; }
- .leave-admin-card-details span { color:#8297a6;font-size:11px; }
- .leave-admin-card > .leave-admin-view { justify-self:end; }
- .leave-admin-filter-panel { grid-template-columns:repeat(4,minmax(0,1fr)); }
- .leave-admin-search { grid-column:span 2; }
+
+@media(max-width:1200px) {
+ .leave-simple-table-scroll {display:none;}
+ .leave-simple-cards {display:grid;gap:10px;padding:14px 18px 18px;border-top:1px solid #eaf0f4;}
+ .leave-simple-card {min-width:0;display:flex;align-items:center;gap:15px;padding:15px;border:1px solid #e4edf2;border-radius:12px;background:#fff;}
+ .leave-simple-card-top {min-width:0;flex:1.1;display:grid;gap:5px;}
+ .leave-simple-card-top > div {display:grid;gap:4px;min-width:0;}
+ .leave-simple-card-top strong {color:#27485e;font-size:14px;font-weight:790;line-height:1.5;}
+ .leave-simple-card-top small {color:#889eab;font-size:11px;}
+ .leave-simple-card-top > .leave-admin-status {justify-self:start;}
+ .leave-simple-card-meta {min-width:0;flex:1.2;display:grid;gap:5px;}
+ .leave-simple-card-meta strong {color:#335870;font-size:13px;font-weight:770;}
+ .leave-simple-card-meta span,.leave-simple-card-meta small {color:#7691a3;font-size:11px;line-height:1.6;}
+ .leave-simple-card > .leave-simple-open {flex:none;margin-left:auto;}
 }
-@media(max-width:1100px) {
- .leave-admin-summary { grid-template-columns:repeat(2,minmax(0,1fr));gap:9px; }
- .leave-admin-summary > div { padding:13px 14px;gap:10px; }
- .leave-admin-summary-icon { width:39px;height:39px; }
- .leave-admin-summary > div > div strong { font-size:23px; }
- .leave-admin-filter-panel { grid-template-columns:repeat(2,minmax(0,1fr));gap:10px; }
- .leave-admin-search { grid-column:1/-1; }
- .leave-admin-date { grid-column:auto; }
- .leave-admin-card-list { grid-template-columns:minmax(0,1fr); }
-}
-@media(min-width:701px) and (max-width:1024px) {
- .leave-admin-head { padding:18px 18px 15px; }
- .leave-admin-filter-panel { padding:0 18px 14px; }
- .leave-admin-toolbar { padding:9px 18px; }
- .leave-admin-card-list { padding:12px; }
- .leave-admin-card { display:flex;align-items:center;gap:13px;padding:13px 15px; }
- .leave-admin-card-top { flex:1.25;display:grid;min-width:0; }
- .leave-admin-card-details { flex:1.3;min-width:0;grid-template-columns:1fr;gap:7px; }
- .leave-admin-card > .leave-admin-view { margin-left:auto;flex:none; }
- .leave-admin-card-top .leave-admin-status { justify-self:start; }
- .leave-admin-card-details > div { gap:2px; }
- .leave-admin-footer-note { padding:11px 18px; }
-}
-@media(max-width:850px) {
- .leave-admin-card { display:grid; }
- .leave-admin-card-details { grid-template-columns:repeat(2,minmax(0,1fr)); }
- .leave-admin-card > .leave-admin-view { justify-self:end; }
+@media(max-width:800px) {
+ .leave-simple-card {flex-wrap:wrap;}
+ .leave-simple-card-top {min-width:170px;}
+ .leave-simple-card-meta {min-width:200px;}
+ .leave-simple-card > .leave-simple-open {margin-left:auto;}
 }
 @media(max-width:700px) {
- .leave-admin { gap:12px; }
- .leave-admin-summary > div { padding:12px; }
- .leave-admin-summary > div > div span { font-size:11px; }
- .leave-admin-summary > div > div strong { font-size:21px; }
- .leave-admin-head { padding:16px 16px 12px; }
- .leave-admin-head p { max-width:270px; }
- .leave-admin-count { padding:7px 8px;font-size:11px; }
- .leave-admin-filter-panel { padding:0 16px 12px; }
- .leave-admin-toolbar { padding:10px 16px; }
- .leave-admin-card-list { padding:11px;gap:10px; }
- .leave-admin-card { padding:13px; }
- .leave-admin-card-details strong { font-size:12px; }
- .leave-admin-footer-note { padding:12px 16px; }
- .leave-admin-backdrop { align-items:end;padding:0; }
- .leave-admin-modal { width:100%;max-height:calc(100dvh - 8px);border-radius:22px 22px 0 0;border:0; }
- .leave-admin-modal-head { padding:17px 18px 12px; }
- .leave-admin-modal-demo { padding:10px 18px; }
- .leave-admin-modal-body { padding:17px 18px; }
- .leave-admin-detail-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
- .leave-admin-modal-actions { padding:12px 18px calc(17px + env(safe-area-inset-bottom));gap:8px; }
+ .leave-simple-top {align-items:flex-start;}
+ .leave-simple-top h3 {font-size:18px;}
+ .leave-simple-export {padding:10px;white-space:nowrap;font-size:12px;}
+ .leave-simple-tabs {padding:10px 12px 0;gap:3px;}
+ .leave-simple-tabs button {padding:12px 11px;font-size:12px;gap:5px;}
+ .leave-simple-heading {padding:16px;}
+ .leave-simple-heading h4 {font-size:15px;}
+ .leave-simple-cards {padding:12px;}
+ .leave-simple-card {display:grid;gap:12px;padding:14px;}
+ .leave-simple-card-top,.leave-simple-card-meta {min-width:0;}
+ .leave-simple-card > .leave-simple-open {justify-self:end;margin:0;}
+ .leave-admin-backdrop {align-items:end;padding:0;}
+ .leave-admin-modal {width:100%;max-height:calc(100dvh - 8px);border-radius:22px 22px 0 0;border:0;}
+ .leave-admin-modal-head {padding:17px 18px 12px;}
+ .leave-admin-modal-demo {padding:10px 18px;}
+ .leave-admin-modal-body {padding:17px 18px;}
+ .leave-admin-detail-grid {grid-template-columns:repeat(2,minmax(0,1fr));}
+ .leave-admin-modal-actions {padding:12px 18px calc(17px + env(safe-area-inset-bottom));gap:8px;}
 }
 @media(max-width:410px) {
- .leave-admin-heading-line h3 { font-size:16px; }
- .leave-admin-filter-panel { grid-template-columns:repeat(2,minmax(0,1fr));gap:8px; }
- .leave-admin-filter-panel > .preview-select:nth-of-type(3) { grid-column:1/-1; }
- .leave-admin-card-details { grid-template-columns:minmax(0,1fr); }
- .leave-admin-modal-person { flex-wrap:wrap; }
- .leave-admin-modal-person > .leave-admin-status { margin-left:61px; }
- .leave-admin-modal-actions button { font-size:12px;padding:9px 11px; }
+ .leave-simple-top {flex-wrap:wrap;}
+ .leave-simple-export {width:100%;justify-content:center;}
+ .leave-simple-tabs button {font-size:11px;}
+ .leave-admin-modal-person {flex-wrap:wrap;}
+ .leave-admin-modal-person > .leave-admin-status {margin-left:61px;}
+ .leave-admin-modal-actions button {font-size:12px;padding:9px 11px;}
 }

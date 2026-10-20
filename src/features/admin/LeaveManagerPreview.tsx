@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { PreviewDatePicker, PreviewSelect } from "./PreviewControls";
+import { exportLeaveWorkbook } from "./leaveWorkbook";
 import "./LeaveManagerPreview.css";
 
 type LeaveStatus = "pending" | "approved" | "rejected";
@@ -36,10 +36,6 @@ const leaveTypes: ReadonlyArray<{ value: LeaveType; label: string }> = [
 const statusLabels: Record<LeaveStatus, string> = {
   pending: "รอพิจารณา", approved: "อนุมัติแล้ว", rejected: "ไม่อนุมัติ"
 };
-const optionsStatus = [
-  { value: "all", label: "ทุกสถานะ" },
-  ...(["pending", "approved", "rejected"] as const).map(value => ({ value, label: statusLabels[value] }))
-];
 const typeLabel = (id: LeaveType) => leaveTypes.find(type => type.value === id)?.label ?? "—";
 const formatter = new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short", year: "numeric" });
 function dateOffset(days: number) {
@@ -56,9 +52,8 @@ function daysBetween(from: string, to: string) {
   const [y2, m2, d2] = to.split("-").map(Number);
   return Math.round((Date.UTC(y2,m2-1,d2) - Date.UTC(y1,m1-1,d1)) / 86400000) + 1;
 }
-function Icon({ name, size = 20 }: { name: "search" | "calendar" | "check" | "close" | "clock" | "file" | "arrow" | "users" | "reject" | "reset" | "info"; size?: number }) {
+function Icon({ name, size = 20 }: { name:  "calendar" | "check" | "close" | "clock" | "file" | "arrow" | "users" | "reject" | "info"; size?: number }) {
   const paths = {
-    search: <><circle cx="10.5" cy="10.5" r="6.8"/><path d="m15.7 15.7 5 5"/></>,
     calendar: <><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></>,
     check: <path d="m5 12 4.5 4.5L19 7"/>,
     close: <path d="M5 5 19 19M19 5 5 19"/>,
@@ -67,7 +62,6 @@ function Icon({ name, size = 20 }: { name: "search" | "calendar" | "check" | "cl
     arrow: <path d="m9 6 6 6-6 6"/>,
     users: <><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a6 6 0 0 1 12 0v1H3Z"/><path d="M16 5a3 3 0 0 1 0 6M17 15a5 5 0 0 1 4 5"/></>,
     reject: <><circle cx="12" cy="12" r="9"/><path d="m8.5 8.5 7 7m0-7-7 7"/></>,
-    reset: <><path d="M3 11a9 9 0 1 1 2.4 6M3 3v8h8"/></>,
     info: <><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></>
   };
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.85"
@@ -103,12 +97,8 @@ export default function LeaveManagerPreview({ requests, onChange }: {
   requests: AdminLeaveRequest[];
   onChange: (next: AdminLeaveRequest[]) => void;
 }) {
-  const [query, setQuery] = useState("");
-  const [employee, setEmployee] = useState("all");
-  const [type, setType] = useState("all");
-  const [status, setStatus] = useState("all");
-  const [start, setStart] = useState("");
-  const [end, setEnd] = useState("");
+  const [view, setView] = useState<"pending" | "history">("pending");
+  const [exportError, setExportError] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [choice, setChoice] = useState<Choice>(null);
   const [decisionNote, setDecisionNote] = useState("");
@@ -116,34 +106,22 @@ export default function LeaveManagerPreview({ requests, onChange }: {
   const [feedback, setFeedback] = useState("");
   const dialogRef = useRef<HTMLElement | null>(null);
   const openerRef = useRef<HTMLButtonElement | null>(null);
-  const total = requests.length;
-  const pending = requests.filter(item => item.status === "pending").length;
-  const approved = requests.filter(item => item.status === "approved").length;
-  const rejected = requests.filter(item => item.status === "rejected").length;
+  const pendingRows = requests.filter(item => item.status === "pending")
+    .sort((a,b) => b.submittedDate.localeCompare(a.submittedDate) || a.id.localeCompare(b.id));
+  const historyRows = requests.filter(item => item.status !== "pending")
+    .sort((a,b) => (b.decisionDate ?? "").localeCompare(a.decisionDate ?? "") || a.id.localeCompare(b.id));
   const selected = requests.find(item => item.id === selectedId) ?? null;
-  const names = [...new Map(requests.map(item => [item.employeeCode, item.employeeName])).entries()]
-    .map(([value, label]) => ({ value, label }));
-  const filtered = requests.filter(item => {
-    const q = query.trim().toLocaleLowerCase();
-    if (q && ![item.id, item.employeeName, item.employeeCode, item.department, typeLabel(item.type)].some(part => part.toLocaleLowerCase().includes(q))) return false;
-    if (employee !== "all" && item.employeeCode !== employee) return false;
-    if (type !== "all" && item.type !== type) return false;
-    if (status !== "all" && item.status !== status) return false;
-    // The selected date range overlaps the leave period (inclusive).
-    if (start && item.endDate < start) return false;
-    if (end && item.startDate > end) return false;
-    return true;
-  }).sort((a,b) => {
-    if (status === "all" && a.status !== b.status) return a.status === "pending" ? -1 : b.status === "pending" ? 1 : 0;
-    return b.submittedDate.localeCompare(a.submittedDate) || a.id.localeCompare(b.id);
-  });
-  const dateError = Boolean(start && end && start > end);
-  const hasFilters = query || employee !== "all" || type !== "all" || status !== "all" || start || end;
-  const visible = dateError ? [] : filtered;
-
-  function clearFilters() {
-    setQuery(""); setEmployee("all"); setType("all"); setStatus("all"); setStart(""); setEnd("");
+  const rows = view === "pending" ? pendingRows : historyRows;
+  function handleExport() {
+    try {
+      exportLeaveWorkbook(requests, typeLabel, statusLabels);
+      setExportError("");
+      setFeedback("ส่งออกไฟล์ Excel จากข้อมูลใบลาตัวอย่างทั้งหมด " + requests.length + " รายการแล้ว");
+    } catch {
+      setExportError("ไม่สามารถสร้างไฟล์ Excel ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง");
+    }
   }
+
   function openDetail(item: AdminLeaveRequest, opener: HTMLButtonElement) {
     openerRef.current = opener;
     setSelectedId(item.id); setChoice(null); setDecisionNote(""); setDecisionError("");
@@ -195,87 +173,79 @@ export default function LeaveManagerPreview({ requests, onChange }: {
   }, [selectedId]);
 
   return (
-    <div className="leave-admin">
-      <div className="leave-admin-summary">
-        <div><span className="leave-admin-summary-icon"><Icon name="file"/></span><div><span>คำขอทั้งหมด</span><strong>{total}</strong></div></div>
-        <div><span className="leave-admin-summary-icon is-pending"><Icon name="clock"/></span><div><span>รอพิจารณา</span><strong>{pending}</strong></div></div>
-        <div><span className="leave-admin-summary-icon is-approved"><Icon name="check"/></span><div><span>อนุมัติแล้ว</span><strong>{approved}</strong></div></div>
-        <div><span className="leave-admin-summary-icon is-rejected"><Icon name="reject"/></span><div><span>ไม่อนุมัติ</span><strong>{rejected}</strong></div></div>
-      </div>
+    <div className="leave-admin leave-simple">
+      <header className="leave-simple-top">
+        <div>
+          <span className="leave-simple-eyebrow">LEAVE MANAGEMENT · UI PREVIEW</span>
+          <h3>ใบลาพนักงาน</h3>
+          <p>อนุมัติคำขอ ดูประวัติ และส่งออกใบลาทั้งหมดเป็น Excel</p>
+        </div>
+        <button type="button" className="leave-simple-export" onClick={handleExport} disabled={requests.length===0}>
+          <Icon name="file" size={19}/> ส่งออก Excel
+        </button>
+      </header>
+      <div className="leave-simple-note"><Icon name="info" size={16}/> ข้อมูลตัวอย่างสำหรับทดสอบเท่านั้น ไม่เชื่อม Firebase และเมื่อรีเฟรชหน้าข้อมูลจะกลับเป็นค่าเริ่มต้น</div>
       {feedback && <div className="leave-admin-feedback" role="status"><Icon name="check" size={18}/><span>{feedback}</span>
-        <button type="button" aria-label="ปิดข้อความ" onClick={() => setFeedback("")}><Icon name="close" size={16}/></button></div>}
+        <button type="button" aria-label="ปิดข้อความ" onClick={()=>setFeedback("")}><Icon name="close" size={16}/></button></div>}
+      {exportError && <p className="leave-simple-error" role="alert">{exportError}</p>}
 
-      <section className="leave-admin-section" aria-labelledby="leave-admin-list-title">
-        <div className="leave-admin-head">
-          <div>
-            <div className="leave-admin-heading-line"><h3 id="leave-admin-list-title">รายการคำขอลา</h3><span>ข้อมูลทดลอง</span></div>
-            <p>ตรวจสอบคำขอ พิจารณา และย้อนดูประวัติได้ในที่เดียว</p>
-          </div>
-          <span className="leave-admin-count">{visible.length} รายการ</span>
+      <section className="leave-simple-section" aria-label="รายการและประวัติใบลา">
+        <nav className="leave-simple-tabs" aria-label="เลือกดูคำขอหรือประวัติ">
+          <button type="button" className={view==="pending"?"is-active":""} aria-current={view==="pending"?"page":undefined}
+            onClick={()=>setView("pending")}>
+            <Icon name="clock" size={18}/> รออนุมัติ <span>{pendingRows.length}</span>
+          </button>
+          <button type="button" className={view==="history"?"is-active":""} aria-current={view==="history"?"page":undefined}
+            onClick={()=>setView("history")}>
+            <Icon name="calendar" size={18}/> ประวัติการลา <span>{historyRows.length}</span>
+          </button>
+        </nav>
+        <div className="leave-simple-heading">
+          <div><h4>{view==="pending"?"คำขอที่รอพิจารณา":"ประวัติการลา"}</h4>
+            <p>{view==="pending"?"กดดูรายละเอียดเพื่ออนุมัติหรือไม่อนุมัติ":"รายการที่พิจารณาแล้ว ทั้งอนุมัติและไม่อนุมัติ"}</p></div>
+          <span>{rows.length} รายการ</span>
         </div>
-        <div className="leave-admin-filter-panel">
-          <label className="leave-admin-search">
-            <Icon name="search" size={18}/>
-            <span className="sr-only">ค้นหาชื่อพนักงานหรือรหัสคำขอ</span>
-            <input type="search" placeholder="ค้นหาพนักงานหรือรหัสคำขอ..." value={query}
-              onChange={event => setQuery(event.target.value)}/>
-          </label>
-          <PreviewSelect label="พนักงาน" value={employee} onChange={setEmployee}
-            options={[{value:"all",label:"พนักงานทั้งหมด"},...names]}/>
-          <PreviewSelect label="ประเภทการลา" value={type} onChange={setType}
-            options={[{value:"all",label:"ทุกประเภท"},...leaveTypes]}/>
-          <PreviewSelect label="สถานะ" value={status} onChange={setStatus} options={optionsStatus}/>
-          <div className="leave-admin-date"><PreviewDatePicker label="วันที่ลา ตั้งแต่" value={start} onChange={setStart}/>
-            {start && <button type="button" className="leave-admin-clear-date" aria-label="ล้างวันเริ่มต้น" onClick={()=>setStart("")}><Icon name="close" size={15}/></button>}</div>
-          <div className="leave-admin-date"><PreviewDatePicker label="วันที่ลา ถึง" value={end} onChange={setEnd}/>
-            {end && <button type="button" className="leave-admin-clear-date" aria-label="ล้างวันสิ้นสุด" onClick={()=>setEnd("")}><Icon name="close" size={15}/></button>}</div>
-        </div>
-        <div className="leave-admin-toolbar">
-          <span><Icon name="info" size={15}/> เลือกช่วงวันที่เพื่อดูคำขอที่มีวันลาตรงกับช่วงนั้น</span>
-          {hasFilters && <button type="button" onClick={clearFilters}><Icon name="reset" size={15}/> ล้างตัวกรอง</button>}
-        </div>
-        {dateError && <p className="leave-admin-date-error" role="alert">ช่วงวันที่ไม่ถูกต้อง กรุณาเลือกวันสิ้นสุดที่ไม่น้อยกว่าวันเริ่มต้น</p>}
-        {visible.length === 0 ? (
+        {rows.length===0 ? (
           <div className="leave-admin-empty">
-            <span><Icon name="calendar" size={27}/></span>
-            <strong>{total ? "ไม่พบคำขอลาที่ตรงกับตัวกรอง" : "ยังไม่มีคำขอลา"}</strong>
-            <p>{total ? "ลองเปลี่ยนตัวกรองหรือเลือกช่วงวันที่ใหม่" : "เมื่อเชื่อม Firebase คำขอจริงจะปรากฏที่นี่"}</p>
-            {hasFilters && <button type="button" onClick={clearFilters}>แสดงคำขอทั้งหมด</button>}
+            <span><Icon name={view==="pending"?"check":"calendar"} size={27}/></span>
+            <strong>{view==="pending"?"ไม่มีคำขอที่รออนุมัติ":"ยังไม่มีประวัติการลา"}</strong>
+            <p>{view==="pending"?"คำขอที่พิจารณาแล้วจะไปอยู่ในแท็บประวัติการลา":"เมื่ออนุมัติหรือไม่อนุมัติใบลา รายการจะปรากฏที่นี่"}</p>
           </div>
-        ) : <>
-          <div className="leave-admin-table-wrap">
-            <table className="leave-admin-table">
-              <thead><tr>
-                <th scope="col">พนักงาน</th><th scope="col">ประเภทการลา</th><th scope="col">ช่วงวันที่</th><th scope="col">สถานะ</th><th scope="col"><span className="sr-only">รายละเอียด</span></th>
-              </tr></thead>
-              <tbody>{visible.map(item => (
-                <tr key={item.id}>
-                  <td><strong>{item.employeeName}</strong><span>{item.employeeCode} · {item.id}</span></td>
-                  <td><strong>{typeLabel(item.type)}</strong><span>{item.department}</span></td>
-                  <td><strong>{formatDate(item.startDate)}{item.startDate !== item.endDate ? " – " + formatDate(item.endDate) : ""}</strong>
-                    <span>{daysBetween(item.startDate,item.endDate)} วัน</span></td>
-                  <td><span className={"leave-admin-status is-"+item.status}>{statusLabels[item.status]}</span></td>
-                  <td><button className="leave-admin-view" type="button" onClick={event=>openDetail(item,event.currentTarget)}>
-                    ดูรายละเอียด <Icon name="arrow" size={16}/></button></td>
-                </tr>
-              ))}</tbody>
-            </table>
-          </div>
-          <div className="leave-admin-card-list">
-            {visible.map(item => <article className="leave-admin-card" key={item.id}>
-              <div className="leave-admin-card-top"><div><strong>{item.employeeName}</strong><small>{item.employeeCode} · {item.id}</small></div>
-                <span className={"leave-admin-status is-"+item.status}>{statusLabels[item.status]}</span></div>
-              <div className="leave-admin-card-details">
-                <div><small>ประเภทการลา</small><strong>{typeLabel(item.type)}</strong></div>
-                <div><small>ช่วงวันที่ลา</small><strong>{formatDate(item.startDate)}{item.startDate!==item.endDate?" – "+formatDate(item.endDate):""}</strong>
-                  <span>{daysBetween(item.startDate,item.endDate)} วัน</span></div>
-              </div>
-              <button className="leave-admin-view" type="button" onClick={event=>openDetail(item,event.currentTarget)}>
-                ดูรายละเอียด <Icon name="arrow" size={16}/></button>
-            </article>)}
-          </div>
-        </>}
-        <p className="leave-admin-footer-note">รายการทั้ง 5 รายการเป็นข้อมูลสมมติสำหรับทดสอบหน้าจอ ไม่ใช่คำขอลาของพนักงานจริง เมื่อรีเฟรชหน้าเว็บจะเริ่มต้นใหม่</p>
+        ) : (
+          <>
+            <div className="leave-simple-table-scroll">
+              <table className="leave-simple-table">
+                <thead><tr><th scope="col">พนักงาน</th><th scope="col">ประเภท / วันที่ลา</th>
+                  <th scope="col">สถานะ</th><th scope="col"><span className="sr-only">เปิดรายละเอียด</span></th></tr></thead>
+                <tbody>{rows.map(item=>(
+                  <tr key={item.id}>
+                    <td><strong>{item.employeeName}</strong><small>{item.employeeCode} · {item.id}</small></td>
+                    <td><strong>{typeLabel(item.type)}</strong>
+                      <small>{formatDate(item.startDate)}{item.startDate!==item.endDate?" – "+formatDate(item.endDate):""} · {daysBetween(item.startDate,item.endDate)} วัน</small></td>
+                    <td><span className={"leave-admin-status is-"+item.status}>{statusLabels[item.status]}</span>
+                      {view==="history" && <small>พิจารณา {item.decisionDate ? formatDate(item.decisionDate) : "—"}</small>}</td>
+                    <td><button type="button" className="leave-simple-open" onClick={event=>openDetail(item,event.currentTarget)}>
+                      รายละเอียด <Icon name="arrow" size={16}/></button></td>
+                  </tr>
+                ))}</tbody>
+              </table>
+            </div>
+            <div className="leave-simple-cards">
+              {rows.map(item=>(
+                <article className="leave-simple-card" key={item.id}>
+                  <div className="leave-simple-card-top"><div><strong>{item.employeeName}</strong><small>{item.employeeCode} · {item.id}</small></div>
+                    <span className={"leave-admin-status is-"+item.status}>{statusLabels[item.status]}</span></div>
+                  <div className="leave-simple-card-meta"><strong>{typeLabel(item.type)}</strong>
+                    <span>{formatDate(item.startDate)}{item.startDate!==item.endDate?" – "+formatDate(item.endDate):""} · {daysBetween(item.startDate,item.endDate)} วัน</span>
+                    {view==="history" && <small>พิจารณา {item.decisionDate ? formatDate(item.decisionDate):"—"}</small>}
+                  </div>
+                  <button type="button" className="leave-simple-open" onClick={event=>openDetail(item,event.currentTarget)}>
+                    รายละเอียด <Icon name="arrow" size={17}/></button>
+                </article>
+              ))}
+            </div>
+          </>
+        )}
       </section>
 
       {selected && createPortal(
