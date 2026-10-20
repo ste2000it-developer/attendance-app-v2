@@ -366,6 +366,7 @@ export default function LeavePage() {
                       </span>
                       <span className="leave-date-picker-detail">{resolved ? showDate(resolved) : "แตะเพื่อเลือกวันที่"}</span>
                     </button>
+                  );
                 })}
               </div>
               <p className="leave-dmy-help">รูปแบบ DD/MM/YYYY · วัน/เดือน/ปี ค.ศ.</p>
