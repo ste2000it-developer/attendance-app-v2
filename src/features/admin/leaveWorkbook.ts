@@ -58,7 +58,7 @@ function xlsxZip(files: {name:string;data:string}[]): Uint8Array {
     locals.push(...file.name);
     const localOffset=offset;
     offset+=30+file.name.length+file.data.length;
-    locals.push(...file.data);
+    for (const byte of file.data) locals.push(byte);
     // Central directory
     push32(central,0x02014b50);push16(central,20);push16(central,20);
     push16(central,0x0800);push16(central,0);push16(central,0);push16(central,0);
@@ -72,7 +72,11 @@ function xlsxZip(files: {name:string;data:string}[]): Uint8Array {
   push16(tail,parts.length);push16(tail,parts.length);
   push32(tail,central.length);push32(tail,locals.length);
   push16(tail,0);
-  return Uint8Array.from([...locals,...central,...tail]);
+  const result = new Uint8Array(locals.length + central.length + tail.length);
+  result.set(locals, 0);
+  result.set(central, locals.length);
+  result.set(tail, locals.length + central.length);
+  return result;
 }
 
 export function exportLeaveWorkbook(
