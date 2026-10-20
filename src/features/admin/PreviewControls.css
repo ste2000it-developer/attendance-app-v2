@@ -1,0 +1,44 @@
+/* Shared PC/iPad controls for Attendance V2 Admin. All dropdowns and dates are custom. */
+.preview-select,.preview-date-control { display:grid;gap:6px;min-width:0; }
+.preview-select-label { color:#687f92;font-size:12px;font-weight:735;line-height:1.4; }
+.preview-select-trigger,.preview-date-trigger { display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;min-width:0;width:100%;height:45px;padding:0 12px;border:1px solid #dce6ed;border-radius:10px;background:#fafcfd;color:#31536d;font:inherit;font-size:13px;font-weight:690;cursor:pointer; }
+.preview-select-trigger:hover,.preview-date-trigger:hover,.preview-select-trigger.is-open { background:#f3f9fc;border-color:#9bc1d6; }
+.preview-select-trigger:focus-visible,.preview-date-trigger:focus-visible { outline:3px solid #a6d1e6;outline-offset:2px; }
+.preview-select-trigger > span,.preview-date-trigger > span:first-child { overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0; }
+.preview-select-trigger svg { flex:none;color:#658ca5;transition:transform .15s; }
+.preview-select-trigger.is-open svg { transform:rotate(180deg); }
+.preview-select-list { z-index:520;display:grid;gap:3px;overflow-y:auto;overscroll-behavior:contain;padding:5px;border:1px solid #deebf2;border-radius:12px;background:#fff;box-shadow:0 12px 34px rgba(19,49,71,.18);outline:none; }
+.preview-select-list > button { min-height:39px;display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:8px 11px;border:0;border-radius:8px;text-align:left;background:transparent;color:#46667d;font:inherit;font-size:13px;cursor:pointer; }
+.preview-select-list > button.is-highlighted { background:#f0f7fb; }
+.preview-select-list > button.is-selected { color:#1c5d83;font-weight:790; }
+.preview-select-list > button svg { flex:none;color:#236d96; }
+.preview-select-compact .preview-select-trigger { height:40px;padding:0 9px;background:#f7fafc; }
+.preview-select-compact .preview-select-label { display:none; }
+.preview-date-trigger .is-placeholder { color:#9baebc;font-weight:620; }
+.preview-date-icon { display:grid;place-items:center;width:34px;height:34px;border-radius:8px;background:#eaf3f8;color:#286b91;flex:none; }
+.preview-date-backdrop { position:fixed;inset:0;z-index:450;display:grid;place-items:center;padding:18px;background:rgba(15,37,54,.52); }
+.preview-date-modal { width:min(100%,440px);max-height:calc(100dvh - 36px);overflow-y:auto;overscroll-behavior:contain;padding:21px;border:1px solid #e1ebf1;border-radius:21px;background:#fff;box-shadow:0 25px 75px rgba(15,37,54,.25); }
+.preview-date-modal-title { display:flex;justify-content:space-between;align-items:start;gap:12px;margin-bottom:17px; }
+.preview-date-modal-title span { color:#69899f;font-size:11px;font-weight:740; }
+.preview-date-modal-title h3 { margin:2px 0 0;font-size:20px;font-weight:800;color:#20445d; }
+.preview-date-close { display:grid;place-items:center;flex:none;width:38px;height:38px;border:0;border-radius:10px;background:#f1f5f8;color:#466e86;cursor:pointer; }
+.preview-date-month-controls { display:flex;gap:8px;align-items:end;margin-bottom:15px; }
+.preview-date-month-controls > button { width:38px;height:40px;flex:none;border:1px solid #dce8ef;border-radius:10px;background:#f7fafc;color:#316b90;display:grid;place-items:center;cursor:pointer; }
+.preview-date-month-selects { display:grid;grid-template-columns:1.4fr .9fr;flex:1;min-width:0;gap:7px; }
+.preview-date-weekdays,.preview-date-days { display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px; }
+.preview-date-weekdays { margin-bottom:8px; }
+.preview-date-weekdays span { text-align:center;font-size:12px;font-weight:760;color:#8398a6; }
+.preview-date-day,.preview-date-days > span { width:100%;min-width:0;aspect-ratio:1.08;border-radius:9px;display:grid;place-items:center; }
+.preview-date-day { border:1px solid transparent;background:#fff;color:#3a5c73;font:inherit;font-size:14px;font-weight:690;cursor:pointer; }
+.preview-date-day:hover { background:#edf6fa;border-color:#bed9e8; }
+.preview-date-day.is-today { box-shadow:inset 0 0 0 1px #8fb4ca; }
+.preview-date-day.is-selected { background:#205d81;border-color:#205d81;color:#fff; }
+.preview-date-bottom { display:flex;justify-content:space-between;align-items:center;gap:10px;border-top:1px solid #e9eff3;padding-top:13px;margin-top:13px; }
+.preview-date-bottom span { color:#8396a5;font-size:11px; }
+.preview-date-bottom button { border:1px solid #d6e7f0;background:#edf6fa;color:#2b6587;border-radius:9px;padding:9px 13px;min-height:39px;font:inherit;font-size:12px;font-weight:770;cursor:pointer; }
+@media(max-width:600px) {
+ .preview-date-backdrop { align-items:end;padding:0; }
+ .preview-date-modal { width:100%;max-height:calc(100dvh - 12px);border-radius:22px 22px 0 0;border:0;padding:18px 18px calc(23px + env(safe-area-inset-bottom)); }
+ .preview-date-month-controls { gap:5px; }
+ .preview-date-month-controls > button { width:34px; }
+}
