@@ -125,16 +125,16 @@ function leaveSheetXml(
   const status=item.status==="pending"?"รอพิจารณา":statusLabels[item.status];
   const statusKind:Kind=item.status==="approved"?"approved":item.status==="rejected"?"rejected":"pending";
   const heights=[
-    28,15,5,20,26,26,5,20,26,27,
+    30,18,5,22,27,27,5,22,27,27,
     textHeight(attachment,34,28),
     textHeight(item.reason,78,36),
-    5,20,27,
+    5,22,27,
     textHeight(item.decisionNote,76,31),
     5,15
   ];
-  // Headline: no full-width dark bar.
-  plain(1,0,3,"ใบลาพนักงาน",1);
-  plain(1,4,5,"เลขที่  "+item.id,2);
+  // Compact navy masthead, light subtitle and clearly tinted section ribbons.
+  plain(1,0,3,"  ใบลาพนักงาน",1);
+  plain(1,4,5,"เลขที่  "+item.id+"  ",2);
   plain(2,0,5,"ATTENDANCE V2  /  แบบฟอร์มการลา",3);
 
   span(4,0,5,"ข้อมูลพนักงาน","section");
@@ -197,12 +197,13 @@ function makeStyles():string {
   const font=(body:string,size:number)=>
     '<font>'+body+'<sz val="'+size+'"/><name val="Tahoma"/></font>';
   const navy='<color rgb="FF203F55"/>';
+  const white='<color rgb="FFFFFFFF"/>';
   const ink='<color rgb="FF2A4255"/>';
   const muted='<color rgb="FF536B7D"/>';
   const fonts=[
     font(ink,10.5),                              // 0 ordinary
-    font('<b/>'+navy,15),                         // 1 document title
-    font('<b/>'+navy,10),                         // 2 reference no.
+    font('<b/>'+white,14.5),                     // 1 masthead title (white on navy)
+    font('<b/>'+white,10),                       // 2 masthead reference
     font(muted,9),                               // 3 subtitle
     font(muted,8),                               // 4 footnote
     font('<b/>'+navy,10.5),                       // 5 section
@@ -217,11 +218,14 @@ function makeStyles():string {
   const fills=[
     '<fill><patternFill patternType="none"/></fill>',
     '<fill><patternFill patternType="gray125"/></fill>',
-    '<fill><patternFill patternType="solid"><fgColor rgb="FFEAF2F7"/><bgColor indexed="64"/></patternFill></fill>', // section
-    '<fill><patternFill patternType="solid"><fgColor rgb="FFF4F7FA"/><bgColor indexed="64"/></patternFill></fill>', // label
+    '<fill><patternFill patternType="solid"><fgColor rgb="FFD4E7F2"/><bgColor indexed="64"/></patternFill></fill>', // clearly visible section ribbon
+    '<fill><patternFill patternType="solid"><fgColor rgb="FFE9F1F6"/><bgColor indexed="64"/></patternFill></fill>', // label cells
     '<fill><patternFill patternType="solid"><fgColor rgb="FFFCF4E6"/><bgColor indexed="64"/></patternFill></fill>', // pending
     '<fill><patternFill patternType="solid"><fgColor rgb="FFEAF6EE"/><bgColor indexed="64"/></patternFill></fill>', // approved
-    '<fill><patternFill patternType="solid"><fgColor rgb="FFFAECEB"/><bgColor indexed="64"/></patternFill></fill>'  // rejected
+    '<fill><patternFill patternType="solid"><fgColor rgb="FFFAECEB"/><bgColor indexed="64"/></patternFill></fill>', // rejected
+    '<fill><patternFill patternType="solid"><fgColor rgb="FF205D81"/><bgColor indexed="64"/></patternFill></fill>', // navy masthead
+    '<fill><patternFill patternType="solid"><fgColor rgb="FFEEF5F9"/><bgColor indexed="64"/></patternFill></fill>', // subtitle and footer
+    '<fill><patternFill patternType="solid"><fgColor rgb="FFF6FAFD"/><bgColor indexed="64"/></patternFill></fill>'  // highlighted values
   ];
   const borderLine='<color rgb="FFC5D5E0"/>';
   // Borders: full/left+top+bottom/top+bottom/right+top+bottom.
@@ -239,16 +243,16 @@ function makeStyles():string {
   }
   const styles=[
     xf(0,0,0,'vertical="center"'),
-    xf(1,0,0,'vertical="center"'),
-    xf(2,0,0,'horizontal="right" vertical="center"'),
-    xf(3,0,0,'vertical="center"'),
-    xf(4,0,0,'vertical="center"')
+    xf(1,7,0,'vertical="center"'),
+    xf(2,7,0,'horizontal="right" vertical="center"'),
+    xf(3,8,0,'vertical="center" indent="1"'),
+    xf(4,8,0,'vertical="center" indent="1"')
   ];
   const kinds=[
     {fontId:5,fillId:2,align:'vertical="center" indent="1"'},                         // section
     {fontId:6,fillId:3,align:'vertical="center" indent="1" wrapText="1"'},            // label
     {fontId:7,fillId:0,align:'vertical="center" indent="1" wrapText="1"'},            // value
-    {fontId:8,fillId:0,align:'vertical="center" indent="1" wrapText="1"'},            // important
+    {fontId:8,fillId:9,align:'vertical="center" indent="1" wrapText="1"'},            // emphasized values on a barely tinted field
     {fontId:9,fillId:0,align:'vertical="center" indent="1" wrapText="1"'},            // long
     {fontId:10,fillId:4,align:'vertical="center" indent="1"'},                        // pending
     {fontId:11,fillId:5,align:'vertical="center" indent="1"'},                        // approved
