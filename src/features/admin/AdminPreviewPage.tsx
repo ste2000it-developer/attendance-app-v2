@@ -1,4 +1,6 @@
 import { useState } from "react";
+import EmployeeManagerPreview from "./EmployeeManagerPreview";
+import type { EmployeeRecord } from "./EmployeeManagerPreview";
 import "./AdminPreviewPage.css";
 
 const tabs = [
@@ -30,6 +32,7 @@ function AdminIcon({ name, size = 21 }: {name: string; size?: number}) {
 
 export default function AdminPreviewPage() {
   const [active, setActive] = useState<Tab>("overview");
+  const [demoEmployees, setDemoEmployees] = useState<EmployeeRecord[]>([]);
   const selected = active === "overview" ? null : screens[active];
 
   return (
@@ -97,6 +100,8 @@ export default function AdminPreviewPage() {
                 </div>
               </section>
             </>
+          ) : active === "people" ? (
+            <EmployeeManagerPreview employees={demoEmployees} onChange={setDemoEmployees} />
           ) : (
             <section className="admin-preview-panel admin-preview-empty">
               <span className="admin-preview-empty-icon"><AdminIcon name={active} size={30}/></span>
