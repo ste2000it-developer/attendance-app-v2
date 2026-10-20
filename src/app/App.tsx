@@ -6,6 +6,8 @@ import { navigation } from "./navigation";
 
 const LeavePage = lazy(() => import("../features/leave/LeavePage"));
 const ProfilePage = lazy(() => import("../features/profile/ProfilePage"));
+const LoginPreviewPage = lazy(() => import("../features/auth/LoginPreviewPage"));
+const AdminPreviewPage = lazy(() => import("../features/admin/AdminPreviewPage"));
 
 function NavIcon({ section }: { section: Section }) {
   const common = {
@@ -84,6 +86,16 @@ function SectionContent({ active, onOpenLeave }: { active: Section; onOpenLeave:
 export default function App() {
   const [active, setActive] = useState<Section>("home");
   const sectionName = navigation.find((item) => item.id === active)?.label || "";
+  // Separate, direct-link UI previews: the live employee demo remains unchanged.
+  // Neither preview authenticates users or grants admin privileges.
+  const preview = new URLSearchParams(window.location.search).get("preview");
+  if (preview === "login" || preview === "admin") {
+    return (
+      <Suspense fallback={<div className="panel loading-panel">กำลังเปิดหน้าตัวอย่าง...</div>}>
+        {preview === "login" ? <LoginPreviewPage /> : <AdminPreviewPage />}
+      </Suspense>
+    );
+  }
 
   return (
     <div className={`app-frame${active === "profile" ? " app-frame-profile" : ""}`}>
