@@ -97,7 +97,7 @@ function leaveSheetXml(
   // missing right edges and phantom internal dividers in Microsoft Excel.
   const kinds = ["section","label","value","important","long","pending","approved","rejected"] as const;
   type Kind=typeof kinds[number];
-  const gridStyle=(kind:Kind,edge:number)=>4+kinds.indexOf(kind)*4+edge;
+  const gridStyle=(kind:Kind,edge:number)=>5+kinds.indexOf(kind)*4+edge;
   function write(row:number,col:number,value:string,style:number) {
     let values=cells.get(row);
     if(!values) {values=new Map();cells.set(row,values);}
@@ -227,7 +227,6 @@ function makeStyles():string {
   // Borders: full/left+top+bottom/top+bottom/right+top+bottom.
   // Internal lines are omitted inside merged cells; the outer perimeter stays visible.
   function border(edge:number):string {
-    const side=(on:boolean)=>on?'<color rgb="FFC5D5E0"/>':"";
     const outer=(on:boolean)=>on?'<left style="thin">'+borderLine+'</left>':'<left/>';
     const right=(on:boolean)=>on?'<right style="thin">'+borderLine+'</right>':'<right/>';
     return '<border>'+outer(edge===0||edge===1)+right(edge===0||edge===3)+
