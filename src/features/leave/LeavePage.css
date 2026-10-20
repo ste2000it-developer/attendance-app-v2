@@ -376,3 +376,49 @@
   .leave-calendar-backdrop .leave-month-days { gap: 3px; }
   .leave-calendar-backdrop .leave-day { min-height: 39px; }
 }
+
+
+/* Entire date tile opens the popup; no keyboard/text-entry affordance. */
+.leave-calendar-stage .leave-date-picker-trigger {
+  display: grid;
+  width: 100%;
+  min-height: 105px;
+  gap: 8px;
+  text-align: left;
+  cursor: pointer;
+  padding: 14px 15px;
+  border: 1px solid #dbe6ed;
+  border-radius: 13px;
+  background: #fff;
+  color: #1f4965;
+  transition: border-color .14s ease, background-color .14s ease;
+}
+.leave-calendar-stage .leave-date-picker-trigger:hover {
+  border-color: #7ca9c3;
+  background: #f5fafc;
+}
+.leave-calendar-stage .leave-date-picker-trigger:focus-visible {
+  outline: 3px solid #a3c9df;
+  outline-offset: 2px;
+}
+.leave-calendar-stage .leave-date-picker-label { color: #597b90; font-size: 13px; font-weight: 735; }
+.leave-date-picker-value-row {
+  display: flex; width: 100%; min-width: 0;
+  align-items: center; justify-content: space-between; gap: 10px;
+}
+.leave-date-picker-value-row strong {
+  color: #1e4862; font-size: clamp(19px, 2.45vw, 23px);
+  line-height: 1.4; font-weight: 790; letter-spacing: .012em;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.leave-date-picker-value-row strong.is-placeholder { color: #8fa4b3; font-weight: 690; }
+.leave-date-picker-icon {
+  display: grid; place-items: center; flex: none;
+  width: 42px; height: 42px; border-radius: 10px;
+  background: #eaf2f7; color: #205d81;
+}
+.leave-date-picker-detail { color: #7c96a5; font-size: 12px; font-weight: 500; line-height: 1.4; }
+@media (max-width: 660px) {
+  .leave-calendar-stage .leave-date-picker-trigger { min-height: 97px; padding: 12px 14px; gap: 6px; }
+  .leave-date-picker-value-row strong { font-size: 22px; }
+}

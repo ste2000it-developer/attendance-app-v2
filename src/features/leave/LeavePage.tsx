@@ -11,8 +11,8 @@ const leaveTypes = [
   { id: "training", label: "ลาเพื่อฝึกอบรม/พัฒนาความรู้", hint: "หลักสูตรหรือการพัฒนาทักษะ", icon: "book", advance: true, note: false, featured: false },
   { id: "military", label: "ลารับราชการทหาร", hint: "ตามภาระหน้าที่รับราชการทหาร", icon: "shield", advance: true, note: false, featured: false },
   { id: "ordination", label: "ลาอุปสมบท", hint: "ตามประเพณีทางศาสนา", icon: "sun", advance: true, note: false, featured: false },
-  { id: "maternity", label: "ลาคลอด", hint: "ตามสิทธิ์ลาคลอด", icon: "heart", advance: true, note: false, featured: false },
-  { id: "sterilization", label: "ลาเพื่อทำหมัน", hint: "เข้ารับการรักษาทางการแพทย์", icon: "heart", advance: true, note: false, featured: false },
+  { id: "maternity", label: "ลาคลอด", hint: "ตามสิทธิ์ลาคลอด", icon: "pregnant", advance: true, note: false, featured: false },
+  { id: "sterilization", label: "ลาเพื่อทำหมัน", hint: "เข้ารับการรักษาทางการแพทย์", icon: "medical", advance: true, note: false, featured: false },
   { id: "other", label: "อื่น ๆ", hint: "ประเภทที่ไม่อยู่ในรายการ", icon: "more", advance: false, note: true, featured: false }
 ] as const;
 
@@ -25,6 +25,8 @@ function Symbol({ name, size = 21 }: { name: string; size?: number }) {
     calendar: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 3v4M17 3v4M3 10h18" /></>,
     history: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
     heart: <path d="M20.4 5.6a5.1 5.1 0 0 0-7.2 0L12 6.8l-1.2-1.2a5.1 5.1 0 0 0-7.2 7.2L12 21l8.4-8.2a5.1 5.1 0 0 0 0-7.2Z" />,
+    pregnant: <><circle cx="9.6" cy="3.9" r="2.1" /><path d="M9 8.2c-1.9 0-3 1.4-3 3.4v4.2m3-7.6c2.5 0 4.2 1.3 4.7 3.7.2 1 .4 1.3 1.5 1.5 1.5.3 2.6 1.5 2.6 3.1 0 1.9-1.5 3.3-3.4 3.3H9m0-10v12m0-5.9h5.2" /></>,
+    medical: <path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6V3Z" />,
     sun: <><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></>,
     briefcase: <><rect x="3" y="7" width="18" height="14" rx="2" /><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18" /></>,
     alert: <><path d="M12 3 2 20h20L12 3Z" /><path d="M12 9v5M12 17h.01" /></>,
@@ -71,13 +73,7 @@ function showDate(value: string) {
   return value ? dateFormatter.format(new Date(value + "T12:00:00")) : "ยังไม่เลือก";
 }
 
-/* Browser-independent DD/MM/YYYY entry, with strict calendar-day validation. */
-function dmyMask(input: string): string {
-  const digits = input.replace(/\D/g, "").slice(0, 8);
-  if (digits.length <= 2) return digits;
-  if (digits.length <= 4) return digits.slice(0, 2) + "/" + digits.slice(2);
-  return digits.slice(0, 2) + "/" + digits.slice(2, 4) + "/" + digits.slice(4);
-}
+/* Dates are selected only via calendar; DD/MM/YYYY values are still validated. */
 function dmyToIso(text: string): string {
   if (!/^\d{2}\/\d{2}\/\d{4}$/.test(text)) return "";
   const [day, month, year] = text.split("/").map(Number);
@@ -348,7 +344,7 @@ export default function LeavePage() {
             <div className="leave-calendar-stage">
               <div className="leave-date-intro">
                 <span className="leave-mini-caption"><Symbol name="calendar" size={18} /> {chosen?.label}</span>
-                <p>แตะช่องวันที่เพื่อเปิดปฏิทิน หรือพิมพ์ตามรูปแบบ DD/MM/YYYY</p>
+                <p>แตะช่องวันที่เพื่อเปิดปฏิทิน แล้วเลือกวันได้ทันที</p>
               </div>
               <div className="leave-date-pair">
                 {(["start", "end"] as const).map((field) => {
@@ -356,27 +352,23 @@ export default function LeavePage() {
                   const resolved = field === "start" ? start : end;
                   const label = field === "start" ? "วันเริ่มลา" : "วันสิ้นสุดลา";
                   return (
-                    <div key={field} className="leave-date-input-card">
-                      <label htmlFor={"leave-" + field + "-dmy"}>{label}</label>
-                      <div className="leave-date-input-line">
-                        <input id={"leave-" + field + "-dmy"} type="text" inputMode="numeric"
-                          autoComplete="off" maxLength={10} placeholder="DD/MM/YYYY"
-                          aria-describedby="leave-date-instructions" value={value}
-                          onChange={(event) => {
-                            (field === "start" ? setStartText : setEndText)(dmyMask(event.target.value));
-                            setError("");
-                          }} />
-                        <button type="button" aria-label={"เปิดปฏิทินเลือก" + label}
-                          onClick={(event) => openCalendar(field, event.currentTarget)}>
-                          <Symbol name="calendar" size={22} />
-                        </button>
-                      </div>
-                      <span>{resolved ? showDate(resolved) : "กดไอคอนปฏิทินเพื่อเลือกวัน"}</span>
-                    </div>
-                  );
+                    <button key={field} type="button"
+                      className="leave-date-input-card leave-date-picker-trigger"
+                      aria-label={label + " " + (value || "ยังไม่เลือกวันที่") + " แตะเพื่อเปิดปฏิทิน"}
+                      aria-haspopup="dialog"
+                      aria-expanded={calendarOpen && editingDate === field}
+                      aria-controls={calendarOpen && editingDate === field ? "leave-calendar-dialog" : undefined}
+                      onClick={(event) => openCalendar(field, event.currentTarget)}>
+                      <span className="leave-date-picker-label">{label}</span>
+                      <span className="leave-date-picker-value-row">
+                        <strong className={!value ? "is-placeholder" : ""}>{value || "DD/MM/YYYY"}</strong>
+                        <span className="leave-date-picker-icon"><Symbol name="calendar" size={22} /></span>
+                      </span>
+                      <span className="leave-date-picker-detail">{resolved ? showDate(resolved) : "แตะเพื่อเลือกวันที่"}</span>
+                    </button>
                 })}
               </div>
-              <p className="leave-dmy-help" id="leave-date-instructions">วัน / เดือน / ปี ค.ศ. · เช่น 20/10/2026</p>
+              <p className="leave-dmy-help">รูปแบบ DD/MM/YYYY · วัน/เดือน/ปี ค.ศ.</p>
               <div className="leave-calendar-total">
                 <span>จำนวนวันที่เลือก</span>
                 <strong>{days} <small>วัน</small></strong>
@@ -391,7 +383,7 @@ export default function LeavePage() {
                   onMouseDown={(event) => {
                     if (event.target === event.currentTarget) setCalendarOpen(false);
                   }}>
-                  <section className="leave-custom-calendar" ref={calendarDialogRef}
+                  <section className="leave-custom-calendar" ref={calendarDialogRef} id="leave-calendar-dialog"
                     role="dialog" aria-modal="true" aria-labelledby="leave-calendar-dialog-title"
                     aria-describedby="leave-calendar-dialog-desc" tabIndex={-1}>
                     <div className="leave-calendar-grip" aria-hidden="true" />
