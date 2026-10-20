@@ -71,7 +71,11 @@ export function PreviewSelect({ label, value, options, onChange, compact = false
     function onDocumentDown(event: PointerEvent) {
       if (!triggerRef.current?.contains(event.target as Node) && !listRef.current?.contains(event.target as Node)) close();
     }
-    function onReposition() { close(); }
+    function onReposition(event: Event) {
+      // Scrolling within the custom menu should never dismiss it.
+      if (event.type === "scroll" && listRef.current?.contains(event.target as Node)) return;
+      close();
+    }
     document.addEventListener("pointerdown", onDocumentDown);
     window.addEventListener("resize", onReposition);
     window.addEventListener("scroll", onReposition, true);

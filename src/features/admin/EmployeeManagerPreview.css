@@ -126,3 +126,63 @@
  .employee-demo-form-actions { display:grid;grid-template-columns:1fr 1fr; }
  .employee-demo-form-actions button { padding:9px 7px; }
 }
+
+
+/* PC + iPad employee directory: wider names, fewer columns, clearer hierarchy. */
+.employee-demo-table { min-width: 0; table-layout: fixed; }
+.employee-demo-table th:nth-child(1) { width: 35%; }
+.employee-demo-table th:nth-child(2) { width: 27%; }
+.employee-demo-table th:nth-child(3) { width: 25%; }
+.employee-demo-table th:nth-child(4) { width: 13%; }
+.employee-demo-table th { padding: 14px 19px; font-size: 12px; }
+.employee-demo-table td { padding: 17px 19px; }
+.employee-demo-table tbody tr:nth-child(even) { background: #fbfcfd; }
+.employee-demo-table tbody tr:hover { background: #f3f9fc; }
+.employee-demo-table .employee-demo-avatar { width: 47px; height: 47px; border-radius: 13px; }
+.employee-demo-table .employee-demo-person strong { font-size: 15px; line-height: 1.45; }
+.employee-demo-table .employee-demo-person small { color:#698a9f; font-size: 12px; font-weight: 650; }
+.employee-demo-email { display: block; max-width: 100%; color:#889dac; font-size: 11px; overflow-wrap:anywhere; }
+.employee-demo-table .employee-demo-data-primary { font-size: 14px; font-weight: 740; color: #2f536a; }
+.employee-demo-table .employee-demo-data-muted { font-size: 12px; }
+.employee-demo-badges { display:flex; flex-wrap:wrap; align-items:center; gap:7px; }
+.employee-demo-table .employee-demo-role, .employee-demo-table .employee-demo-status { font-size: 11px; padding: 6px 9px; }
+.employee-demo-table .employee-demo-edit { font-size: 12px; padding: 9px 12px; }
+.employee-demo-filters { grid-template-columns: minmax(220px,1.85fr) repeat(3,minmax(110px,1fr)); align-items:end; }
+.employee-demo-filters > .preview-select { min-width:0; }
+.employee-demo-form-grid > .preview-select, .employee-demo-form-grid > .preview-date-control { min-width:0;align-self:end; }
+.employee-demo-mobile-list .employee-demo-person strong { font-size: 14px; }
+@media(min-width:681px) and (max-width:1150px) {
+ .employee-demo-table th,.employee-demo-table td { padding-inline: 12px; }
+ .employee-demo-table .employee-demo-person { gap:9px; }
+ .employee-demo-table .employee-demo-avatar { width:40px;height:40px; }
+ .employee-demo-table .employee-demo-person strong { font-size:14px; }
+ .employee-demo-badges { gap:5px; }
+ .employee-demo-table .employee-demo-edit { padding:8px 10px; }
+}
+@media(min-width:681px) and (max-width:800px) {
+ .employee-demo-table-scroll { display:block; }
+ .employee-demo-mobile-list { display:none; }
+ .employee-demo-table th:nth-child(1) { width:32%; }
+ .employee-demo-table th:nth-child(2) { width:29%; }
+ .employee-demo-table th:nth-child(3) { width:26%; }
+ .employee-demo-table th:nth-child(4) { width:13%; }
+ .employee-demo-table .employee-demo-email { font-size:10px; }
+}
+@media(max-width:1000px) {
+ .employee-demo-filters { grid-template-columns: minmax(0,1.5fr) repeat(3,minmax(0,1fr)); }
+}
+@media(max-width:800px) {
+ .employee-demo-filters { grid-template-columns:repeat(3,minmax(0,1fr)); }
+ .employee-demo-search { grid-column:1/-1; }
+ .employee-demo-form-grid > .preview-select,.employee-demo-form-grid > .preview-date-control { min-width:0; }
+}
+@media(max-width:680px) {
+ .employee-demo-table-scroll { display:none; }
+ .employee-demo-mobile-list { display:grid; }
+}
+@media(max-width:420px) {
+ .employee-demo-filters { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .employee-demo-search { grid-column:1/-1; }
+ .employee-demo-filters > .preview-select:last-child { grid-column:1/-1; }
+ .employee-demo-form-grid > .preview-select,.employee-demo-form-grid > .preview-date-control { grid-column:1/-1; }
+}

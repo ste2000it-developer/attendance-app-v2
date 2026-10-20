@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import "./EmployeeManagerPreview.css";
+import { PreviewDatePicker, PreviewSelect } from "./PreviewControls";
 
 export type EmployeeDraft = {
   code: string;
@@ -8,7 +9,6 @@ export type EmployeeDraft = {
   email: string;
   department: string;
   position: string;
-  workplace: string;
   role: "employee" | "admin";
   status: "active" | "inactive";
   startDate: string;
@@ -18,7 +18,7 @@ export type EmployeeRecord = EmployeeDraft & { id: number };
 type StatusFilter = "all" | EmployeeDraft["status"];
 type RoleFilter = "all" | EmployeeDraft["role"];
 const blank: EmployeeDraft = {
-  code: "", fullName: "", email: "", department: "", position: "", workplace: "",
+  code: "", fullName: "", email: "", department: "", position: "",
   role: "employee", status: "active", startDate: ""
 };
 const statusLabels = { active: "ปฏิบัติงาน", inactive: "พักงาน" };
@@ -59,7 +59,7 @@ export default function EmployeeManagerPreview({ employees, onChange }: {
   const departments = Array.from(new Set(employees.map(person => person.department.trim()).filter(Boolean))).sort((a,b)=>a.localeCompare(b,"th"));
   const normalized = search.trim().toLocaleLowerCase();
   const filtered = employees.filter(person => {
-    const hasSearch = !normalized || [person.code,person.fullName,person.email,person.department,person.position,person.workplace]
+    const hasSearch = !normalized || [person.code,person.fullName,person.email,person.department,person.position]
       .some(value => value.toLocaleLowerCase().includes(normalized));
     return hasSearch && (statusFilter === "all" || person.status === statusFilter)
       && (roleFilter === "all" || person.role === roleFilter)
@@ -84,7 +84,7 @@ export default function EmployeeManagerPreview({ employees, onChange }: {
     setEditingId(person.id);
     setForm({
       code: person.code, fullName: person.fullName, email: person.email,
-      department: person.department, position: person.position, workplace: person.workplace,
+      department: person.department, position: person.position,
       role: person.role, status: person.status, startDate: person.startDate
     });
     setFormError("");
@@ -101,9 +101,14 @@ export default function EmployeeManagerPreview({ employees, onChange }: {
     document.body.style.overflow = "hidden";
     modalRef.current?.querySelector<HTMLInputElement>("#employee-demo-code")?.focus();
     function handleKeyboard(event: KeyboardEvent) {
+      // Calendars and custom dropdown menus render above this dialog via portal.
+      // Their Escape/Tab handling must not close or trap focus in the employee editor.
+      if (!modalRef.current?.contains(event.target as Node)) return;
+      if (event.defaultPrevented) return;
       if(event.key === "Escape") {
         event.preventDefault();
         setDialogOpen(false);
+        return;
       }
       if(event.key !== "Tab") return;
       const focusable=Array.from(modalRef.current?.querySelectorAll<HTMLElement>(
@@ -128,9 +133,9 @@ export default function EmployeeManagerPreview({ employees, onChange }: {
     event.preventDefault();
     const clean: EmployeeDraft = {
       ...form, code:form.code.trim(),fullName:form.fullName.trim(),email:form.email.trim().toLowerCase(),
-      department:form.department.trim(),position:form.position.trim(),workplace:form.workplace.trim()
+      department:form.department.trim(),position:form.position.trim()
     };
-    if(!clean.code || !clean.fullName || !clean.email || !clean.department || !clean.position || !clean.workplace) {
+    if(!clean.code || !clean.fullName || !clean.email || !clean.department || !clean.position) {
       setFormError("กรุณากรอกข้อมูลที่มีเครื่องหมาย * ให้ครบ");
       return;
     }
@@ -183,30 +188,12 @@ export default function EmployeeManagerPreview({ employees, onChange }: {
             <input type="search" value={search} onChange={e=>setSearch(e.target.value)}
               placeholder="ค้นหาชื่อหรือรหัสพนักงาน..." />
           </label>
-          <div className="employee-demo-select-wrap">
-            <label htmlFor="employee-demo-status">สถานะ</label>
-            <select id="employee-demo-status" value={statusFilter} onChange={e=>setStatusFilter(e.target.value as StatusFilter)}>
-              <option value="all">ทุกสถานะ</option>
-              <option value="active">ปฏิบัติงาน</option>
-              <option value="inactive">พักงาน</option>
-            </select>
-          </div>
-          <div className="employee-demo-select-wrap">
-            <label htmlFor="employee-demo-role">สิทธิ์</label>
-            <select id="employee-demo-role" value={roleFilter} onChange={e=>setRoleFilter(e.target.value as RoleFilter)}>
-              <option value="all">ทุกสิทธิ์</option>
-              <option value="employee">พนักงาน</option>
-              <option value="admin">แอดมิน</option>
-            </select>
-          </div>
-          <div className="employee-demo-select-wrap">
-            <label htmlFor="employee-demo-department">แผนก</label>
-            <select id="employee-demo-department" value={departmentFilter}
-              onChange={e=>setDepartmentFilter(e.target.value)}>
-              <option value="all">ทุกแผนก</option>
-              {departments.map(dep=><option key={dep} value={dep}>{dep}</option>)}
-            </select>
-          </div>
+          <PreviewSelect label="สถานะ" value={statusFilter} onChange={v=>setStatusFilter(v as StatusFilter)}
+            options={[{value:"all",label:"ทุกสถานะ"},{value:"active",label:"ปฏิบัติงาน"},{value:"inactive",label:"พักงาน"}]}/>
+          <PreviewSelect label="สิทธิ์" value={roleFilter} onChange={v=>setRoleFilter(v as RoleFilter)}
+            options={[{value:"all",label:"ทุกสิทธิ์"},{value:"employee",label:"พนักงาน"},{value:"admin",label:"แอดมิน"}]}/>
+          <PreviewSelect label="แผนก" value={departmentFilter} onChange={setDepartmentFilter}
+            options={[{value:"all",label:"ทุกแผนก"},...departments.map(dep=>({value:dep,label:dep}))]}/>
         </div>
         <div className="employee-demo-table-wrap">
           {employees.length===0 ? (
@@ -227,16 +214,24 @@ export default function EmployeeManagerPreview({ employees, onChange }: {
             <>
               <div className="employee-demo-table-scroll">
                 <table className="employee-demo-table">
-                  <thead><tr><th>พนักงาน</th><th>ตำแหน่ง / แผนก</th><th>สถานที่ทำงาน</th><th>สิทธิ์</th><th>สถานะ</th><th><span className="sr-only">จัดการ</span></th></tr></thead>
+                  <thead><tr><th scope="col">ชื่อและรหัสพนักงาน</th><th scope="col">ตำแหน่ง / แผนก</th>
+                    <th scope="col">สิทธิ์และสถานะ</th><th scope="col"><span className="sr-only">จัดการ</span></th></tr></thead>
                   <tbody>{filtered.map(person=>(
                     <tr key={person.id}>
-                      <td><div className="employee-demo-person"><span className="employee-demo-avatar" aria-hidden="true"><PeopleIcon name="users" size={21}/></span>
-                        <div><strong>{person.fullName}</strong><small>{person.code}</small></div></div></td>
-                      <td><div className="employee-demo-data-primary">{person.position}</div><small className="employee-demo-data-muted">{person.department}</small></td>
-                      <td className="employee-demo-data-primary">{person.workplace}</td>
-                      <td><span className={"employee-demo-role employee-demo-role-"+person.role}>{roleLabels[person.role]}</span></td>
-                      <td><span className={"employee-demo-status employee-demo-status-"+person.status}>{statusLabels[person.status]}</span></td>
-                      <td><button className="employee-demo-edit" type="button" onClick={event=>openEdit(person,event)} aria-label={"แก้ไข "+person.fullName}><PeopleIcon name="edit" size={17}/> แก้ไข</button></td>
+                      <td><div className="employee-demo-person">
+                        <span className="employee-demo-avatar" aria-hidden="true"><PeopleIcon name="users" size={21}/></span>
+                        <div><strong>{person.fullName}</strong><small>{person.code}</small>
+                          <span className="employee-demo-email">{person.email}</span></div>
+                      </div></td>
+                      <td><div className="employee-demo-data-primary">{person.position}</div>
+                        <small className="employee-demo-data-muted">{person.department}</small></td>
+                      <td><div className="employee-demo-badges">
+                        <span className={"employee-demo-role employee-demo-role-"+person.role}>{roleLabels[person.role]}</span>
+                        <span className={"employee-demo-status employee-demo-status-"+person.status}>{statusLabels[person.status]}</span>
+                      </div></td>
+                      <td><button className="employee-demo-edit" type="button"
+                        onClick={event=>openEdit(person,event)} aria-label={"แก้ไข "+person.fullName}>
+                        <PeopleIcon name="edit" size={17}/> แก้ไข</button></td>
                     </tr>
                   ))}</tbody>
                 </table>
@@ -246,7 +241,7 @@ export default function EmployeeManagerPreview({ employees, onChange }: {
                   <article key={person.id} className="employee-demo-mobile-person">
                     <div className="employee-demo-person"><span className="employee-demo-avatar" aria-hidden="true"><PeopleIcon name="users" size={20}/></span>
                       <div><strong>{person.fullName}</strong><small>{person.code}</small></div></div>
-                    <div className="employee-demo-mobile-meta"><span>{person.position} · {person.department}</span><span>{person.workplace}</span></div>
+                    <div className="employee-demo-mobile-meta"><span>{person.position} · {person.department}</span><span>{person.email}</span></div>
                     <div className="employee-demo-mobile-bottom">
                       <span className={"employee-demo-role employee-demo-role-"+person.role}>{roleLabels[person.role]}</span>
                       <span className={"employee-demo-status employee-demo-status-"+person.status}>{statusLabels[person.status]}</span>
@@ -290,21 +285,14 @@ export default function EmployeeManagerPreview({ employees, onChange }: {
                 <label><span>ตำแหน่ง <b>*</b></span>
                   <input required maxLength={80} value={form.position} placeholder="ระบุตำแหน่ง"
                     onChange={e=>updateField("position",e.target.value)}/></label>
-                <label><span>สาขา / สถานที่ทำงาน <b>*</b></span>
-                  <input required maxLength={120} value={form.workplace} placeholder="ระบุสถานที่ทำงาน"
-                    onChange={e=>updateField("workplace",e.target.value)}/></label>
-                <label><span>วันที่เริ่มงาน</span>
-                  <input type="date" value={form.startDate} onChange={e=>updateField("startDate",e.target.value)}/></label>
-                <label><span>สิทธิ์ผู้ใช้</span>
-                  <select value={form.role} onChange={e=>updateField("role",e.target.value as EmployeeDraft["role"])}>
-                    <option value="employee">พนักงาน</option><option value="admin">แอดมิน</option>
-                  </select>
-                </label>
-                <label><span>สถานะพนักงาน</span>
-                  <select value={form.status} onChange={e=>updateField("status",e.target.value as EmployeeDraft["status"])}>
-                    <option value="active">ปฏิบัติงาน</option><option value="inactive">พักงาน</option>
-                  </select>
-                </label>
+                <PreviewDatePicker label="วันที่เริ่มงาน" value={form.startDate}
+                  onChange={date=>updateField("startDate",date)}/>
+                <PreviewSelect label="สิทธิ์ผู้ใช้" value={form.role}
+                  onChange={v=>updateField("role",v as EmployeeDraft["role"])}
+                  options={[{value:"employee",label:"พนักงาน"},{value:"admin",label:"แอดมิน"}]}/>
+                <PreviewSelect label="สถานะพนักงาน" value={form.status}
+                  onChange={v=>updateField("status",v as EmployeeDraft["status"])}
+                  options={[{value:"active",label:"ปฏิบัติงาน"},{value:"inactive",label:"พักงาน"}]}/>
               </div>
               {formError && <p className="employee-demo-error" role="alert">{formError}</p>}
               <div className="employee-demo-form-actions">
