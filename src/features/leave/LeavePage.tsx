@@ -103,6 +103,9 @@ export default function LeavePage() {
   const [startText, setStartText] = useState("");
   const [endText, setEndText] = useState("");
   const [editingDate, setEditingDate] = useState<"start" | "end">("start");
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const calendarDialogRef = useRef<HTMLElement | null>(null);
+  const calendarOpenerRef = useRef<HTMLButtonElement | null>(null);
   const [visibleMonth, setVisibleMonth] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   const start = dmyToIso(startText);
   const end = dmyToIso(endText);
@@ -123,11 +126,59 @@ export default function LeavePage() {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [step]);
 
+
+  function openCalendar(field: "start" | "end", opener: HTMLButtonElement) {
+    calendarOpenerRef.current = opener;
+    setEditingDate(field);
+    const selectedIso = dmyToIso(field === "start" ? startText : endText);
+    const chosenDate = selectedIso ? new Date(selectedIso + "T12:00:00") : new Date();
+    setVisibleMonth(new Date(chosenDate.getFullYear(), chosenDate.getMonth(), 1));
+    setCalendarOpen(true);
+  }
+
+  function selectCalendarDate(date: Date) {
+    if (editingDate === "start") setStartText(dateToDmy(date));
+    else setEndText(dateToDmy(date));
+    setError("");
+    setCalendarOpen(false);
+  }
+
+  // A real dialog: keyboard focus enters the popup, remains within it,
+  // closes with Escape, and returns to the calendar button.
+  useEffect(() => {
+    if (!calendarOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    calendarDialogRef.current?.querySelector<HTMLButtonElement>(".leave-calendar-close")?.focus();
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setCalendarOpen(false);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const controls = Array.from(calendarDialogRef.current?.querySelectorAll<HTMLButtonElement>("button:not([disabled])") ?? []);
+      if (!controls.length) return;
+      if (event.shiftKey && document.activeElement === controls[0]) {
+        event.preventDefault(); controls[controls.length - 1].focus();
+      } else if (!event.shiftKey && document.activeElement === controls[controls.length - 1]) {
+        event.preventDefault(); controls[0].focus();
+      }
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+      calendarOpenerRef.current?.focus({ preventScroll: true });
+    };
+  }, [calendarOpen]);
+
   function begin() {
     setType("");
     setStartText("");
     setEndText("");
     setEditingDate("start");
+    setCalendarOpen(false);
     setVisibleMonth(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
     setNote("");
     setAttachment(null);
@@ -185,35 +236,28 @@ export default function LeavePage() {
     <div className="page-content leave-v2 leave-journey">
       {step === 0 ? (
         <>
-          <header className="page-heading leave-landing-heading">
-            <div>
-              <span className="eyebrow">EMPLOYEE / LEAVE</span>
-              <h1>การลา</h1>
-              <p>จัดการวันลาได้ง่าย ๆ ในไม่กี่ขั้นตอน</p>
-            </div>
-            <span className="page-demo-tag">ตัวอย่าง UI</span>
+          <header className="leave-landing-heading">
+            <h1>การลา</h1>
+            <p>ยื่นคำขอและดูสถานะการลา</p>
           </header>
 
-          <section className="leave-entry" aria-labelledby="leave-entry-title">
-            <div className="leave-entry-top">
-              <span className="leave-entry-symbol"><Symbol name="calendar" size={27} /></span>
-              <span className="leave-entry-tag">ยื่นคำขอใหม่</span>
-            </div>
-            <h2 id="leave-entry-title">ต้องการยื่นใบลา?</h2>
-            <p>ตอบคำถามทีละขั้น เลือกประเภทและวันลาได้โดยไม่ต้องกรอกฟอร์มยาว ๆ</p>
+          <section className="leave-entry" aria-label="เริ่มยื่นใบลา">
             <button type="button" className="leave-primary leave-entry-cta" onClick={begin}>
-              ยื่นใบลาใหม่ <Chevron />
+              <span className="leave-entry-action-label">
+                <span className="leave-entry-action-icon"><Symbol name="calendar" size={24} /></span>
+                ยื่นใบลาใหม่
+              </span>
+              <Chevron />
             </button>
-            <span className="leave-entry-step-note">เพียง 4 ขั้นตอน · ย้อนกลับมาแก้ไขได้</span>
+            <p className="leave-entry-step-note">เลือกประเภทและกรอกใบลาได้ทีละขั้นตอน</p>
           </section>
 
           <section className="leave-history" aria-labelledby="leave-history-title">
             <div className="leave-history-heading">
               <div>
                 <h2 id="leave-history-title">ประวัติการลา</h2>
-                <p>รายการคำขอและสถานะการอนุมัติ</p>
+                <p>ดูคำขอและสถานะการอนุมัติ</p>
               </div>
-              <span className="leave-history-count">0 รายการจริง</span>
             </div>
             {latestPreview && (
               <div className="leave-latest-demo">
@@ -226,9 +270,9 @@ export default function LeavePage() {
               </div>
             )}
             <div className="leave-history-empty">
-              <span className="leave-history-empty-icon"><Symbol name="history" size={27} /></span>
-              <strong>ยังไม่มีประวัติการลาจริง</strong>
-              <p>เมื่อเชื่อมต่อระบบแล้ว คำขอและผลการอนุมัติจะแสดงที่นี่</p>
+              <span className="leave-history-empty-icon"><Symbol name="history" size={25} /></span>
+              <strong>ยังไม่มีประวัติการลา</strong>
+              <p>เมื่อเชื่อมระบบแล้ว รายการจะปรากฏที่นี่</p>
             </div>
           </section>
           <p className="leave-footnote"><Symbol name="info" size={16} /> เวอร์ชันทดลอง · ยังไม่เชื่อมบัญชีและระบบอนุมัติ</p>
@@ -302,94 +346,101 @@ export default function LeavePage() {
 
           {step === 2 && (
             <div className="leave-calendar-stage">
-              <section className="leave-date-display">
-                <div className="leave-mini-caption"><Symbol name="calendar" size={19} /> {chosen?.label}</div>
-                <h2>เลือกช่วงวันลา</h2>
-                <p>พิมพ์วันที่แบบ วัน/เดือน/ปี หรือแตะเลือกจากปฏิทินด้านล่าง</p>
-                <div className="leave-date-pair">
-                  {(["start", "end"] as const).map((field) => {
-                    const value = field === "start" ? startText : endText;
-                    const resolved = field === "start" ? start : end;
-                    const label = field === "start" ? "วันเริ่มลา" : "วันสิ้นสุดลา";
-                    return (
-                      <div key={field} className={"leave-date-input-card" + (editingDate === field ? " is-active" : "")}>
-                        <label htmlFor={"leave-" + field + "-dmy"}>{label}</label>
-                        <div className="leave-date-input-line">
-                          <input id={"leave-" + field + "-dmy"} type="text" inputMode="numeric"
-                            autoComplete="off" maxLength={10} placeholder="DD/MM/YYYY"
-                            aria-describedby="leave-date-instructions" value={value}
-                            onFocus={() => setEditingDate(field)}
-                            onChange={(event) => {
-                              (field === "start" ? setStartText : setEndText)(dmyMask(event.target.value));
-                              setEditingDate(field); setError("");
-                            }} />
-                          <button type="button" aria-label={"เลือก" + label + "จากปฏิทิน"} onClick={() => setEditingDate(field)}>
-                            <Symbol name="calendar" size={20} />
-                          </button>
-                        </div>
-                        <span>{resolved ? showDate(resolved) : "เลือกจากปฏิทินได้"}</span>
+              <div className="leave-date-intro">
+                <span className="leave-mini-caption"><Symbol name="calendar" size={18} /> {chosen?.label}</span>
+                <p>แตะช่องวันที่เพื่อเปิดปฏิทิน หรือพิมพ์ตามรูปแบบ DD/MM/YYYY</p>
+              </div>
+              <div className="leave-date-pair">
+                {(["start", "end"] as const).map((field) => {
+                  const value = field === "start" ? startText : endText;
+                  const resolved = field === "start" ? start : end;
+                  const label = field === "start" ? "วันเริ่มลา" : "วันสิ้นสุดลา";
+                  return (
+                    <div key={field} className="leave-date-input-card">
+                      <label htmlFor={"leave-" + field + "-dmy"}>{label}</label>
+                      <div className="leave-date-input-line">
+                        <input id={"leave-" + field + "-dmy"} type="text" inputMode="numeric"
+                          autoComplete="off" maxLength={10} placeholder="DD/MM/YYYY"
+                          aria-describedby="leave-date-instructions" value={value}
+                          onChange={(event) => {
+                            (field === "start" ? setStartText : setEndText)(dmyMask(event.target.value));
+                            setError("");
+                          }} />
+                        <button type="button" aria-label={"เปิดปฏิทินเลือก" + label}
+                          onClick={(event) => openCalendar(field, event.currentTarget)}>
+                          <Symbol name="calendar" size={22} />
+                        </button>
                       </div>
-                    );
-                  })}
-                </div>
-                <p className="leave-dmy-help" id="leave-date-instructions">บังคับ DD/MM/YYYY · เช่น 20/10/2026 (ปี ค.ศ.)</p>
-              </section>
-              <section className="leave-custom-calendar" aria-label="เลือกวันจากปฏิทิน">
-                <div className="leave-month-bar">
-                  <div>
-                    <span>กำลังเลือก{editingDate === "start" ? "วันเริ่มลา" : "วันสิ้นสุดลา"}</span>
-                    <strong>{monthName.format(visibleMonth)}</strong>
-                  </div>
-                  <div className="leave-month-buttons">
-                    <button type="button" aria-label="เดือนก่อนหน้า"
-                      onClick={() => setVisibleMonth((m) => new Date(m.getFullYear(), m.getMonth() - 1, 1))}><Chevron left /></button>
-                    <button type="button" aria-label="เดือนถัดไป"
-                      onClick={() => setVisibleMonth((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1))}><Chevron /></button>
-                  </div>
-                </div>
-                <div className="leave-weekdays" aria-hidden="true">{weekdays.map((day) => <span key={day}>{day}</span>)}</div>
-                <div className="leave-month-days">
-                  {[
-                    ...Array.from({ length: (new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), 1).getDay() + 6) % 7 }, () => null),
-                    ...Array.from({ length: new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 0).getDate() }, (_, i) =>
-                      new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), i + 1))
-                  ].map((date, index) => {
-                    if (!date) return <span key={"empty-" + index} className="leave-month-empty" />;
-                    const iso = dateToIso(date);
-                    const selected = iso === start || iso === end;
-                    const between = Boolean(start && end && iso > start && iso < end);
-                    return (
-                      <button type="button" key={iso}
-                        className={"leave-day" + (selected ? " is-selected" : "") + (between ? " is-between" : "") + (iso === localToday() ? " is-today" : "")}
-                        aria-label={showDate(iso)} aria-pressed={selected}
-                        onClick={() => {
-                          if (editingDate === "start") { setStartText(dateToDmy(date)); setEditingDate("end"); }
-                          else setEndText(dateToDmy(date));
-                          setError("");
-                        }}>{date.getDate()}</button>
-                    );
-                  })}
-                </div>
-                <div className="leave-calendar-footer">
-                  <button type="button" onClick={() => {
-                    const today = new Date();
-                    if (editingDate === "start") { setStartText(dateToDmy(today)); setEditingDate("end"); }
-                    else setEndText(dateToDmy(today));
-                    setVisibleMonth(new Date(today.getFullYear(), today.getMonth(), 1));
-                    setError("");
-                  }}>เลือกวันนี้</button>
-                  <span>แตะวันที่เพื่อเลือกอัตโนมัติ</span>
-                </div>
-              </section>
+                      <span>{resolved ? showDate(resolved) : "กดไอคอนปฏิทินเพื่อเลือกวัน"}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="leave-dmy-help" id="leave-date-instructions">วัน / เดือน / ปี ค.ศ. · เช่น 20/10/2026</p>
               <div className="leave-calendar-total">
                 <span>จำนวนวันที่เลือก</span>
                 <strong>{days} <small>วัน</small></strong>
-                <small>{days ? "นับรวมวันแรกและวันสุดท้าย" : "เลือกวันเริ่มและสิ้นสุด"}</small>
+                <small>{days ? "นับรวมวันเริ่มและวันสิ้นสุด" : "ระบุวันที่ทั้งสองช่อง"}</small>
               </div>
               <div className="leave-rule-hint">
                 <Symbol name="info" size={19} />
-                <span>{chosen?.advance ? "ต้องยื่นลาล่วงหน้าอย่างน้อย 1 วัน" : "ยื่นลาในวันเดียวกันได้"} · เดโมยังไม่เช็กวันหยุดบริษัท</span>
+                <span>{chosen?.advance ? "ต้องยื่นลาล่วงหน้าอย่างน้อย 1 วัน" : "ยื่นลาในวันเดียวกันได้"} · เดโมยังไม่ตรวจวันหยุดบริษัท</span>
               </div>
+              {calendarOpen && (
+                <div className="leave-calendar-backdrop" role="presentation"
+                  onMouseDown={(event) => {
+                    if (event.target === event.currentTarget) setCalendarOpen(false);
+                  }}>
+                  <section className="leave-custom-calendar" ref={calendarDialogRef}
+                    role="dialog" aria-modal="true" aria-labelledby="leave-calendar-dialog-title"
+                    aria-describedby="leave-calendar-dialog-desc" tabIndex={-1}>
+                    <div className="leave-calendar-grip" aria-hidden="true" />
+                    <div className="leave-calendar-dialog-heading">
+                      <div>
+                        <span>เลือก{editingDate === "start" ? "วันเริ่มลา" : "วันสิ้นสุดลา"}</span>
+                        <h2 id="leave-calendar-dialog-title">เลือกวันที่</h2>
+                      </div>
+                      <button type="button" className="leave-calendar-close" aria-label="ปิดปฏิทิน"
+                        onClick={() => setCalendarOpen(false)}><Symbol name="close" size={20} /></button>
+                    </div>
+                    <p className="leave-calendar-dialog-hint" id="leave-calendar-dialog-desc">แตะวันที่ที่ต้องการ เลือกแล้วปฏิทินจะปิดอัตโนมัติ</p>
+                    <div className="leave-month-bar">
+                      <strong>{monthName.format(visibleMonth)}</strong>
+                      <div className="leave-month-buttons">
+                        <button type="button" aria-label="เดือนก่อนหน้า"
+                          onClick={() => setVisibleMonth((m) => new Date(m.getFullYear(), m.getMonth() - 1, 1))}><Chevron left /></button>
+                        <button type="button" aria-label="เดือนถัดไป"
+                          onClick={() => setVisibleMonth((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1))}><Chevron /></button>
+                      </div>
+                    </div>
+                    <div className="leave-weekdays" aria-hidden="true">
+                      {weekdays.map((day) => <span key={day}>{day}</span>)}
+                    </div>
+                    <div className="leave-month-days">
+                      {[
+                        ...Array.from({ length: (new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), 1).getDay() + 6) % 7 }, () => null),
+                        ...Array.from({ length: new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 0).getDate() }, (_, i) =>
+                          new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), i + 1))
+                      ].map((date, index) => {
+                        if (!date) return <span key={"empty-" + index} className="leave-month-empty" />;
+                        const iso = dateToIso(date);
+                        const selected = iso === start || iso === end;
+                        const between = Boolean(start && end && iso > start && iso < end);
+                        return (
+                          <button type="button" key={iso}
+                            className={"leave-day" + (selected ? " is-selected" : "") + (between ? " is-between" : "") + (iso === localToday() ? " is-today" : "")}
+                            aria-label={showDate(iso)} aria-pressed={selected}
+                            onClick={() => selectCalendarDate(date)}>{date.getDate()}</button>
+                        );
+                      })}
+                    </div>
+                    <div className="leave-calendar-footer">
+                      <button type="button" onClick={() => selectCalendarDate(new Date())}>เลือกวันนี้</button>
+                      <span>วันที่แสดงแบบ DD/MM/YYYY</span>
+                    </div>
+                  </section>
+                </div>
+              )}
             </div>
           )}
 

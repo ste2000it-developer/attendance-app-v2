@@ -256,3 +256,123 @@
   .leave-custom-calendar { padding: 16px 10px; }
   .leave-weekdays, .leave-month-days { gap: 3px; }
 }
+
+
+/* Home-matched leave landing: no oversized promo card or duplicated demo badge. */
+.leave-v2.leave-journey { max-width: 700px; gap: 17px; }
+.leave-landing-heading { display: block; width: 100%; text-align: left; }
+.leave-landing-heading h1 {
+  margin: 0 0 3px; color: #1b354c;
+  font-size: clamp(22px,2.5vw,28px);
+  letter-spacing: -.035em; font-weight: 800; line-height: 1.3;
+}
+.leave-landing-heading p { margin: 0; color: #647b8f; font-size: 13px; line-height: 1.5; }
+.leave-v2.leave-journey .leave-entry {
+  display: grid; gap: 9px; justify-items: stretch;
+  padding: 15px 0 17px; border: 0; border-bottom: 1px solid #e4ecf1;
+  border-radius: 0; background: transparent;
+}
+.leave-entry-cta.leave-primary {
+  width: 100%; min-height: 77px; margin: 0;
+  padding: 10px 14px 10px 13px; border-radius: 16px;
+  box-shadow: 0 7px 18px rgba(25,57,75,.08); font-size: 20px; font-weight: 800;
+}
+.leave-entry-action-label { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.leave-entry-action-icon {
+  display: grid; place-items: center; flex: none;
+  width: 50px; height: 50px; border-radius: 13px; color: #fff;
+  background: rgba(255,255,255,.15);
+}
+.leave-entry-step-note { text-align: center; margin: 0; color: #788c9c; font-size: 12px; font-weight: 600; }
+.leave-v2.leave-journey .leave-history {
+  border: 0; border-radius: 0; background: transparent; overflow: visible;
+}
+.leave-v2.leave-journey .leave-history-heading { padding: 6px 0 12px; }
+.leave-v2.leave-journey .leave-history-heading h2 {
+  font-size: 17px; margin: 0 0 3px; color: #203b50; font-weight: 770;
+}
+.leave-v2.leave-journey .leave-history-heading p { font-size: 12px; color: #748a9b; }
+.leave-v2.leave-journey .leave-history-empty {
+  min-height: 145px; padding: 22px 14px;
+  gap: 6px; border: 1px solid #e6edf2; border-radius: 14px; background: #f8fafb;
+}
+.leave-v2.leave-journey .leave-history-empty-icon {
+  width: 41px; height: 41px; border-radius: 12px; margin-bottom: 1px;
+}
+.leave-v2.leave-journey .leave-history-empty-icon svg { width: 22px; height: 22px; }
+.leave-v2.leave-journey .leave-history-empty strong { font-size: 13px; }
+.leave-v2.leave-journey .leave-history-empty p { font-size: 12px; line-height: 1.5; }
+.leave-v2.leave-journey .leave-footnote { margin: -4px 0 0; font-size: 11px; }
+.leave-v2.leave-journey .leave-latest-demo { margin: 0 0 13px; }
+
+/* Date step: two clear DD/MM/YYYY fields, calendar only in popup. */
+.leave-calendar-stage { gap: 14px; }
+.leave-date-intro { display: grid; gap: 8px; }
+.leave-date-intro > p { margin: 0; color: #71889b; font-size: 13px; line-height: 1.65; }
+.leave-calendar-stage .leave-date-pair { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.leave-calendar-stage .leave-date-input-card { background: #fff; }
+.leave-calendar-stage .leave-dmy-help { margin: -4px 0 0; color: #728a9c; }
+.leave-calendar-stage .leave-date-input-line button {
+  width: 42px; height: 42px; border-radius: 10px;
+  background: #eaf2f7; color: #205d81;
+}
+.leave-calendar-stage .leave-date-input-line button:hover { background: #dcebf4; }
+.leave-calendar-stage .leave-calendar-total { margin-top: 2px; }
+.leave-calendar-backdrop {
+  position: fixed; inset: 0; z-index: 150;
+  display: grid; place-items: center; padding: 20px;
+  background: rgba(16,35,53,.48);
+}
+.leave-calendar-backdrop .leave-custom-calendar {
+  width: min(100%, 435px); max-height: calc(100dvh - 40px);
+  overflow-y: auto; overscroll-behavior: contain;
+  padding: 21px 23px 20px; border-radius: 22px; border: 1px solid #e1eaf1;
+  background: #fff; box-shadow: 0 25px 85px rgba(15,36,55,.25);
+}
+.leave-calendar-grip { display: none; }
+.leave-calendar-dialog-heading {
+  display: flex; align-items: start; justify-content: space-between; gap: 15px;
+}
+.leave-calendar-dialog-heading > div { display: grid; gap: 2px; }
+.leave-calendar-dialog-heading span { color: #61849b; font-size: 12px; font-weight: 710; }
+.leave-calendar-dialog-heading h2 { margin: 0; color: #1d3c53; font-size: 22px; font-weight: 810; }
+.leave-calendar-close {
+  display: grid; place-items: center; flex: none;
+  width: 42px; height: 42px; border: 0; border-radius: 12px;
+  background: #f0f4f7; color: #376079;
+}
+.leave-calendar-dialog-hint { margin: 9px 0 18px; font-size: 12px; line-height: 1.65; color: #72899a; }
+.leave-calendar-backdrop .leave-month-bar { margin-bottom: 14px; }
+.leave-calendar-backdrop .leave-month-bar > strong { font-size: 18px; color: #25475f; }
+.leave-calendar-backdrop .leave-day { min-height: 42px; aspect-ratio: 1.06; }
+.leave-calendar-backdrop .leave-weekdays { margin-bottom: 7px; }
+.leave-calendar-backdrop .leave-calendar-footer { margin-top: 12px; }
+@media (max-width: 800px) {
+  .leave-v2.leave-journey { max-width: 560px; gap: 13px; }
+  .leave-v2.leave-journey .leave-landing-heading h1 { font-size: 21px; }
+  .leave-v2.leave-journey .leave-landing-heading p { font-size: 12px; }
+  .leave-v2.leave-journey .leave-entry { padding: 12px 0 14px; gap: 8px; }
+  .leave-entry-cta.leave-primary { min-height: 70px; font-size: 19px; }
+  .leave-entry-action-icon { width: 46px; height: 46px; }
+  .leave-v2.leave-journey .leave-history-empty { min-height: 133px; }
+  .leave-calendar-stage .leave-date-pair { grid-template-columns: minmax(0,1fr); gap: 10px; }
+  .leave-calendar-backdrop { align-items: end; padding: 0; }
+  .leave-calendar-backdrop .leave-custom-calendar {
+    width: 100%; max-height: calc(100dvh - 14px);
+    padding: 12px 21px calc(23px + env(safe-area-inset-bottom));
+    border: 0; border-radius: 24px 24px 0 0;
+  }
+  .leave-calendar-grip {
+    display: block; width: 42px; height: 5px; border-radius: 99px;
+    background: #d3e0e8; margin: 0 auto 16px;
+  }
+  .leave-calendar-backdrop .leave-day { min-height: 42px; aspect-ratio: 1.12; }
+}
+@media (max-width: 375px) {
+  .leave-calendar-backdrop .leave-custom-calendar {
+    padding-inline: 15px;
+  }
+  .leave-calendar-backdrop .leave-weekdays,
+  .leave-calendar-backdrop .leave-month-days { gap: 3px; }
+  .leave-calendar-backdrop .leave-day { min-height: 39px; }
+}
