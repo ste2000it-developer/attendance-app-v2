@@ -70,14 +70,42 @@ const dateFormatter = new Intl.DateTimeFormat("th-TH", { day: "numeric", month: 
 function showDate(value: string) {
   return value ? dateFormatter.format(new Date(value + "T12:00:00")) : "ยังไม่เลือก";
 }
+
+/* Browser-independent DD/MM/YYYY entry, with strict calendar-day validation. */
+function dmyMask(input: string): string {
+  const digits = input.replace(/\D/g, "").slice(0, 8);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return digits.slice(0, 2) + "/" + digits.slice(2);
+  return digits.slice(0, 2) + "/" + digits.slice(2, 4) + "/" + digits.slice(4);
+}
+function dmyToIso(text: string): string {
+  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(text)) return "";
+  const [day, month, year] = text.split("/").map(Number);
+  if (year < 1900 || year > 2200 || month < 1 || month > 12 || day < 1 || day > 31) return "";
+  const actual = new Date(year, month - 1, day);
+  if (actual.getFullYear() !== year || actual.getMonth() !== month - 1 || actual.getDate() !== day) return "";
+  return [year, String(month).padStart(2, "0"), String(day).padStart(2, "0")].join("-");
+}
+function dateToDmy(date: Date): string {
+  return [String(date.getDate()).padStart(2, "0"), String(date.getMonth() + 1).padStart(2, "0"), String(date.getFullYear())].join("/");
+}
+function dateToIso(date: Date): string {
+  return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"), String(date.getDate()).padStart(2, "0")].join("-");
+}
+const monthName = new Intl.DateTimeFormat("th-TH-u-ca-gregory", { month: "long", year: "numeric" });
+const weekdays = ["จ", "อ", "พ", "พฤ", "ศ", "ส", "อา"];
+
 const steps = ["ประเภทการลา", "ช่วงวันที่", "รายละเอียด", "ตรวจสอบ"];
 
 export default function LeavePage() {
   const [step, setStep] = useState<LeaveStep>(0);
   const [type, setType] = useState<LeaveType | "">("");
-  const [showAll, setShowAll] = useState(false);
-  const [start, setStart] = useState("");
-  const [end, setEnd] = useState("");
+  const [startText, setStartText] = useState("");
+  const [endText, setEndText] = useState("");
+  const [editingDate, setEditingDate] = useState<"start" | "end">("start");
+  const [visibleMonth, setVisibleMonth] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+  const start = dmyToIso(startText);
+  const end = dmyToIso(endText);
   const [note, setNote] = useState("");
   const [attachment, setAttachment] = useState<File | null>(null);
   const [fileKey, setFileKey] = useState(0);
@@ -97,9 +125,10 @@ export default function LeavePage() {
 
   function begin() {
     setType("");
-    setShowAll(false);
-    setStart("");
-    setEnd("");
+    setStartText("");
+    setEndText("");
+    setEditingDate("start");
+    setVisibleMonth(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
     setNote("");
     setAttachment(null);
     setFileKey((previous) => previous + 1);
@@ -120,7 +149,7 @@ export default function LeavePage() {
       return;
     }
     if (step === 2) {
-      if (!start || !end) { setError("กรุณาเลือกวันเริ่มลาและวันสิ้นสุด"); return; }
+      if (!start || !end) { setError("กรุณาระบุวันที่ให้ถูกต้องในรูปแบบ DD/MM/YYYY เช่น 20/10/2026"); return; }
       if (end < start) { setError("วันสิ้นสุดต้องไม่ก่อนวันเริ่มลา"); return; }
       if (chosen?.advance && start <= localToday()) {
         setError("ประเภทนี้ต้องยื่นลาล่วงหน้าอย่างน้อย 1 วัน");
@@ -151,7 +180,6 @@ export default function LeavePage() {
     setStep(5);
   }
 
-  const typeCards = (showAll ? leaveTypes : leaveTypes.filter((item) => item.featured));
 
   return (
     <div className="page-content leave-v2 leave-journey">
@@ -248,61 +276,119 @@ export default function LeavePage() {
               : "ตรวจทานข้อมูลอีกครั้งก่อนจบการทดลอง"}</p>
           </div>
 
+
           {step === 1 && (
             <div className="leave-type-stage">
               <div className="leave-type-list" role="group" aria-label="เลือกประเภทการลา">
-                {typeCards.map((item) => (
+                {leaveTypes.map((item) => (
                   <button key={item.id} type="button"
                     className={"leave-type-option" + (type === item.id ? " is-selected" : "")}
-                    aria-pressed={type === item.id}
+                    aria-pressed={type === item.id} title={item.hint}
                     onClick={() => { setType(item.id); setError(""); }}>
-                    <span className="leave-type-symbol"><Symbol name={item.icon} size={23} /></span>
-                    <span className="leave-type-text">
-                      <strong>{item.label}</strong>
-                      <small>{item.hint}</small>
-                    </span>
-                    <span className="leave-type-radio" aria-hidden="true">{type === item.id && <span />}</span>
+                    <span className="leave-type-symbol"><Symbol name={item.icon} size={25} /></span>
+                    <span className="leave-type-text"><strong>{item.label}</strong></span>
+                    {type === item.id && <span className="leave-type-check"><Symbol name="check" size={13} /></span>}
                   </button>
                 ))}
               </div>
-              {!showAll && (
-                <button type="button" className="leave-more-button" onClick={() => setShowAll(true)}>
-                  ดูประเภทการลาอื่น ๆ อีก 6 ประเภท <Chevron />
-                </button>
-              )}
               {chosen && (
                 <div className="leave-rule-hint">
                   <Symbol name="info" size={19} />
-                  <span>{chosen.advance ? "ประเภทนี้ต้องยื่นลาล่วงหน้าอย่างน้อย 1 วัน" : "ประเภทนี้สามารถยื่นลาในวันเดียวกันได้"}</span>
+                  <span>{chosen.advance ? "ประเภทนี้ต้องยื่นลาล่วงหน้าอย่างน้อย 1 วัน" : "ประเภทนี้ยื่นลาในวันเดียวกันได้"}</span>
                 </div>
               )}
             </div>
           )}
 
           {step === 2 && (
-            <div className="leave-step-card">
-              <div className="leave-mini-caption"><Symbol name="calendar" size={19} /> {chosen?.label}</div>
-              <div className="leave-date-fields">
-                <label className="leave-field">วันเริ่มลา
-                  <input type="date" value={start}
-                    onChange={(event) => { setStart(event.target.value); setError(""); }}
-                    aria-invalid={!!error && (!start || error.includes("ล่วงหน้า"))} />
-                </label>
-                <label className="leave-field">วันสิ้นสุดลา
-                  <input type="date" value={end}
-                    onChange={(event) => { setEnd(event.target.value); setError(""); }}
-                    min={start || undefined}
-                    aria-invalid={!!error && (!end || end < start)} />
-                </label>
-              </div>
-              <div className="leave-days">
+            <div className="leave-calendar-stage">
+              <section className="leave-date-display">
+                <div className="leave-mini-caption"><Symbol name="calendar" size={19} /> {chosen?.label}</div>
+                <h2>เลือกช่วงวันลา</h2>
+                <p>พิมพ์วันที่แบบ วัน/เดือน/ปี หรือแตะเลือกจากปฏิทินด้านล่าง</p>
+                <div className="leave-date-pair">
+                  {(["start", "end"] as const).map((field) => {
+                    const value = field === "start" ? startText : endText;
+                    const resolved = field === "start" ? start : end;
+                    const label = field === "start" ? "วันเริ่มลา" : "วันสิ้นสุดลา";
+                    return (
+                      <div key={field} className={"leave-date-input-card" + (editingDate === field ? " is-active" : "")}>
+                        <label htmlFor={"leave-" + field + "-dmy"}>{label}</label>
+                        <div className="leave-date-input-line">
+                          <input id={"leave-" + field + "-dmy"} type="text" inputMode="numeric"
+                            autoComplete="off" maxLength={10} placeholder="DD/MM/YYYY"
+                            aria-describedby="leave-date-instructions" value={value}
+                            onFocus={() => setEditingDate(field)}
+                            onChange={(event) => {
+                              (field === "start" ? setStartText : setEndText)(dmyMask(event.target.value));
+                              setEditingDate(field); setError("");
+                            }} />
+                          <button type="button" aria-label={"เลือก" + label + "จากปฏิทิน"} onClick={() => setEditingDate(field)}>
+                            <Symbol name="calendar" size={20} />
+                          </button>
+                        </div>
+                        <span>{resolved ? showDate(resolved) : "เลือกจากปฏิทินได้"}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="leave-dmy-help" id="leave-date-instructions">บังคับ DD/MM/YYYY · เช่น 20/10/2026 (ปี ค.ศ.)</p>
+              </section>
+              <section className="leave-custom-calendar" aria-label="เลือกวันจากปฏิทิน">
+                <div className="leave-month-bar">
+                  <div>
+                    <span>กำลังเลือก{editingDate === "start" ? "วันเริ่มลา" : "วันสิ้นสุดลา"}</span>
+                    <strong>{monthName.format(visibleMonth)}</strong>
+                  </div>
+                  <div className="leave-month-buttons">
+                    <button type="button" aria-label="เดือนก่อนหน้า"
+                      onClick={() => setVisibleMonth((m) => new Date(m.getFullYear(), m.getMonth() - 1, 1))}><Chevron left /></button>
+                    <button type="button" aria-label="เดือนถัดไป"
+                      onClick={() => setVisibleMonth((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1))}><Chevron /></button>
+                  </div>
+                </div>
+                <div className="leave-weekdays" aria-hidden="true">{weekdays.map((day) => <span key={day}>{day}</span>)}</div>
+                <div className="leave-month-days">
+                  {[
+                    ...Array.from({ length: (new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), 1).getDay() + 6) % 7 }, () => null),
+                    ...Array.from({ length: new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 0).getDate() }, (_, i) =>
+                      new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), i + 1))
+                  ].map((date, index) => {
+                    if (!date) return <span key={"empty-" + index} className="leave-month-empty" />;
+                    const iso = dateToIso(date);
+                    const selected = iso === start || iso === end;
+                    const between = Boolean(start && end && iso > start && iso < end);
+                    return (
+                      <button type="button" key={iso}
+                        className={"leave-day" + (selected ? " is-selected" : "") + (between ? " is-between" : "") + (iso === localToday() ? " is-today" : "")}
+                        aria-label={showDate(iso)} aria-pressed={selected}
+                        onClick={() => {
+                          if (editingDate === "start") { setStartText(dateToDmy(date)); setEditingDate("end"); }
+                          else setEndText(dateToDmy(date));
+                          setError("");
+                        }}>{date.getDate()}</button>
+                    );
+                  })}
+                </div>
+                <div className="leave-calendar-footer">
+                  <button type="button" onClick={() => {
+                    const today = new Date();
+                    if (editingDate === "start") { setStartText(dateToDmy(today)); setEditingDate("end"); }
+                    else setEndText(dateToDmy(today));
+                    setVisibleMonth(new Date(today.getFullYear(), today.getMonth(), 1));
+                    setError("");
+                  }}>เลือกวันนี้</button>
+                  <span>แตะวันที่เพื่อเลือกอัตโนมัติ</span>
+                </div>
+              </section>
+              <div className="leave-calendar-total">
                 <span>จำนวนวันที่เลือก</span>
                 <strong>{days} <small>วัน</small></strong>
-                <span className="leave-days-note">นับรวมวันแรกและวันสุดท้าย</span>
+                <small>{days ? "นับรวมวันแรกและวันสุดท้าย" : "เลือกวันเริ่มและสิ้นสุด"}</small>
               </div>
               <div className="leave-rule-hint">
                 <Symbol name="info" size={19} />
-                <span>{chosen?.advance ? "ตามกติกา V1 ต้องยื่นลาล่วงหน้าอย่างน้อย 1 วัน" : "ยื่นลาในวันเดียวกันได้"} · ยังไม่ตรวจวันหยุดบริษัทในเดโม</span>
+                <span>{chosen?.advance ? "ต้องยื่นลาล่วงหน้าอย่างน้อย 1 วัน" : "ยื่นลาในวันเดียวกันได้"} · เดโมยังไม่เช็กวันหยุดบริษัท</span>
               </div>
             </div>
           )}
