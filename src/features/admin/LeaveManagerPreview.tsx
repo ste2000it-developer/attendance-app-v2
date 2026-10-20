@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 import { PreviewDatePicker, PreviewSelect } from "./PreviewControls";
 import "./LeaveManagerPreview.css";
@@ -195,9 +194,6 @@ export default function LeaveManagerPreview({ requests, onChange }: {
     };
   }, [selectedId]);
 
-  function submitKeys(event: ReactKeyboardEvent<HTMLTextAreaElement>) {
-    if (event.key === "Escape") event.stopPropagation();
-  }
   return (
     <div className="leave-admin">
       <div className="leave-admin-summary">
@@ -325,7 +321,7 @@ export default function LeaveManagerPreview({ requests, onChange }: {
                   required={choice==="reject"} value={decisionNote}
                   placeholder={choice==="reject"?"ระบุเหตุผลที่ไม่อนุมัติ":"หมายเหตุเพิ่มเติม (ถ้ามี)"}
                   onChange={event=>{setDecisionNote(event.target.value);setDecisionError("");}}
-                  onKeyDown={submitKeys}/>
+                  />
                 {decisionError && <span className="leave-admin-inline-error" role="alert">{decisionError}</span>}
               </div>}
             </div>
