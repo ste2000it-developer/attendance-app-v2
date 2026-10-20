@@ -11,7 +11,7 @@ const leaveTypes = [
   { id: "training", label: "ลาเพื่อฝึกอบรม/พัฒนาความรู้", hint: "หลักสูตรหรือการพัฒนาทักษะ", icon: "book", advance: true, note: false, featured: false },
   { id: "military", label: "ลารับราชการทหาร", hint: "ตามภาระหน้าที่รับราชการทหาร", icon: "shield", advance: true, note: false, featured: false },
   { id: "ordination", label: "ลาอุปสมบท", hint: "ตามประเพณีทางศาสนา", icon: "sun", advance: true, note: false, featured: false },
-  { id: "maternity", label: "ลาคลอด", hint: "ตามสิทธิ์ลาคลอด", icon: "pregnant", advance: true, note: false, featured: false },
+  { id: "maternity", label: "ลาคลอด", hint: "ตามสิทธิ์ลาคลอด", icon: "woman", advance: true, note: false, featured: false },
   { id: "sterilization", label: "ลาเพื่อทำหมัน", hint: "เข้ารับการรักษาทางการแพทย์", icon: "medical", advance: true, note: false, featured: false },
   { id: "other", label: "อื่น ๆ", hint: "ประเภทที่ไม่อยู่ในรายการ", icon: "more", advance: false, note: true, featured: false }
 ] as const;
@@ -25,7 +25,7 @@ function Symbol({ name, size = 21 }: { name: string; size?: number }) {
     calendar: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 3v4M17 3v4M3 10h18" /></>,
     history: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
     heart: <path d="M20.4 5.6a5.1 5.1 0 0 0-7.2 0L12 6.8l-1.2-1.2a5.1 5.1 0 0 0-7.2 7.2L12 21l8.4-8.2a5.1 5.1 0 0 0 0-7.2Z" />,
-    pregnant: <><circle cx="9.6" cy="3.9" r="2.1" /><path d="M9 8.2c-1.9 0-3 1.4-3 3.4v4.2m3-7.6c2.5 0 4.2 1.3 4.7 3.7.2 1 .4 1.3 1.5 1.5 1.5.3 2.6 1.5 2.6 3.1 0 1.9-1.5 3.3-3.4 3.3H9m0-10v12m0-5.9h5.2" /></>,
+    woman: <><circle cx="12" cy="5" r="2.3" /><path d="M12 7.8c-2.5 0-4.6 1.8-5 4.3l-.4 2.2h2.6L8 21h2.2l.8-4h2l.8 4H16l-1.2-6.7h2.6l-.4-2.2c-.4-2.5-2.5-4.3-5-4.3Z" /></>,
     medical: <path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6V3Z" />,
     sun: <><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></>,
     briefcase: <><rect x="3" y="7" width="18" height="14" rx="2" /><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18" /></>,
