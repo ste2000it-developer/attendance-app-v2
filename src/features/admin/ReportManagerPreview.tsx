@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import {
   createDemoAttendanceMonth,currentReportMonth,reportDateLabel,reportMonthLabel,
   reportStatusLabels,shiftReportMonth
@@ -6,7 +6,7 @@ import {
 import { exportAttendanceReportWorkbook } from "./reportWorkbook";
 import "./ReportManagerPreview.css";
 import ReportYearlyPreview from "./ReportYearlyPreview";
-import ReportDetailDialog from "./ReportDetailDialog";
+import { MonthlyReportInline } from "./ReportInlineDetail";
 import "./ReportYearlyPreview.css";
 
 function ReportIcon({name,size=19}:{name:"left"|"right"|"download"|"search"|"check"|"calendar"|"clock"|"users"|"close"|"file"|"arrow";size?:number}){
@@ -48,7 +48,7 @@ function ReportMonthlyPreview() {
       text.toLocaleLowerCase("th-TH").includes(query.trim().toLocaleLowerCase("th-TH"))
     )
   );
-  const selected=data.employees.find(person=>person.code===selectedCode)||null;
+  // Only one row can be expanded at a time. The month switch collapses it.
   const nextDisabled=month>=currentReportMonth();
   const oldest=shiftReportMonth(currentReportMonth(),-11);
   const previousDisabled=month<=oldest;
@@ -118,25 +118,36 @@ function ReportMonthlyPreview() {
             <thead><tr><th scope="col">พนักงาน</th><th scope="col">เข้างาน</th>
               <th scope="col">ขาด</th><th scope="col">ลา</th><th scope="col">สาย</th>
               <th scope="col">OT (ชม.)</th><th scope="col"><span className="sr-only">รายละเอียด</span></th></tr></thead>
-            <tbody>{visible.map(person=><tr key={person.code}>
+            <tbody>{visible.map(person=><Fragment key={person.code}>
+            <tr className={"report-inline-parent"+(selectedCode===person.code?" is-expanded":"")}>
               <td><strong>{person.name}</strong><span>{person.code} · {person.department}</span></td>
               <td className="report-v2-number positive">{person.present}</td>
               <td className="report-v2-number">{person.absent}</td>
               <td className="report-v2-number">{person.leave}</td>
               <td className="report-v2-number">{person.late}</td>
               <td className="report-v2-number ot">{hours(person.otHours)}</td>
-              <td><button type="button" className="report-v2-open"
-                aria-haspopup="dialog" onClick={()=>setSelectedCode(person.code)}>
-                รายวัน <ReportIcon name="arrow" size={15}/></button></td>
-            </tr>)}</tbody>
+              <td><button type="button"
+                className={"report-v2-open"+(selectedCode===person.code?" is-active":"")}
+                aria-expanded={selectedCode===person.code} aria-controls={"report-month-"+person.code+"-table"}
+                onClick={()=>setSelectedCode(selectedCode===person.code?null:person.code)}>
+                {selectedCode===person.code?"ซ่อน":"ดูรายวัน"} <ReportIcon name="arrow" size={15}/></button></td>
+            </tr>
+            {selectedCode===person.code&&<tr className="report-inline-row">
+              <td colSpan={7}>
+                <MonthlyReportInline id={"report-month-"+person.code+"-table"} person={person} month={month}/>
+              </td>
+            </tr>}
+          </Fragment>)}</tbody>
           </table>
         </div>
         <div className="report-v2-person-cards">
-          {visible.map(person=><article className="report-v2-person-card" key={person.code}>
+          {visible.map(person=><article className={"report-v2-person-card"+(selectedCode===person.code?" is-expanded":"")} key={person.code}>
             <div className="report-v2-person-head"><div><strong>{person.name}</strong>
               <small>{person.code} · {person.department}</small></div>
-              <button type="button" onClick={()=>setSelectedCode(person.code)}
-                aria-haspopup="dialog">ดูรายวัน <ReportIcon name="arrow" size={15}/></button></div>
+              <button type="button" className={selectedCode===person.code?"is-active":""}
+                aria-expanded={selectedCode===person.code} aria-controls={"report-month-"+person.code+"-card"}
+                onClick={()=>setSelectedCode(selectedCode===person.code?null:person.code)}>
+                {selectedCode===person.code?"ซ่อน":"ดูรายวัน"} <ReportIcon name="arrow" size={15}/></button></div>
             <div className="report-v2-person-metrics">
               <span>เข้างาน <strong>{person.present}</strong></span>
               <span>ขาด <strong>{person.absent}</strong></span>
@@ -144,59 +155,13 @@ function ReportMonthlyPreview() {
               <span>สาย <strong>{person.late}</strong></span>
               <span>OT <strong>{hours(person.otHours)} ชม.</strong></span>
             </div>
+            {selectedCode===person.code&&<MonthlyReportInline id={"report-month-"+person.code+"-card"} person={person} month={month}/>}
           </article>)}
         </div>
       </>}
       <p className="report-v2-footnote">เข้างานรวมรายการมาสายแล้ว (ไม่บวกซ้ำ) · 1 รายการ = พนักงาน 1 คนต่อ 1 วันทำงานจำลอง</p>
     </section>
-    {selected&&<ReportDetailDialog titleId="report-v2-detail-title" onClose={()=>setSelectedCode(null)}>
-      <header className="report-v2-detail-heading report-v2-modal-header">
-        <div className="report-v2-modal-person">
-          <span className="report-v2-modal-avatar" aria-hidden="true">{selected.code.slice(-2)}</span>
-          <div className="report-v2-modal-person-copy">
-            <span className="report-v2-modal-eyebrow">รายงานการทำงาน / รายวัน</span>
-            <h3 id="report-v2-detail-title">{selected.name}</h3>
-            <p>{selected.code}<span className="report-v2-modal-bullet">·</span>{selected.department}</p>
-            <span className="report-v2-modal-mobile-period">{reportMonthLabel(month)}</span>
-          </div>
-        </div>
-        <div className="report-v2-modal-top-actions">
-          <span className="report-v2-modal-period">{reportMonthLabel(month)}</span>
-          <button className="report-v2-detail-close" type="button" onClick={()=>setSelectedCode(null)} aria-label="ปิดรายละเอียด"><ReportIcon name="close" size={18}/></button>
-        </div>
-      </header>
-      <div className="report-v2-modal-summary" aria-label="สรุปการทำงานรายเดือน">
-        {[
-          ["เข้างาน",selected.present,"วัน","present"],
-          ["ขาด",selected.absent,"วัน","absent"],
-          ["ลา",selected.leave,"วัน","leave"],
-          ["สาย",selected.late,"ครั้ง","late"],
-          ["OT",selected.otHours,"ชม.","ot"]
-        ].map(([label,value,unit,tone])=><div className={"report-v2-modal-metric is-"+tone} key={label}>
-          <span>{label}</span>
-          <strong>{hours(Number(value))}<small>{unit}</small></strong>
-        </div>)}
-      </div>
-      <div className="report-v2-modal-list-heading">
-        <div><h4>บันทึกการลงเวลารายวัน</h4><p>แสดงรายการที่จำลองไว้ในเดือนนี้</p></div>
-        <span>{selected.days.length} วันทำงาน</span>
-      </div>
-      <div className="report-v2-detail-scroll">
-        <table className="report-v2-detail-table report-v2-modal-table">
-          <thead><tr><th scope="col">วันที่</th><th scope="col">สถานะ</th><th scope="col">เวลาเข้า</th>
-            <th scope="col">เวลาออก</th><th scope="col">สาย</th><th scope="col">OT</th></tr></thead>
-          <tbody>{selected.days.length?selected.days.map(day=><tr key={day.date}>
-            <td className="report-v2-modal-date">{reportDateLabel(day.date)}</td>
-            <td><span className={"report-v2-status report-v2-status-"+day.status}>{reportStatusLabels[day.status]}</span></td>
-            <td className="report-v2-modal-time">{day.checkIn||"—"}</td>
-            <td className="report-v2-modal-time">{day.checkOut||"—"}</td>
-            <td>{day.lateMinutes?day.lateMinutes+" นาที":"—"}</td>
-            <td className={day.otHours?"report-v2-modal-ot":""}>{day.otHours?hours(day.otHours)+" ชม.":"—"}</td>
-          </tr>):<tr><td colSpan={6} className="report-v2-no-data">เดือนนี้ยังไม่มีวันทำงานในข้อมูลทดลอง</td></tr>}</tbody>
-        </table>
-      </div>
-      <p className="report-v2-detail-footnote"><span aria-hidden="true">ⓘ</span> ข้อมูลสำหรับทดสอบหน้าจอเท่านั้น ไม่ใช่ประวัติลงเวลาจริงหรือผลคำนวณค่าจ้าง</p>
-    </ReportDetailDialog>}
+
   </div>;
 }
 
