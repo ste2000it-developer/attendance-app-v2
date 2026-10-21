@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   createDemoAttendanceMonth,currentReportMonth,reportMonthLabel,
   shiftReportMonth
@@ -6,10 +6,10 @@ import {
 import { exportAttendanceReportWorkbook } from "./reportWorkbook";
 import "./ReportManagerPreview.css";
 import ReportYearlyPreview from "./ReportYearlyPreview";
-import { MonthlyReportInline } from "./ReportInlineDetail";
+import ReportPeopleView from "./ReportPeopleView";
 import "./ReportYearlyPreview.css";
 
-function ReportIcon({name,size=19}:{name:"left"|"right"|"download"|"search"|"check"|"calendar"|"clock"|"users"|"close"|"file"|"arrow";size?:number}){
+function ReportIcon({name,size=19}:{name:"left"|"right"|"download"|"search"|"check"|"calendar"|"clock"|"users"|"file";size?:number}){
   const paths={
     left:<path d="m15 5-7 7 7 7"/>,
     right:<path d="m9 5 7 7-7 7"/>,
@@ -19,9 +19,7 @@ function ReportIcon({name,size=19}:{name:"left"|"right"|"download"|"search"|"che
     calendar:<><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></>,
     clock:<><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></>,
     users:<><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a6 6 0 0 1 12 0v1H3Z"/><path d="M16 5a3 3 0 0 1 0 6M17 15a5 5 0 0 1 4 5"/></>,
-    close:<path d="M5 5 19 19M19 5 5 19"/>,
     file:<><path d="M13 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-5-5Z"/><path d="M13 3v5h5"/></>,
-    arrow:<path d="m9 6 6 6-6 6"/>
   };
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
     strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
@@ -39,23 +37,14 @@ const cards=[
 
 function ReportMonthlyPreview() {
   const [month,setMonth]=useState(currentReportMonth);
-  const [query,setQuery]=useState("");
-  const [selectedCode,setSelectedCode]=useState<string|null>(null);
   const [exportError,setExportError]=useState("");
   const data=useMemo(()=>createDemoAttendanceMonth(month),[month]);
-  const visible=data.employees.filter(person=>
-    [person.name,person.code,person.department].some(text=>
-      text.toLocaleLowerCase("th-TH").includes(query.trim().toLocaleLowerCase("th-TH"))
-    )
-  );
-  // Only one row can be expanded at a time. The month switch collapses it.
   const nextDisabled=month>=currentReportMonth();
   const oldest=shiftReportMonth(currentReportMonth(),-11);
   const previousDisabled=month<=oldest;
   function changeMonth(delta:number){
     if((delta>0&&nextDisabled)||(delta<0&&previousDisabled))return;
     setMonth(old=>shiftReportMonth(old,delta));
-    setSelectedCode(null);
     setExportError("");
   }
   function exportExcel(){
@@ -100,67 +89,8 @@ function ReportMonthlyPreview() {
         <small>{card.description}</small>
       </div>)}
     </div>
-    <section className="report-v2-section" aria-labelledby="report-v2-people-title">
-      <div className="report-v2-heading">
-        <div><h3 id="report-v2-people-title">รายงานรายพนักงาน</h3>
-          <p>สรุปตามวันทำงานที่จำลองในเดือนนี้ · {data.scheduledDates.length} วัน</p></div>
-        <span className="report-v2-count">{visible.length} / {data.employees.length} คน</span>
-      </div>
-      <label className="report-v2-search">
-        <ReportIcon name="search" size={17}/>
-        <span className="sr-only">ค้นหาพนักงาน</span>
-        <input type="search" value={query} onChange={event=>setQuery(event.target.value)}
-          placeholder="ค้นหาชื่อ รหัส หรือแผนก..." />
-      </label>
-      {visible.length===0?<div className="report-v2-empty">ไม่พบพนักงานที่ตรงกับคำค้นหา</div>:<>
-        <div className="report-v2-table-wrap">
-          <table className="report-v2-table">
-            <thead><tr><th scope="col">พนักงาน</th><th scope="col">เข้างาน</th>
-              <th scope="col">ขาด</th><th scope="col">ลา</th><th scope="col">สาย</th>
-              <th scope="col">OT (ชม.)</th><th scope="col"><span className="sr-only">รายละเอียด</span></th></tr></thead>
-            <tbody>{visible.map(person=><Fragment key={person.code}>
-            <tr className={"report-inline-parent"+(selectedCode===person.code?" is-expanded":"")}>
-              <td><strong>{person.name}</strong><span>{person.code} · {person.department}</span></td>
-              <td className="report-v2-number positive">{person.present}</td>
-              <td className="report-v2-number">{person.absent}</td>
-              <td className="report-v2-number">{person.leave}</td>
-              <td className="report-v2-number">{person.late}</td>
-              <td className="report-v2-number ot">{hours(person.otHours)}</td>
-              <td><button type="button"
-                className={"report-v2-open"+(selectedCode===person.code?" is-active":"")}
-                aria-expanded={selectedCode===person.code} aria-controls={"report-month-"+person.code+"-table"}
-                onClick={()=>setSelectedCode(selectedCode===person.code?null:person.code)}>
-                {selectedCode===person.code?"ซ่อน":"ดูรายวัน"} <ReportIcon name="arrow" size={15}/></button></td>
-            </tr>
-            {selectedCode===person.code&&<tr className="report-inline-row">
-              <td colSpan={7}>
-                <MonthlyReportInline id={"report-month-"+person.code+"-table"} person={person} month={month}/>
-              </td>
-            </tr>}
-          </Fragment>)}</tbody>
-          </table>
-        </div>
-        <div className="report-v2-person-cards">
-          {visible.map(person=><article className={"report-v2-person-card"+(selectedCode===person.code?" is-expanded":"")} key={person.code}>
-            <div className="report-v2-person-head"><div><strong>{person.name}</strong>
-              <small>{person.code} · {person.department}</small></div>
-              <button type="button" className={selectedCode===person.code?"is-active":""}
-                aria-expanded={selectedCode===person.code} aria-controls={"report-month-"+person.code+"-card"}
-                onClick={()=>setSelectedCode(selectedCode===person.code?null:person.code)}>
-                {selectedCode===person.code?"ซ่อน":"ดูรายวัน"} <ReportIcon name="arrow" size={15}/></button></div>
-            <div className="report-v2-person-metrics">
-              <span>เข้างาน <strong>{person.present}</strong></span>
-              <span>ขาด <strong>{person.absent}</strong></span>
-              <span>ลา <strong>{person.leave}</strong></span>
-              <span>สาย <strong>{person.late}</strong></span>
-              <span>OT <strong>{hours(person.otHours)} ชม.</strong></span>
-            </div>
-            {selectedCode===person.code&&<MonthlyReportInline id={"report-month-"+person.code+"-card"} person={person} month={month}/>}
-          </article>)}
-        </div>
-      </>}
-      <p className="report-v2-footnote">เข้างานรวมรายการมาสายแล้ว (ไม่บวกซ้ำ) · 1 รายการ = พนักงาน 1 คนต่อ 1 วันทำงานจำลอง</p>
-    </section>
+    <ReportPeopleView mode="month" employees={data.employees}
+      periodLabel={reportMonthLabel(month)} scheduledDays={data.scheduledDates.length}/>
 
   </div>;
 }

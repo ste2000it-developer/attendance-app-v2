@@ -1,17 +1,15 @@
-import {Fragment,useMemo,useState} from "react";
+import {useMemo,useState} from "react";
 import {createDemoAttendanceYear,currentReportYear} from "./reportAnnualData";
 import {exportAnnualReportWorkbook} from "./reportWorkbook";
-import { YearlyReportInline } from "./ReportInlineDetail";
+import ReportPeopleView from "./ReportPeopleView";
 import "./ReportYearlyPreview.css";
 
-function YearIcon({name,size=17}:{name:"left"|"right"|"download"|"search"|"close"|"arrow";size?:number}) {
+function YearIcon({name,size=17}:{name:"left"|"right"|"download"|"search";size?:number}) {
   const paths={
     left:<path d="m15 5-7 7 7 7"/>,
     right:<path d="m9 5 7 7-7 7"/>,
     download:<><path d="M12 3v12m-4-4 4 4 4-4M4 17v3h16v-3"/></>,
     search:<><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></>,
-    close:<path d="M5 5 19 19M19 5 5 19"/>,
-    arrow:<path d="m9 6 6 6-6 6"/>
   };
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
     strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
@@ -27,23 +25,14 @@ const digits=(number:number)=>number.toLocaleString("th-TH",{maximumFractionDigi
 
 export default function ReportYearlyPreview(){
   const [year,setYear]=useState(currentReportYear);
-  const [search,setSearch]=useState("");
-  const [selectedCode,setSelectedCode]=useState<string|null>(null);
   const [error,setError]=useState("");
   const data=useMemo(()=>createDemoAttendanceYear(year),[year]);
   const earliest=currentReportYear()-4;
   const latest=currentReportYear();
-  const visible=data.employees.filter(person=>
-    [person.name,person.code,person.department].some(v=>
-      v.toLocaleLowerCase("th-TH").includes(search.trim().toLocaleLowerCase("th-TH"))
-    )
-  );
-  // Only one row can be expanded at a time. The year switch collapses it.
   function moveYear(change:number){
     const target=year+change;
     if(target<earliest||target>latest)return;
     setYear(target);
-    setSelectedCode(null);
     setError("");
   }
   function exportExcel(){
@@ -81,68 +70,9 @@ export default function ReportYearlyPreview(){
         <small>{stat.hint}</small>
       </div>)}
     </div>
-    <section className="report-v2-section" aria-labelledby="report-yearly-title">
-      <div className="report-v2-heading">
-        <div><h3 id="report-yearly-title">สรุปรายปีแยกพนักงาน</h3>
-          <p>รวม {data.scheduledDays} วันทำงานจำลองต่อคน ในปี พ.ศ. {year+543}</p></div>
-        <span className="report-v2-count">{visible.length} / {data.employees.length} คน</span>
-      </div>
-      <label className="report-v2-search">
-        <YearIcon name="search"/>
-        <span className="sr-only">ค้นหาพนักงาน</span>
-        <input type="search" value={search} onChange={event=>setSearch(event.target.value)}
-          placeholder="ค้นหาชื่อ รหัส หรือแผนก..." />
-      </label>
-      {visible.length===0?<div className="report-v2-empty">ไม่พบพนักงานที่ตรงกับคำค้นหา</div>:<>
-        <div className="report-v2-table-wrap">
-          <table className="report-v2-table">
-            <thead><tr><th scope="col">พนักงาน</th><th scope="col">เข้างาน</th>
-              <th scope="col">ขาด</th><th scope="col">ลา</th><th scope="col">สาย</th>
-              <th scope="col">OT (ชม.)</th><th scope="col"><span className="sr-only">รายละเอียด</span></th></tr></thead>
-            <tbody>{visible.map(person=><Fragment key={person.code}>
-            <tr className={"report-inline-parent"+(selectedCode===person.code?" is-expanded":"")}>
-              <td><strong>{person.name}</strong><span>{person.code} · {person.department}</span></td>
-              <td className="report-v2-number positive">{digits(person.present)}</td>
-              <td className="report-v2-number">{digits(person.absent)}</td>
-              <td className="report-v2-number">{digits(person.leave)}</td>
-              <td className="report-v2-number">{digits(person.late)}</td>
-              <td className="report-v2-number ot">{digits(person.otHours)}</td>
-              <td><button type="button"
-                className={"report-v2-open"+(selectedCode===person.code?" is-active":"")}
-                aria-expanded={selectedCode===person.code} aria-controls={"report-year-"+person.code+"-table"}
-                onClick={()=>setSelectedCode(selectedCode===person.code?null:person.code)}>
-                {selectedCode===person.code?"ซ่อน":"ดูรายเดือน"} <YearIcon name="arrow" size={15}/></button></td>
-            </tr>
-            {selectedCode===person.code&&<tr className="report-inline-row">
-              <td colSpan={7}>
-                <YearlyReportInline id={"report-year-"+person.code+"-table"} person={person} data={data}/>
-              </td>
-            </tr>}
-          </Fragment>)}</tbody>
-          </table>
-        </div>
-        <div className="report-v2-person-cards">
-          {visible.map(person=><article className={"report-v2-person-card"+(selectedCode===person.code?" is-expanded":"")} key={person.code}>
-            <div className="report-v2-person-head">
-              <div><strong>{person.name}</strong><small>{person.code} · {person.department}</small></div>
-              <button type="button" className={selectedCode===person.code?"is-active":""}
-                aria-expanded={selectedCode===person.code} aria-controls={"report-year-"+person.code+"-card"}
-                onClick={()=>setSelectedCode(selectedCode===person.code?null:person.code)}>
-                {selectedCode===person.code?"ซ่อน":"ดูรายเดือน"} <YearIcon name="arrow" size={15}/></button>
-            </div>
-            <div className="report-v2-person-metrics">
-              <span>เข้างาน <strong>{digits(person.present)}</strong></span>
-              <span>ขาด <strong>{digits(person.absent)}</strong></span>
-              <span>ลา <strong>{digits(person.leave)}</strong></span>
-              <span>สาย <strong>{digits(person.late)}</strong></span>
-              <span>OT <strong>{digits(person.otHours)} ชม.</strong></span>
-            </div>
-            {selectedCode===person.code&&<YearlyReportInline id={"report-year-"+person.code+"-card"} person={person} data={data}/>}
-          </article>)}
-        </div>
-      </>}
-      <p className="report-v2-footnote">กด “12 เดือน” เพื่อดูยอดของแต่ละเดือน · เข้างานรวมรายการสายแล้ว · การค้นหามีผลเฉพาะหน้าจอ ส่วน Excel ส่งออกพนักงานตัวอย่างทั้งหมด</p>
-    </section>
+    <ReportPeopleView mode="year" employees={data.employees}
+      periodLabel={"พ.ศ. "+(year+543)} scheduledDays={data.scheduledDays}
+      availableMonths={data.includedMonths}/>
 
   </div>;
 }
