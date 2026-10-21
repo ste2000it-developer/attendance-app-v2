@@ -24,9 +24,6 @@ const totals=[
   {key:"otHours",label:"OT รวม",suffix:"ชม.",hint:"ชั่วโมงสมมติ"}
 ] as const;
 const digits=(number:number)=>number.toLocaleString("th-TH",{maximumFractionDigits:1});
-const shortMonth=(month:string)=>new Intl.DateTimeFormat("th-TH",{month:"short"}).format(
-  new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,15)
-);
 
 export default function ReportYearlyPreview(){
   const [year,setYear]=useState(currentReportYear);

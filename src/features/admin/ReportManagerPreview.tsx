@@ -1,7 +1,7 @@
 import { Fragment, useMemo, useState } from "react";
 import {
-  createDemoAttendanceMonth,currentReportMonth,reportDateLabel,reportMonthLabel,
-  reportStatusLabels,shiftReportMonth
+  createDemoAttendanceMonth,currentReportMonth,reportMonthLabel,
+  shiftReportMonth
 } from "./reportDemoData";
 import { exportAttendanceReportWorkbook } from "./reportWorkbook";
 import "./ReportManagerPreview.css";
