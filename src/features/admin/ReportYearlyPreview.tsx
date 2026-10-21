@@ -1,7 +1,6 @@
 import {useMemo,useState} from "react";
 import {createDemoAttendanceYear,currentReportYear} from "./reportAnnualData";
 import {exportAnnualReportWorkbook} from "./reportWorkbook";
-import {reportMonthLabel} from "./reportDemoData";
 import "./ReportYearlyPreview.css";
 
 function YearIcon({name,size=17}:{name:"left"|"right"|"download"|"search"|"close"|"arrow";size?:number}) {
