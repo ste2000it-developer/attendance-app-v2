@@ -136,7 +136,7 @@ function ReportMonthlyPreview() {
             <div className="report-v2-person-head"><div><strong>{person.name}</strong>
               <small>{person.code} · {person.department}</small></div>
               <button type="button" onClick={()=>setSelectedCode(person.code)}
-                aria-haspopup="dialog">รายวัน <ReportIcon name="arrow" size={15}/></button></div>
+                aria-haspopup="dialog">ดูรายวัน <ReportIcon name="arrow" size={15}/></button></div>
             <div className="report-v2-person-metrics">
               <span>เข้างาน <strong>{person.present}</strong></span>
               <span>ขาด <strong>{person.absent}</strong></span>
@@ -150,24 +150,51 @@ function ReportMonthlyPreview() {
       <p className="report-v2-footnote">เข้างานรวมรายการมาสายแล้ว (ไม่บวกซ้ำ) · 1 รายการ = พนักงาน 1 คนต่อ 1 วันทำงานจำลอง</p>
     </section>
     {selected&&<ReportDetailDialog titleId="report-v2-detail-title" onClose={()=>setSelectedCode(null)}>
-      <div className="report-v2-detail-heading">
-        <div><span>รายละเอียดการลงเวลา</span><h3 id="report-v2-detail-title">{selected.name}</h3>
-          <p>{selected.code} · {reportMonthLabel(month)}</p></div>
-        <button className="report-v2-detail-close" type="button" onClick={()=>setSelectedCode(null)} aria-label="ปิดรายละเอียด"><ReportIcon name="close" size={18}/></button>
+      <header className="report-v2-detail-heading report-v2-modal-header">
+        <div className="report-v2-modal-person">
+          <span className="report-v2-modal-avatar" aria-hidden="true">{selected.code.slice(-2)}</span>
+          <div className="report-v2-modal-person-copy">
+            <span className="report-v2-modal-eyebrow">รายงานการทำงาน / รายวัน</span>
+            <h3 id="report-v2-detail-title">{selected.name}</h3>
+            <p>{selected.code}<span className="report-v2-modal-bullet">·</span>{selected.department}</p>
+          </div>
+        </div>
+        <div className="report-v2-modal-top-actions">
+          <span className="report-v2-modal-period">{reportMonthLabel(month)}</span>
+          <button className="report-v2-detail-close" type="button" onClick={()=>setSelectedCode(null)} aria-label="ปิดรายละเอียด"><ReportIcon name="close" size={18}/></button>
+        </div>
+      </header>
+      <div className="report-v2-modal-summary" aria-label="สรุปการทำงานรายเดือน">
+        {[
+          ["เข้างาน",selected.present,"วัน","present"],
+          ["ขาด",selected.absent,"วัน","absent"],
+          ["ลา",selected.leave,"วัน","leave"],
+          ["สาย",selected.late,"ครั้ง","late"],
+          ["OT",selected.otHours,"ชม.","ot"]
+        ].map(([label,value,unit,tone])=><div className={"report-v2-modal-metric is-"+tone} key={label}>
+          <span>{label}</span>
+          <strong>{hours(Number(value))}<small>{unit}</small></strong>
+        </div>)}
+      </div>
+      <div className="report-v2-modal-list-heading">
+        <div><h4>บันทึกการลงเวลารายวัน</h4><p>แสดงรายการที่จำลองไว้ในเดือนนี้</p></div>
+        <span>{selected.days.length} วันทำงาน</span>
       </div>
       <div className="report-v2-detail-scroll">
-        <table className="report-v2-detail-table">
-          <thead><tr><th scope="col">วันที่</th><th scope="col">สถานะ</th><th scope="col">เข้างาน</th>
-            <th scope="col">ออกงาน</th><th scope="col">สาย (นาที)</th><th scope="col">OT (ชม.)</th></tr></thead>
+        <table className="report-v2-detail-table report-v2-modal-table">
+          <thead><tr><th scope="col">วันที่</th><th scope="col">สถานะ</th><th scope="col">เวลาเข้า</th>
+            <th scope="col">เวลาออก</th><th scope="col">สาย</th><th scope="col">OT</th></tr></thead>
           <tbody>{selected.days.length?selected.days.map(day=><tr key={day.date}>
-            <td>{reportDateLabel(day.date)}</td>
+            <td className="report-v2-modal-date">{reportDateLabel(day.date)}</td>
             <td><span className={"report-v2-status report-v2-status-"+day.status}>{reportStatusLabels[day.status]}</span></td>
-            <td>{day.checkIn||"—"}</td><td>{day.checkOut||"—"}</td>
-            <td>{day.lateMinutes||"—"}</td><td>{day.otHours?hours(day.otHours):"—"}</td>
+            <td className="report-v2-modal-time">{day.checkIn||"—"}</td>
+            <td className="report-v2-modal-time">{day.checkOut||"—"}</td>
+            <td>{day.lateMinutes?day.lateMinutes+" นาที":"—"}</td>
+            <td className={day.otHours?"report-v2-modal-ot":""}>{day.otHours?hours(day.otHours)+" ชม.":"—"}</td>
           </tr>):<tr><td colSpan={6} className="report-v2-no-data">เดือนนี้ยังไม่มีวันทำงานในข้อมูลทดลอง</td></tr>}</tbody>
         </table>
       </div>
-      <p className="report-v2-detail-footnote">เวลาทั้งหมดเป็นข้อมูลจำลองเพื่อดูหน้าจอ ไม่ใช่หลักฐานการลงเวลาหรือคำนวณค่าจ้าง</p>
+      <p className="report-v2-detail-footnote"><span aria-hidden="true">ⓘ</span> ข้อมูลสำหรับทดสอบหน้าจอเท่านั้น ไม่ใช่ประวัติลงเวลาจริงหรือผลคำนวณค่าจ้าง</p>
     </ReportDetailDialog>}
   </div>;
 }

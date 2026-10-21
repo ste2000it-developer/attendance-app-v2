@@ -120,7 +120,7 @@ export default function ReportYearlyPreview(){
             <div className="report-v2-person-head">
               <div><strong>{person.name}</strong><small>{person.code} · {person.department}</small></div>
               <button type="button" onClick={()=>setSelectedCode(person.code)}
-                aria-haspopup="dialog">12 เดือน <YearIcon name="arrow" size={15}/></button>
+                aria-haspopup="dialog">ดูรายเดือน <YearIcon name="arrow" size={15}/></button>
             </div>
             <div className="report-v2-person-metrics">
               <span>เข้างาน <strong>{digits(person.present)}</strong></span>
@@ -135,23 +135,50 @@ export default function ReportYearlyPreview(){
       <p className="report-v2-footnote">กด “12 เดือน” เพื่อดูยอดของแต่ละเดือน · เข้างานรวมรายการสายแล้ว · การค้นหามีผลเฉพาะหน้าจอ ส่วน Excel ส่งออกพนักงานตัวอย่างทั้งหมด</p>
     </section>
     {selected&&<ReportDetailDialog titleId="report-yearly-detail-title" onClose={()=>setSelectedCode(null)}>
-      <div className="report-v2-detail-heading">
-        <div><span>สรุปการทำงาน 12 เดือน</span>
-          <h3 id="report-yearly-detail-title">{selected.name}</h3>
-          <p>{selected.code} · ปี พ.ศ. {year+543}</p></div>
-        <button className="report-v2-detail-close" type="button" aria-label="ปิดรายละเอียด" onClick={()=>setSelectedCode(null)}><YearIcon name="close" size={18}/></button>
+      <header className="report-v2-detail-heading report-v2-modal-header">
+        <div className="report-v2-modal-person">
+          <span className="report-v2-modal-avatar" aria-hidden="true">{selected.code.slice(-2)}</span>
+          <div className="report-v2-modal-person-copy">
+            <span className="report-v2-modal-eyebrow">รายงานการทำงาน / รายปี</span>
+            <h3 id="report-yearly-detail-title">{selected.name}</h3>
+            <p>{selected.code}<span className="report-v2-modal-bullet">·</span>{selected.department}</p>
+          </div>
+        </div>
+        <div className="report-v2-modal-top-actions">
+          <span className="report-v2-modal-period">พ.ศ. {year+543}</span>
+          <button className="report-v2-detail-close" type="button" aria-label="ปิดรายละเอียด" onClick={()=>setSelectedCode(null)}><YearIcon name="close" size={18}/></button>
+        </div>
+      </header>
+      <div className="report-v2-modal-summary" aria-label="สรุปการทำงานรายปี">
+        {[
+          ["เข้างาน",selected.present,"วัน","present"],
+          ["ขาด",selected.absent,"วัน","absent"],
+          ["ลา",selected.leave,"วัน","leave"],
+          ["สาย",selected.late,"ครั้ง","late"],
+          ["OT",selected.otHours,"ชม.","ot"]
+        ].map(([label,value,unit,tone])=><div className={"report-v2-modal-metric is-"+tone} key={label}>
+          <span>{label}</span>
+          <strong>{digits(Number(value))}<small>{unit}</small></strong>
+        </div>)}
+      </div>
+      <div className="report-v2-modal-list-heading">
+        <div><h4>ผลการทำงานแยกรายเดือน</h4><p>มกราคม – ธันวาคม · มีข้อมูล {data.includedMonths} เดือน</p></div>
+        <span>{data.scheduledDays} วันทำงาน</span>
       </div>
       <div className="report-v2-detail-scroll">
-        <table className="report-v2-detail-table report-yearly-detail-table">
+        <table className="report-v2-detail-table report-v2-modal-table report-yearly-detail-table">
           <thead><tr><th scope="col">เดือน</th><th scope="col">วันทำงาน</th>
             <th scope="col">เข้างาน</th><th scope="col">ขาด</th><th scope="col">ลา</th>
-            <th scope="col">สาย</th><th scope="col">OT (ชม.)</th></tr></thead>
+            <th scope="col">สาย</th><th scope="col">OT</th></tr></thead>
           <tbody>
             {selected.months.map(entry=><tr key={entry.month} className={!entry.available?"report-yearly-future":""}>
-              <td><strong>{shortMonth(entry.month)}</strong></td>
-              {entry.available?<><td>{entry.scheduledDays}</td><td>{entry.present}</td>
+              <td><span className="report-v2-month-label">{shortMonth(entry.month)}</span></td>
+              {entry.available?<><td>{entry.scheduledDays}</td>
+                <td><div className="report-v2-attendance-value"><strong>{entry.present}</strong>
+                  <span className="report-v2-attendance-track" aria-hidden="true"><i style={{width:(entry.scheduledDays?Math.min(100,entry.present/entry.scheduledDays*100):0)+"%"}}/></span>
+                </div></td>
                 <td>{entry.absent}</td><td>{entry.leave}</td><td>{entry.late}</td>
-                <td>{digits(entry.otHours)}</td></>:<td colSpan={6}>ยังไม่ถึงเดือนนี้</td>}
+                <td className={entry.otHours?"report-v2-modal-ot":""}>{digits(entry.otHours)}</td></>:<td colSpan={6} className="report-v2-future-label">ยังไม่มีข้อมูล</td>}
             </tr>)}
             <tr className="report-yearly-total"><td>รวมทั้งปี</td><td>{data.scheduledDays}</td>
               <td>{selected.present}</td><td>{selected.absent}</td><td>{selected.leave}</td>
@@ -159,7 +186,7 @@ export default function ReportYearlyPreview(){
           </tbody>
         </table>
       </div>
-      <p className="report-v2-detail-footnote">ยอดรายปีเป็นผลรวมเดือนเดียวกันจากข้อมูลจำลอง ไม่มีการเชื่อมกับข้อมูลพนักงานจริง</p>
+      <p className="report-v2-detail-footnote"><span aria-hidden="true">ⓘ</span> รายปีรวมจากข้อมูลตัวอย่าง ไม่ใช่ข้อมูลพนักงานจริง · เดือนอนาคตไม่นับเป็นขาดงาน</p>
     </ReportDetailDialog>}
   </div>;
 }
