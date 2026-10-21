@@ -5,6 +5,8 @@ import {
 } from "./reportDemoData";
 import { exportAttendanceReportWorkbook } from "./reportWorkbook";
 import "./ReportManagerPreview.css";
+import ReportYearlyPreview from "./ReportYearlyPreview";
+import "./ReportYearlyPreview.css";
 
 function ReportIcon({name,size=19}:{name:"left"|"right"|"download"|"search"|"check"|"calendar"|"clock"|"users"|"close"|"file"|"arrow";size?:number}){
   const paths={
@@ -34,7 +36,7 @@ const cards=[
   {key:"otHours",label:"OT รวม",suffix:"ชม.",description:"ชั่วโมง OT จำลอง ไม่ใช้คิดเงิน",icon:"clock"}
 ] as const;
 
-export default function ReportManagerPreview() {
+function ReportMonthlyPreview() {
   const [month,setMonth]=useState(currentReportMonth);
   const [query,setQuery]=useState("");
   const [selectedCode,setSelectedCode]=useState<string|null>(null);
@@ -167,4 +169,19 @@ export default function ReportManagerPreview() {
       <p className="report-v2-detail-footnote">เวลาทั้งหมดเป็นข้อมูลจำลองเพื่อดูหน้าจอ ไม่ใช่หลักฐานการลงเวลาหรือคำนวณค่าจ้าง</p>
     </section>}
   </div>;
+}
+
+
+/** Keep the existing monthly report intact and switch only the visible view. */
+export default function ReportManagerPreview(){
+  const [mode,setMode]=useState<"month"|"year">("month");
+  return <>
+    <div className="report-v2-mode-tabs" role="group" aria-label="เลือกชนิดรายงาน">
+      <button type="button" className={mode==="month"?"is-active":""}
+        aria-pressed={mode==="month"} onClick={()=>setMode("month")}>รายเดือน</button>
+      <button type="button" className={mode==="year"?"is-active":""}
+        aria-pressed={mode==="year"} onClick={()=>setMode("year")}>รายปี</button>
+    </div>
+    {mode==="month"?<ReportMonthlyPreview/>:<ReportYearlyPreview/>}
+  </>;
 }
