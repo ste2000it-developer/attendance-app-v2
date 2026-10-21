@@ -30,7 +30,8 @@ function Icon({ name, size = 22 }: { name: IconName; size?: number }) {
     "chevron-left": <path d="m15 6-6 6 6 6" />,
     pin: <><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="2.5" /></>,
     clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
-    reset: <><path d="M20 7v5h-5" /><path d="M4 17v-5h5" /><path d="M6 9a7 7 0 0 1 12-2l2 5M4 12l2 5a7 7 0 0 0 12-2" /></>,
+    // Lucide RotateCcw (MIT): standardized restart/repeat icon.
+    reset: <><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></>,
     check: <path d="m5 12 4.5 4.5L19 7" />,
     close: <path d="M6 6l12 12M18 6 6 18" />,
     calendar: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 3v4M17 3v4M3 10h18" /></>

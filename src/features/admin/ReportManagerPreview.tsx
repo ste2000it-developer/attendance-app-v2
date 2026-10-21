@@ -7,7 +7,6 @@ import { exportAttendanceReportWorkbook } from "./reportWorkbook";
 import "./ReportManagerPreview.css";
 import ReportYearlyPreview from "./ReportYearlyPreview";
 import ReportPeopleView from "./ReportPeopleView";
-import type { ReportMode } from "./ReportPeopleView";
 import "./ReportYearlyPreview.css";
 
 function ReportIcon({name,size=19}:{name:"left"|"right"|"download"|"search"|"check"|"calendar"|"clock"|"users"|"file";size?:number}){
@@ -35,11 +34,7 @@ const cards=[
   {key:"otHours",label:"OT รวม",suffix:"ชม.",description:"ชั่วโมง OT จำลอง ไม่ใช้คิดเงิน",icon:"clock"}
 ] as const;
 
-function ReportMonthlyPreview({initialSelectedCode,onOpenMode,onResetSelection}:{
-  initialSelectedCode:string|null;
-  onOpenMode:(mode:ReportMode,employeeCode:string)=>void;
-  onResetSelection:()=>void;
-}) {
+function ReportMonthlyPreview() {
   const [month,setMonth]=useState(currentReportMonth);
   const [exportError,setExportError]=useState("");
   const data=useMemo(()=>createDemoAttendanceMonth(month),[month]);
@@ -48,7 +43,6 @@ function ReportMonthlyPreview({initialSelectedCode,onOpenMode,onResetSelection}:
   const previousDisabled=month<=oldest;
   function changeMonth(delta:number){
     if((delta>0&&nextDisabled)||(delta<0&&previousDisabled))return;
-    onResetSelection();
     setMonth(old=>shiftReportMonth(old,delta));
     setExportError("");
   }
@@ -96,7 +90,7 @@ function ReportMonthlyPreview({initialSelectedCode,onOpenMode,onResetSelection}:
     </div>
     <ReportPeopleView key={month} mode="month" employees={data.employees}
       periodLabel={reportMonthLabel(month)} scheduledDays={data.scheduledDates.length}
-      initialSelectedCode={initialSelectedCode} onOpenMode={onOpenMode}/>
+      />
 
   </div>;
 }
@@ -104,27 +98,14 @@ function ReportMonthlyPreview({initialSelectedCode,onOpenMode,onResetSelection}:
 
 /** Keep the existing monthly report intact and switch only the visible view. */
 export default function ReportManagerPreview(){
-  const [mode,setMode]=useState<ReportMode>("month");
-  const [requestedEmployee,setRequestedEmployee]=useState<string|null>(null);
-  const openModeForPerson=(nextMode:ReportMode,employeeCode:string)=>{
-    setRequestedEmployee(employeeCode);
-    setMode(nextMode);
-  };
-  const switchTab=(nextMode:ReportMode)=>{
-    setRequestedEmployee(null);
-    setMode(nextMode);
-  };
+  const [mode,setMode]=useState<"month"|"year">("month");
   return <>
     <div className="report-v2-mode-tabs" role="group" aria-label="เลือกชนิดรายงาน">
       <button type="button" className={mode==="month"?"is-active":""}
-        aria-pressed={mode==="month"} onClick={()=>switchTab("month")}>รายเดือน</button>
+        aria-pressed={mode==="month"} onClick={()=>setMode("month")}>รายเดือน</button>
       <button type="button" className={mode==="year"?"is-active":""}
-        aria-pressed={mode==="year"} onClick={()=>switchTab("year")}>รายปี</button>
+        aria-pressed={mode==="year"} onClick={()=>setMode("year")}>รายปี</button>
     </div>
-    {mode==="month"
-      ?<ReportMonthlyPreview initialSelectedCode={requestedEmployee} onOpenMode={openModeForPerson}
-         onResetSelection={()=>setRequestedEmployee(null)}/>
-      :<ReportYearlyPreview initialSelectedCode={requestedEmployee} onOpenMode={openModeForPerson}
-         onResetSelection={()=>setRequestedEmployee(null)}/>}
+    {mode==="month"?<ReportMonthlyPreview/>:<ReportYearlyPreview/>}
   </>;
 }
