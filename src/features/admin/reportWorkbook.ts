@@ -87,7 +87,7 @@ function annualSummaryRows(data:AnnualReport):ReportRow[]{
   result.push({kind:"total",values:[
     "","รวมพนักงานทั้งหมด","",data.includedMonths,
     data.scheduledDays*data.employees.length,
-    data.total.present,data.total.absent,data.total.leave,data.total.late,data.total.otHours
+    data.total.present,data.total.leave,data.total.late,data.total.otHours
   ]});
   return result;
 }
@@ -112,7 +112,7 @@ function annualMonthlyRows(data:AnnualReport):ReportRow[]{
     }
     result.push({kind:"total",values:[
       employee.code,"รวม "+employee.name,"ทั้งปี",data.scheduledDays,
-      employee.present,employee.absent,employee.leave,employee.late,employee.otHours
+      employee.present,employee.leave,employee.late,employee.otHours
     ]});
   }
   return result;
