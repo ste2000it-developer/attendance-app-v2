@@ -5,6 +5,7 @@
  * Text cells are ALWAYS inline strings, never evaluated as formulas.
  */
 import type { AttendanceMonth, ReportStatus } from "./reportDemoData";
+import type { AnnualReport } from "./reportAnnualData";
 import { reportMonthLabel, reportStatusLabels } from "./reportDemoData";
 
 type CellValue=string|number;
@@ -67,6 +68,55 @@ function detailRows(data:AttendanceMonth):ReportRow[] {
     }
   }
   return rows;
+}
+function annualSummaryRows(data:AnnualReport):ReportRow[]{
+  const year=data.year+543;
+  const result:ReportRow[]=[
+    {kind:"heading",values:["สรุปการทำงานรายปี แยกพนักงาน"]},
+    {kind:"subheading",values:["ATTENDANCE V2  |  ปี พ.ศ. "+year+"  |  ข้อมูลทดลอง"]},
+    {kind:"note",values:["ข้อมูลจำลอง ไม่เชื่อม Firebase ไม่รวมวันหยุดบริษัทและไม่ใช้คำนวณค่าจ้าง"]},
+    {kind:"note",values:["นับข้อมูล "+data.includedMonths+" เดือน · "+data.scheduledDays+" วันทำงานจำลอง/คน · เข้างานรวมมาสายแล้ว"]},
+    {kind:"header",values:["รหัสพนักงาน","ชื่อพนักงาน","แผนก","เดือนที่นับ","วันทำงาน","เข้างาน","ขาด","ลา","สาย","OT (ชม.)"]}
+  ];
+  for(const employee of data.employees){
+    result.push({kind:"data",values:[
+      employee.code,employee.name,employee.department,data.includedMonths,
+      data.scheduledDays,employee.present,employee.absent,employee.leave,employee.late,employee.otHours
+    ]});
+  }
+  result.push({kind:"total",values:[
+    "","รวมพนักงานทั้งหมด","",data.includedMonths,
+    data.scheduledDays*data.employees.length,
+    data.total.present,data.total.absent,data.total.leave,data.total.late,data.total.otHours
+  ]});
+  return result;
+}
+function annualMonthlyRows(data:AnnualReport):ReportRow[]{
+  const result:ReportRow[]=[
+    {kind:"heading",values:["รายละเอียดรายเดือน แยกพนักงาน"]},
+    {kind:"subheading",values:["ATTENDANCE V2  |  ปี พ.ศ. "+(data.year+543)+"  |  ข้อมูลทดลอง"]},
+    {kind:"note",values:["เดือนอนาคตยังไม่มีข้อมูล (แสดง —) ไม่ใช่วันขาดงาน"]},
+    {kind:"note",values:["12 เดือนต่อพนักงาน · เข้างานรวมสายแล้ว · OT เป็นชั่วโมงจำลอง"]},
+    {kind:"header",values:["รหัสพนักงาน","ชื่อพนักงาน","เดือน","วันทำงาน","เข้างาน","ขาด","ลา","สาย","OT (ชม.)"]}
+  ];
+  for(const employee of data.employees){
+    for(const month of employee.months){
+      result.push({kind:"data",values:[
+        employee.code,employee.name,reportMonthLabel(month.month),
+        month.available?month.scheduledDays:"—",
+        month.available?month.present:"—",
+        month.available?month.absent:"—",
+        month.available?month.leave:"—",
+        month.available?month.late:"—",
+        month.available?month.otHours:"—"
+      ]});
+    }
+    result.push({kind:"total",values:[
+      employee.code,"รวม "+employee.name,"ทั้งปี",data.scheduledDays,
+      employee.present,employee.absent,employee.leave,employee.late,employee.otHours
+    ]});
+  }
+  return result;
 }
 function makeSheet(rows:ReportRow[],widths:number[],name:"summary"|"detail"):string {
   const finalColumn=ref(widths.length-1);
@@ -216,6 +266,9 @@ export function exportAttendanceReportWorkbook(data:AttendanceMonth):void{
     {name:"รายละเอียดรายวัน",path:"xl/worksheets/sheet2.xml",
       content:makeSheet(detailRows(data),[19,18,29,23,18,14,14,17,17],"detail")}
   ];
+  writeReportWorkbook(worksheets,"Attendance-V2-Work-Report-"+data.month+".xlsx");
+}
+function writeReportWorkbook(worksheets:{name:string;path:string;content:string}[],filename:string):void{
   const files=[
     {name:"[Content_Types].xml",data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
       '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'+
@@ -245,9 +298,19 @@ export function exportAttendanceReportWorkbook(data:AttendanceMonth):void{
   const uri=URL.createObjectURL(blob);
   const link=document.createElement("a");
   link.href=uri;
-  link.download="Attendance-V2-Work-Report-"+data.month+".xlsx";
+  link.download=filename;
   document.body.appendChild(link);
   link.click();
   link.remove();
   window.setTimeout(()=>URL.revokeObjectURL(uri),60000);
+}
+
+export function exportAnnualReportWorkbook(data:AnnualReport):void{
+  const worksheets=[
+    {name:"สรุปรายปี",path:"xl/worksheets/sheet1.xml",
+      content:makeSheet(annualSummaryRows(data),[19,31,25,15,17,16,15,15,15,18],"summary")},
+    {name:"แยกรายเดือน",path:"xl/worksheets/sheet2.xml",
+      content:makeSheet(annualMonthlyRows(data),[19,29,27,17,16,15,15,15,18],"summary")}
+  ];
+  writeReportWorkbook(worksheets,"Attendance-V2-Annual-Report-"+data.year+".xlsx");
 }
