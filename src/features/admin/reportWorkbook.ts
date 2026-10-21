@@ -37,16 +37,16 @@ function summaryRows(data:AttendanceMonth):ReportRow[] {
     {kind:"subheading",values:["ATTENDANCE V2  |  "+label+"  |  ข้อมูลทดลอง"]},
     {kind:"note",values:["ตัวเลขเป็นข้อมูลจำลอง ไม่มีการอ่าน Firebase หรือใช้คำนวณค่าจ้างจริง"]},
     {kind:"note",values:["เข้างานรวมมาสายแล้ว  |  วันทำงานจำลอง "+data.scheduledDates.length+" วัน  |  พนักงาน "+data.employees.length+" คน"]},
-    {kind:"header",values:["รหัสพนักงาน","ชื่อพนักงาน","แผนก","เข้างาน (วัน)","ขาด (วัน)","ลา (วัน)","สาย (ครั้ง)","OT (ชม.)"]}
+    {kind:"header",values:["รหัสพนักงาน","ชื่อพนักงาน","แผนก","เข้างาน (วัน)","ลา (วัน)","สาย (ครั้ง)","OT (ชม.)"]}
   ];
   for(const person of data.employees){
     rows.push({kind:"data",values:[
-      person.code,person.name,person.department,person.present,person.absent,
+      person.code,person.name,person.department,person.present,
       person.leave,person.late,person.otHours
     ]});
   }
   rows.push({kind:"total",values:[
-    "","รวมทั้งหมด","",data.total.present,data.total.absent,data.total.leave,data.total.late,data.total.otHours
+    "","รวมทั้งหมด","",data.total.present,data.total.leave,data.total.late,data.total.otHours
   ]});
   return rows;
 }
@@ -76,12 +76,12 @@ function annualSummaryRows(data:AnnualReport):ReportRow[]{
     {kind:"subheading",values:["ATTENDANCE V2  |  ปี พ.ศ. "+year+"  |  ข้อมูลทดลอง"]},
     {kind:"note",values:["ข้อมูลจำลอง ไม่เชื่อม Firebase ไม่รวมวันหยุดบริษัทและไม่ใช้คำนวณค่าจ้าง"]},
     {kind:"note",values:["นับข้อมูล "+data.includedMonths+" เดือน · "+data.scheduledDays+" วันทำงานจำลอง/คน · เข้างานรวมมาสายแล้ว"]},
-    {kind:"header",values:["รหัสพนักงาน","ชื่อพนักงาน","แผนก","เดือนที่นับ","วันทำงาน","เข้างาน","ขาด","ลา","สาย","OT (ชม.)"]}
+    {kind:"header",values:["รหัสพนักงาน","ชื่อพนักงาน","แผนก","เดือนที่นับ","วันทำงาน","เข้างาน","ลา","สาย","OT (ชม.)"]}
   ];
   for(const employee of data.employees){
     result.push({kind:"data",values:[
       employee.code,employee.name,employee.department,data.includedMonths,
-      data.scheduledDays,employee.present,employee.absent,employee.leave,employee.late,employee.otHours
+      data.scheduledDays,employee.present,employee.leave,employee.late,employee.otHours
     ]});
   }
   result.push({kind:"total",values:[
@@ -95,9 +95,9 @@ function annualMonthlyRows(data:AnnualReport):ReportRow[]{
   const result:ReportRow[]=[
     {kind:"heading",values:["รายละเอียดรายเดือน แยกพนักงาน"]},
     {kind:"subheading",values:["ATTENDANCE V2  |  ปี พ.ศ. "+(data.year+543)+"  |  ข้อมูลทดลอง"]},
-    {kind:"note",values:["เดือนอนาคตยังไม่มีข้อมูล (แสดง —) ไม่ใช่วันขาดงาน"]},
+    {kind:"note",values:["เดือนอนาคตยังไม่มีข้อมูล (แสดง —) ไม่รวมเป็นวันทำงาน"]},
     {kind:"note",values:["12 เดือนต่อพนักงาน · เข้างานรวมสายแล้ว · OT เป็นชั่วโมงจำลอง"]},
-    {kind:"header",values:["รหัสพนักงาน","ชื่อพนักงาน","เดือน","วันทำงาน","เข้างาน","ขาด","ลา","สาย","OT (ชม.)"]}
+    {kind:"header",values:["รหัสพนักงาน","ชื่อพนักงาน","เดือน","วันทำงาน","เข้างาน","ลา","สาย","OT (ชม.)"]}
   ];
   for(const employee of data.employees){
     for(const month of employee.months){
@@ -105,8 +105,7 @@ function annualMonthlyRows(data:AnnualReport):ReportRow[]{
         employee.code,employee.name,reportMonthLabel(month.month),
         month.available?month.scheduledDays:"—",
         month.available?month.present:"—",
-        month.available?month.absent:"—",
-        month.available?month.leave:"—",
+                month.available?month.leave:"—",
         month.available?month.late:"—",
         month.available?month.otHours:"—"
       ]});
@@ -132,7 +131,7 @@ function makeSheet(rows:ReportRow[],widths:number[],name:"summary"|"detail"):str
         if(entry.kind==="header")return cell(position,row,value,4);
         if(entry.kind==="total")return cell(position,row,value,9);
         if(name==="detail"&&position===4){
-          const statusStyle:Record<ReportStatus,number>={present:10,late:11,leave:12,absent:13};
+          const statusStyle:Record<ReportStatus,number>={present:10,late:11,leave:12};
           return cell(position,row,value,statusStyle[entry.status??"present"]);
         }
         const number=typeof value==="number";
@@ -172,7 +171,6 @@ function stylesXml():string{
     f('<b/><color rgb="FF267B57"/>',10),             // 6 present
     f('<b/><color rgb="FF997330"/>',10),             // 7 late
     f('<b/><color rgb="FF626DA9"/>',10),             // 8 leave
-    f('<b/><color rgb="FFAF5A56"/>',10)              // 9 absent
   ];
   const fills=[
     '<fill><patternFill patternType="none"/></fill>',
@@ -184,7 +182,6 @@ function stylesXml():string{
     '<fill><patternFill patternType="solid"><fgColor rgb="FFEAF6EF"/><bgColor indexed="64"/></patternFill></fill>', // present
     '<fill><patternFill patternType="solid"><fgColor rgb="FFFCF4E7"/><bgColor indexed="64"/></patternFill></fill>', // late
     '<fill><patternFill patternType="solid"><fgColor rgb="FFF0F0FC"/><bgColor indexed="64"/></patternFill></fill>', // leave
-    '<fill><patternFill patternType="solid"><fgColor rgb="FFFAEEEC"/><bgColor indexed="64"/></patternFill></fill>'  // absent
   ];
   const borderColor='<color rgb="FFE2EAF0"/>';
   const borders=[
@@ -209,7 +206,6 @@ function stylesXml():string{
     xf(6,6,1,'vertical="center" indent="1"'), // 10 present
     xf(7,7,1,'vertical="center" indent="1"'), // 11 late
     xf(8,8,1,'vertical="center" indent="1"'), // 12 leave
-    xf(9,9,1,'vertical="center" indent="1"')  // 13 absent
   ];
   return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
     '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'+
@@ -262,7 +258,7 @@ function packZip(files:{name:string;data:string}[]):Uint8Array{
 export function exportAttendanceReportWorkbook(data:AttendanceMonth):void{
   const worksheets=[
     {name:"สรุปรายพนักงาน",path:"xl/worksheets/sheet1.xml",
-      content:makeSheet(summaryRows(data),[19,30,24,18,16,16,17,18],"summary")},
+      content:makeSheet(summaryRows(data),[19,30,24,18,16,17,18],"summary")},
     {name:"รายละเอียดรายวัน",path:"xl/worksheets/sheet2.xml",
       content:makeSheet(detailRows(data),[19,18,29,23,18,14,14,17,17],"detail")}
   ];
@@ -308,9 +304,9 @@ function writeReportWorkbook(worksheets:{name:string;path:string;content:string}
 export function exportAnnualReportWorkbook(data:AnnualReport):void{
   const worksheets=[
     {name:"สรุปรายปี",path:"xl/worksheets/sheet1.xml",
-      content:makeSheet(annualSummaryRows(data),[19,31,25,15,17,16,15,15,15,18],"summary")},
+      content:makeSheet(annualSummaryRows(data),[19,31,25,15,17,16,15,15,18],"summary")},
     {name:"แยกรายเดือน",path:"xl/worksheets/sheet2.xml",
-      content:makeSheet(annualMonthlyRows(data),[19,29,27,17,16,15,15,15,18],"summary")}
+      content:makeSheet(annualMonthlyRows(data),[19,29,27,17,16,15,15,18],"summary")}
   ];
   writeReportWorkbook(worksheets,"Attendance-V2-Annual-Report-"+data.year+".xlsx");
 }

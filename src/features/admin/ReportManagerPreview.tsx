@@ -29,7 +29,6 @@ function hours(value:number):string {
 }
 const cards=[
   {key:"present",label:"เข้างาน",suffix:"วัน-คน",description:"รวมวันที่มาทำงาน (รวมสาย)",icon:"check"},
-  {key:"absent",label:"ขาดงาน",suffix:"วัน-คน",description:"รายการขาดงานในข้อมูลตัวอย่าง",icon:"users"},
   {key:"leave",label:"ลางาน",suffix:"วัน-คน",description:"นับรายการลาจำลอง",icon:"calendar"},
   {key:"late",label:"มาสาย",suffix:"ครั้ง",description:"รวมอยู่ในยอดเข้างานด้วย",icon:"clock"},
   {key:"otHours",label:"OT รวม",suffix:"ชม.",description:"ชั่วโมง OT จำลอง ไม่ใช้คิดเงิน",icon:"clock"}
@@ -89,7 +88,7 @@ function ReportMonthlyPreview() {
         <small>{card.description}</small>
       </div>)}
     </div>
-    <ReportPeopleView mode="month" employees={data.employees}
+    <ReportPeopleView key={month} mode="month" employees={data.employees}
       periodLabel={reportMonthLabel(month)} scheduledDays={data.scheduledDates.length}/>
 
   </div>;

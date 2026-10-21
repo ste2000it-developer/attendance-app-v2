@@ -18,7 +18,7 @@ type Tab = typeof tabs[number]["id"];
 const screens: Record<Exclude<Tab,"overview">, { title: string; detail: string; icon: string }> = {
   people: { title: "จัดการพนักงาน", detail: "เพิ่มพนักงาน กำหนดแผนก ตำแหน่ง สิทธิ์ และข้อมูลบัตรพนักงาน", icon: "people" },
   leave: { title: "จัดการคำขอลา", detail: "อนุมัติคำขอ ดูประวัติการลา และส่งออกใบลาทั้งหมดเป็น Excel", icon: "calendar" },
-  report: { title: "รายงานการทำงาน", detail: "สรุปเข้างาน ขาด ลา สาย และ OT รายเดือน พร้อมรายงานรายพนักงานและ Excel", icon: "chart" },
+  report: { title: "รายงานการทำงาน", detail: "สรุปเข้างาน ลา สาย และ OT รายเดือน พร้อมรายงานรายพนักงานและ Excel", icon: "chart" },
   settings: { title: "ตั้งค่าระบบ", detail: "กำหนดสถานที่ทำงาน วันหยุด และสิทธิ์ผู้ใช้งาน", icon: "settings" }
 };
 function AdminIcon({ name, size = 21 }: {name: string; size?: number}) {

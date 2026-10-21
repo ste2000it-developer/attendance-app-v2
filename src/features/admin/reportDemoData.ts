@@ -2,7 +2,7 @@
  * Fictional deterministic attendance records only.
  * They do not represent Firebase, actual employee schedules or payroll policy.
  */
-export type ReportStatus = "present" | "late" | "leave" | "absent";
+export type ReportStatus = "present" | "late" | "leave";
 export type ReportDay = {
   date: string;
   status: ReportStatus;
@@ -17,7 +17,6 @@ export type ReportEmployee = {
   department: string;
   days: ReportDay[];
   present: number;
-  absent: number;
   leave: number;
   late: number;
   otHours: number;
@@ -26,7 +25,7 @@ export type AttendanceMonth = {
   month: string;
   scheduledDates: string[];
   employees: ReportEmployee[];
-  total: { present: number; absent: number; leave: number; late: number; otHours: number };
+  total: { present: number; leave: number; late: number; otHours: number };
 };
 const staff = [
   ["DEMO-001", "พนักงานตัวอย่าง 01", "ฝ่ายปฏิบัติการ"],
@@ -57,7 +56,7 @@ export function reportDateLabel(iso:string):string {
     .format(new Date(iso+"T12:00:00"));
 }
 export const reportStatusLabels:Record<ReportStatus,string>={
-  present:"เข้างาน",late:"มาสาย",leave:"ลา",absent:"ขาด"
+  present:"เข้างาน",late:"มาสาย",leave:"ลา"
 };
 export function createDemoAttendanceMonth(month:string):AttendanceMonth {
   const [year,m]=month.split("-").map(Number);
@@ -76,7 +75,7 @@ export function createDemoAttendanceMonth(month:string):AttendanceMonth {
   const employees:ReportEmployee[]=staff.map(([code,name,department],index)=>{
     const days:ReportDay[]=scheduledDates.map((date,dayIndex)=>{
       const pattern=(dayIndex*3+index*7+m)%23;
-      const status:ReportStatus=pattern===0?"absent":pattern===5||pattern===18?"leave":pattern===9||pattern===16?"late":"present";
+      const status:ReportStatus=pattern===5||pattern===18?"leave":pattern===9||pattern===16?"late":"present";
       const working=status==="present"||status==="late";
       const lateMinutes=status==="late"?12+(index*5+dayIndex*7)%25:0;
       // Fictional OT hours only. Not a calculation of legal/payroll eligibility.
@@ -91,7 +90,6 @@ export function createDemoAttendanceMonth(month:string):AttendanceMonth {
     return {
       code,name,department,days,
       present:days.filter(d=>d.status==="present"||d.status==="late").length,
-      absent:days.filter(d=>d.status==="absent").length,
       leave:days.filter(d=>d.status==="leave").length,
       late:days.filter(d=>d.status==="late").length,
       otHours:Math.round(days.reduce((sum,d)=>sum+d.otHours,0)*10)/10
@@ -101,10 +99,9 @@ export function createDemoAttendanceMonth(month:string):AttendanceMonth {
     month,scheduledDates,employees,
     total:employees.reduce((acc,e)=>({
       present:acc.present+e.present,
-      absent:acc.absent+e.absent,
       leave:acc.leave+e.leave,
       late:acc.late+e.late,
       otHours:Math.round((acc.otHours+e.otHours)*10)/10
-    }),{present:0,absent:0,leave:0,late:0,otHours:0})
+    }),{present:0,leave:0,late:0,otHours:0})
   };
 }

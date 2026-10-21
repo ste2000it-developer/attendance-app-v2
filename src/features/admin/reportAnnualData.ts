@@ -4,7 +4,7 @@
  */
 import { createDemoAttendanceMonth, currentReportMonth } from "./reportDemoData";
 export type AnnualTotals = {
-  present:number;absent:number;leave:number;late:number;otHours:number;
+  present:number;leave:number;late:number;otHours:number;
 };
 export type AnnualMonth = AnnualTotals & {
   month:string;
@@ -23,10 +23,9 @@ export type AnnualReport = {
   total:AnnualTotals;
 };
 const pad=(n:number)=>String(n).padStart(2,"0");
-const empty=():AnnualTotals=>({present:0,absent:0,leave:0,late:0,otHours:0});
+const empty=():AnnualTotals=>({present:0,leave:0,late:0,otHours:0});
 const add=(a:AnnualTotals,b:AnnualTotals):AnnualTotals=>({
   present:a.present+b.present,
-  absent:a.absent+b.absent,
   leave:a.leave+b.leave,
   late:a.late+b.late,
   otHours:Math.round((a.otHours+b.otHours)*10)/10
@@ -45,7 +44,7 @@ export function createDemoAttendanceYear(year:number):AnnualReport {
       const row=data.employees.find(item=>item.code===person.code);
       if(!row)throw new Error("Missing demo employee for "+month);
       return {month,available,scheduledDays:data.scheduledDates.length,
-        present:row.present,absent:row.absent,leave:row.leave,late:row.late,otHours:row.otHours};
+        present:row.present,leave:row.leave,late:row.late,otHours:row.otHours};
     });
     return {
       code:person.code,name:person.name,department:person.department,months:monthly,

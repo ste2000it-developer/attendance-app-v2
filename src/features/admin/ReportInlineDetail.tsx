@@ -9,11 +9,10 @@ const shortMonth=(month:string)=>new Intl.DateTimeFormat("th-TH",{month:"short"}
 );
 
 function SummaryStrip({person}:{person:{
-  present:number;absent:number;leave:number;late:number;otHours:number;
+  present:number;leave:number;late:number;otHours:number;
 }}){
   const measures=[
     {name:"เข้างาน",value:person.present,unit:"วัน",tone:"present"},
-    {name:"ขาด",value:person.absent,unit:"วัน",tone:"absent"},
     {name:"ลา",value:person.leave,unit:"วัน",tone:"leave"},
     {name:"สาย",value:person.late,unit:"ครั้ง",tone:"late"},
     {name:"OT",value:person.otHours,unit:"ชม.",tone:"ot"}
@@ -65,7 +64,7 @@ export function YearlyReportInline({person,data,id}:{
       aria-label={"ตารางสิบสองเดือนของ "+person.name+" เลื่อนดูได้"}>
       <table className="report-inline-table report-inline-year-table">
         <thead><tr><th scope="col">เดือน</th><th scope="col">วันทำงาน</th><th scope="col">เข้างาน</th>
-          <th scope="col">ขาด</th><th scope="col">ลา</th><th scope="col">สาย</th>
+          <th scope="col">ลา</th><th scope="col">สาย</th>
           <th scope="col">OT (ชม.)</th></tr></thead>
         <tbody>
           {person.months.map(entry=><tr key={entry.month} className={!entry.available?"report-inline-future":""}>
@@ -75,18 +74,18 @@ export function YearlyReportInline({person,data,id}:{
                 <span className="report-inline-track" aria-hidden="true">
                   <i style={{width:(entry.scheduledDays?Math.min(100,entry.present/entry.scheduledDays*100):0)+"%"}}/>
                 </span></div></td>
-              <td>{entry.absent}</td><td>{entry.leave}</td><td>{entry.late}</td>
+              <td>{entry.leave}</td><td>{entry.late}</td>
               <td className={entry.otHours?"report-inline-ot":""}>{num(entry.otHours)}</td>
             </>:<td colSpan={6} className="report-inline-future-text">ยังไม่ถึงเดือนนี้</td>}
           </tr>)}
           <tr className="report-inline-grand-total">
             <td>รวมทั้งปี</td><td>{data.scheduledDays}</td><td>{person.present}</td>
-            <td>{person.absent}</td><td>{person.leave}</td><td>{person.late}</td>
+            <td>{person.leave}</td><td>{person.late}</td>
             <td>{num(person.otHours)}</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <p className="report-inline-footnote">เข้างานนับรวมมาสายแล้ว · เดือนอนาคตยังไม่มีข้อมูล ไม่ใช่วันขาดงาน · เป็นข้อมูลทดลอง</p>
+    <p className="report-inline-footnote">เข้างานนับรวมมาสายแล้ว · เดือนอนาคตยังไม่มีข้อมูล ไม่รวมเป็นวันทำงาน · เป็นข้อมูลทดลอง</p>
   </section>;
 }

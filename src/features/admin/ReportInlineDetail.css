@@ -28,7 +28,7 @@
 .report-inline-heading>small{font-size:11px;color:#6c8ca0;background:#edf5f9;
   padding:7px 10px;border-radius:7px;font-weight:720;white-space:nowrap;}
 .report-inline-summary{
-  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
   margin:0 18px 14px;padding:12px 0;
   background:#f1f7fa;border-radius:9px;
 }
@@ -38,7 +38,6 @@
 .report-inline-stat strong{font-size:19px;color:#2b5872;font-weight:810;
   font-variant-numeric:tabular-nums;white-space:nowrap;}
 .report-inline-stat strong small{margin-left:4px;font-size:10px;font-weight:690;color:#8a9eac;}
-.report-inline-stat.is-absent strong{color:#ad635e;}
 .report-inline-stat.is-leave strong{color:#6b79a7;}
 .report-inline-stat.is-late strong{color:#a18041;}
 .report-inline-stat.is-ot strong{color:#327b68;}

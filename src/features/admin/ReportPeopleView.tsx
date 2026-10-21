@@ -23,10 +23,11 @@ const fmtShortDate=(iso:string)=>new Intl.DateTimeFormat("th-TH",{day:"numeric",
 const fmtShortMonth=(iso:string)=>new Intl.DateTimeFormat("th-TH",{month:"short"}).format(
   new Date(Number(iso.slice(0,4)),Number(iso.slice(5,7))-1,15)
 );
-const colorStyle=(code:string)=>"report-split-avatar-"+(Number(code.slice(-1))%4+1);
+const colorStyle=(code:string)=>"report-split-color-"+(Number(code.slice(-2))%8||8);
 
-function EmployeeProfile({person,periodLabel,scheduledDays,mode,availableMonths}:{
+function EmployeeProfile({person,periodLabel,scheduledDays,mode,availableMonths,onClose}:{
   person:Person;periodLabel:string;scheduledDays:number;mode:"month"|"year";availableMonths?:number;
+  onClose:()=>void;
 }){
   const [allHistory,setAllHistory]=useState(false);
   const presence=rate(person.present,scheduledDays);
@@ -35,8 +36,8 @@ function EmployeeProfile({person,periodLabel,scheduledDays,mode,availableMonths}
   const totalRows=hasDailyHistory?person.days.length:person.months.length;
   const historyToShow=allHistory?totalRows:5;
 
-  return <aside className="report-split-profile" aria-label={"รายละเอียดการทำงานของ "+person.name}>
-    <div className="report-split-cover" aria-hidden="true"/>
+  return <aside className={"report-split-profile "+colorStyle(person.code)} aria-label={"รายละเอียดการทำงานของ "+person.name}>
+    <div className="report-split-cover"><button type="button" className="report-split-close" onClick={onClose} aria-label="ซ่อนรายละเอียดพนักงาน">×</button></div>
     <div className="report-split-identity">
       <div className={"report-split-avatar report-split-profile-avatar "+colorStyle(person.code)}
         aria-hidden="true">{person.code.slice(-2)}</div>
@@ -67,7 +68,6 @@ function EmployeeProfile({person,periodLabel,scheduledDays,mode,availableMonths}
     </div>
 
     <div className="report-split-tiny-stats" aria-label="ยอดสรุปพนักงาน">
-      <div><span>ขาด</span><strong>{person.absent} <small>วัน</small></strong></div>
       <div><span>สาย</span><strong>{person.late} <small>ครั้ง</small></strong></div>
       <div><span>OT</span><strong>{readable(person.otHours)} <small>ชม.</small></strong></div>
     </div>
@@ -96,7 +96,7 @@ function EmployeeProfile({person,periodLabel,scheduledDays,mode,availableMonths}
               <div className="report-split-entry-date">{fmtShortMonth(entry.month)}</div>
               <div className="report-split-entry-content">
                 <span className="report-split-month-count">{entry.available?"เข้างาน "+entry.present+" วัน":"ยังไม่มีข้อมูล"}</span>
-                <small>{entry.available?"ขาด "+entry.absent+" · ลา "+entry.leave+" · สาย "+entry.late:"ยังไม่ถึงเดือนนี้"}</small>
+                <small>{entry.available?"ลา "+entry.leave+" · สาย "+entry.late:"ยังไม่ถึงเดือนนี้"}</small>
               </div>
               <div className="report-split-entry-right">{entry.available&&entry.otHours?readable(entry.otHours)+" ชม. OT":""}</div>
             </div>
@@ -123,14 +123,15 @@ export default function ReportPeopleView({mode,employees,periodLabel,scheduledDa
   const visible=employees.filter(person=>[person.name,person.code,person.department].some(
     value=>value.toLocaleLowerCase("th-TH").includes(search)
   ));
-  const selected=visible.find(person=>person.code===selectedCode)??visible[0]??null;
-  return <div className="report-split-grid">
+  const selected=visible.find(person=>person.code===selectedCode)??null;
+  const togglePerson=(code:string)=>setSelectedCode(current=>current===code?null:code);
+  return <div className={"report-split-grid"+(selected?" has-selection":"")}>
     <section className="report-split-list" aria-label="รายชื่อพนักงานและยอดรายงาน">
       <div className="report-split-list-heading">
         <div>
           <span className="report-split-kicker">ATTENDANCE / {mode==="month"?"MONTHLY":"YEARLY"}</span>
           <h3>รายงานพนักงาน</h3>
-          <p>เลือกพนักงานเพื่อดูรายละเอียดด้านขวา</p>
+          <p>กดชื่อพนักงานเพื่อแสดงรายละเอียด กดซ้ำเพื่อซ่อน</p>
         </div>
         <span className="report-split-counter">{visible.length} คน</span>
       </div>
@@ -146,23 +147,21 @@ export default function ReportPeopleView({mode,employees,periodLabel,scheduledDa
       <div className="report-split-table-scroll">
         <table className="report-split-table">
           <thead><tr>
-            <th scope="col">พนักงาน</th><th scope="col">เข้างาน</th><th scope="col">ขาด</th>
-            <th scope="col">ลา</th><th scope="col">สาย</th><th scope="col">OT</th>
+            <th scope="col">พนักงาน</th><th scope="col">เข้างาน</th><th scope="col">ลา</th><th scope="col">สาย</th><th scope="col">OT</th>
           </tr></thead>
           <tbody>{visible.map(person=><tr key={person.code}
-            className={selected?.code===person.code?"is-selected":""}
-            onClick={()=>setSelectedCode(person.code)}>
+            className={colorStyle(person.code)+(selected?.code===person.code?" is-selected":"")}
+            onClick={()=>togglePerson(person.code)}>
             <td><button type="button" className="report-split-person-button"
               aria-pressed={selected?.code===person.code}
               aria-label={"ดูรายงานของ "+person.name}
-              onClick={event=>{event.stopPropagation();setSelectedCode(person.code);}}>
+              onClick={event=>{event.stopPropagation();togglePerson(person.code);}}>
               <span className={"report-split-avatar report-split-row-avatar "+colorStyle(person.code)}
                 aria-hidden="true">{person.code.slice(-2)}</span>
               <span className="report-split-person-text"><strong>{person.name}</strong>
                 <small>{person.department}</small></span>
             </button></td>
             <td className="report-split-number is-present">{person.present}</td>
-            <td className="report-split-number">{person.absent}</td>
             <td className="report-split-number">{person.leave}</td>
             <td className="report-split-number">{person.late}</td>
             <td className="report-split-number is-ot">{readable(person.otHours)}</td>
@@ -177,7 +176,6 @@ export default function ReportPeopleView({mode,employees,periodLabel,scheduledDa
     </section>
     {selected?<EmployeeProfile key={mode+"-"+periodLabel+"-"+selected.code}
       person={selected} periodLabel={periodLabel} mode={mode}
-      scheduledDays={scheduledDays} availableMonths={availableMonths}/>:
-    <aside className="report-split-blank">เลือกพนักงานจากรายการทางซ้ายเพื่อดูรายละเอียด</aside>}
+      scheduledDays={scheduledDays} availableMonths={availableMonths} onClose={()=>setSelectedCode(null)}/>:null}
   </div>;
 }

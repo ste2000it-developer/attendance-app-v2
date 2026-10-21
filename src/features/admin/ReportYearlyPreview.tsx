@@ -16,7 +16,6 @@ function YearIcon({name,size=17}:{name:"left"|"right"|"download"|"search";size?:
 }
 const totals=[
   {key:"present",label:"เข้างาน",suffix:"วัน-คน",hint:"รวมวันที่มาสายแล้ว"},
-  {key:"absent",label:"ขาดงาน",suffix:"วัน-คน",hint:"จากวันทำงานจำลอง"},
   {key:"leave",label:"ลางาน",suffix:"วัน-คน",hint:"ไม่เชื่อมใบลาจริง"},
   {key:"late",label:"มาสาย",suffix:"ครั้ง",hint:"นับอยู่ในวันเข้างาน"},
   {key:"otHours",label:"OT รวม",suffix:"ชม.",hint:"ชั่วโมงสมมติ"}
@@ -70,7 +69,7 @@ export default function ReportYearlyPreview(){
         <small>{stat.hint}</small>
       </div>)}
     </div>
-    <ReportPeopleView mode="year" employees={data.employees}
+    <ReportPeopleView key={year} mode="year" employees={data.employees}
       periodLabel={"พ.ศ. "+(year+543)} scheduledDays={data.scheduledDays}
       availableMonths={data.includedMonths}/>
 

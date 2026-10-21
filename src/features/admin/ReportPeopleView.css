@@ -114,7 +114,6 @@
 .report-split-entry-date{font-size:10px;font-weight:770;color:#547185;white-space:nowrap;}
 .report-split-entry-content{display:grid;gap:3px;min-width:0;}
 .report-split-entry-status{font-size:10px;font-weight:770;color:#369377;}
-.report-split-entry-status.is-absent{color:#ca6a65;}
 .report-split-entry-status.is-late{color:#ac8540;}
 .report-split-entry-status.is-leave{color:#8770b6;}
 .report-split-entry-content small{font-size:9px;color:#9caeb8;white-space:nowrap;}
@@ -160,3 +159,31 @@
  .report-split-row-avatar{width:31px;height:31px;}
  .report-split-profile .report-split-cover{height:80px;}
 }
+
+/* Attendance V2 employee accents and an on-demand side panel */
+.report-split-grid{grid-template-columns:minmax(0,1fr);}
+.report-split-grid.has-selection{grid-template-columns:minmax(0,1.6fr) minmax(260px,1fr);}
+.report-split-color-1{--employee-accent:#327eaa;--employee-tint:#eaf3fa;}
+.report-split-color-2{--employee-accent:#398d77;--employee-tint:#eaf7f2;}
+.report-split-color-3{--employee-accent:#8871b4;--employee-tint:#f1eef9;}
+.report-split-color-4{--employee-accent:#ad7a48;--employee-tint:#fcf3e9;}
+.report-split-color-5{--employee-accent:#4d77b8;--employee-tint:#edf2fc;}
+.report-split-color-6{--employee-accent:#ad6f87;--employee-tint:#f9eff3;}
+.report-split-color-7{--employee-accent:#428a97;--employee-tint:#eaf6f8;}
+.report-split-color-8{--employee-accent:#718953;--employee-tint:#f0f5e8;}
+.report-split-table tbody tr.is-selected,
+.report-split-table tbody tr.is-selected:hover{background:var(--employee-tint,#edf5f9);}
+.report-split-table tbody tr.is-selected td:first-child{box-shadow:inset 3px 0 var(--employee-accent,#205d81);}
+.report-split-row-avatar{color:var(--employee-accent,#205d81);background:var(--employee-tint,#edf4f9);}
+.report-split-table .report-split-person-text strong{color:var(--employee-accent,#3d6075);}
+.report-split-cover{height:80px;box-sizing:border-box;display:flex;justify-content:flex-end;align-items:flex-start;padding:10px 12px;background:var(--employee-tint,#edf4f9);border-top:5px solid var(--employee-accent,#205d81);}
+.report-split-profile-avatar{background:var(--employee-accent,#205d81);color:#fff;}
+.report-split-close{display:grid;place-items:center;width:30px;height:30px;border:0;border-radius:9px;background:#ffffffcd;color:#516f81;font-size:21px;cursor:pointer;}
+.report-split-close:hover{background:#fff;color:#245f82;}
+.report-split-close:focus-visible{outline:3px solid #98cce2;outline-offset:2px;}
+.report-split-tiny-stats{grid-template-columns:repeat(2,minmax(0,1fr));}
+@media(max-width:1240px){.report-split-grid.has-selection{grid-template-columns:minmax(0,1.5fr) minmax(255px,1fr);} .report-split-table th:nth-child(3),.report-split-table td:nth-child(3),.report-split-table th:nth-child(4),.report-split-table td:nth-child(4){display:table-cell;}}
+.report-v2{container-type:inline-size;}
+@container (max-width:760px){.report-split-grid.has-selection{grid-template-columns:minmax(0,1fr);} .report-split-profile{position:static;}}
+@media(max-width:900px){.report-split-grid.has-selection{grid-template-columns:minmax(0,1fr);}}
+@media(min-width:901px) and (max-width:1240px){.report-split-grid.has-selection{grid-template-columns:minmax(0,1.5fr) minmax(255px,1fr);}}
