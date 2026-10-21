@@ -6,6 +6,7 @@ import {
 import { exportAttendanceReportWorkbook } from "./reportWorkbook";
 import "./ReportManagerPreview.css";
 import ReportYearlyPreview from "./ReportYearlyPreview";
+import ReportDetailDialog from "./ReportDetailDialog";
 import "./ReportYearlyPreview.css";
 
 function ReportIcon({name,size=19}:{name:"left"|"right"|"download"|"search"|"check"|"calendar"|"clock"|"users"|"close"|"file"|"arrow";size?:number}){
@@ -125,7 +126,7 @@ function ReportMonthlyPreview() {
               <td className="report-v2-number">{person.late}</td>
               <td className="report-v2-number ot">{hours(person.otHours)}</td>
               <td><button type="button" className="report-v2-open"
-                aria-expanded={selectedCode===person.code} onClick={()=>setSelectedCode(selectedCode===person.code?null:person.code)}>
+                aria-haspopup="dialog" onClick={()=>setSelectedCode(person.code)}>
                 รายวัน <ReportIcon name="arrow" size={15}/></button></td>
             </tr>)}</tbody>
           </table>
@@ -134,8 +135,8 @@ function ReportMonthlyPreview() {
           {visible.map(person=><article className="report-v2-person-card" key={person.code}>
             <div className="report-v2-person-head"><div><strong>{person.name}</strong>
               <small>{person.code} · {person.department}</small></div>
-              <button type="button" onClick={()=>setSelectedCode(selectedCode===person.code?null:person.code)}
-                aria-expanded={selectedCode===person.code}>รายวัน <ReportIcon name="arrow" size={15}/></button></div>
+              <button type="button" onClick={()=>setSelectedCode(person.code)}
+                aria-haspopup="dialog">รายวัน <ReportIcon name="arrow" size={15}/></button></div>
             <div className="report-v2-person-metrics">
               <span>เข้างาน <strong>{person.present}</strong></span>
               <span>ขาด <strong>{person.absent}</strong></span>
@@ -148,11 +149,11 @@ function ReportMonthlyPreview() {
       </>}
       <p className="report-v2-footnote">เข้างานรวมรายการมาสายแล้ว (ไม่บวกซ้ำ) · 1 รายการ = พนักงาน 1 คนต่อ 1 วันทำงานจำลอง</p>
     </section>
-    {selected&&<section className="report-v2-detail" aria-labelledby="report-v2-detail-title">
+    {selected&&<ReportDetailDialog titleId="report-v2-detail-title" onClose={()=>setSelectedCode(null)}>
       <div className="report-v2-detail-heading">
         <div><span>รายละเอียดการลงเวลา</span><h3 id="report-v2-detail-title">{selected.name}</h3>
           <p>{selected.code} · {reportMonthLabel(month)}</p></div>
-        <button type="button" onClick={()=>setSelectedCode(null)} aria-label="ปิดรายละเอียด"><ReportIcon name="close" size={18}/></button>
+        <button className="report-v2-detail-close" type="button" onClick={()=>setSelectedCode(null)} aria-label="ปิดรายละเอียด"><ReportIcon name="close" size={18}/></button>
       </div>
       <div className="report-v2-detail-scroll">
         <table className="report-v2-detail-table">
@@ -167,7 +168,7 @@ function ReportMonthlyPreview() {
         </table>
       </div>
       <p className="report-v2-detail-footnote">เวลาทั้งหมดเป็นข้อมูลจำลองเพื่อดูหน้าจอ ไม่ใช่หลักฐานการลงเวลาหรือคำนวณค่าจ้าง</p>
-    </section>}
+    </ReportDetailDialog>}
   </div>;
 }
 

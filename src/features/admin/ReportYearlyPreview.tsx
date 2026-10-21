@@ -1,6 +1,7 @@
 import {useMemo,useState} from "react";
 import {createDemoAttendanceYear,currentReportYear} from "./reportAnnualData";
 import {exportAnnualReportWorkbook} from "./reportWorkbook";
+import ReportDetailDialog from "./ReportDetailDialog";
 import "./ReportYearlyPreview.css";
 
 function YearIcon({name,size=17}:{name:"left"|"right"|"download"|"search"|"close"|"arrow";size?:number}) {
@@ -109,7 +110,7 @@ export default function ReportYearlyPreview(){
               <td className="report-v2-number">{digits(person.late)}</td>
               <td className="report-v2-number ot">{digits(person.otHours)}</td>
               <td><button type="button" className="report-v2-open"
-                aria-expanded={selectedCode===person.code} onClick={()=>setSelectedCode(selectedCode===person.code?null:person.code)}>
+                aria-haspopup="dialog" onClick={()=>setSelectedCode(person.code)}>
                 12 เดือน <YearIcon name="arrow" size={15}/></button></td>
             </tr>)}</tbody>
           </table>
@@ -118,8 +119,8 @@ export default function ReportYearlyPreview(){
           {visible.map(person=><article className="report-v2-person-card" key={person.code}>
             <div className="report-v2-person-head">
               <div><strong>{person.name}</strong><small>{person.code} · {person.department}</small></div>
-              <button type="button" onClick={()=>setSelectedCode(selectedCode===person.code?null:person.code)}
-                aria-expanded={selectedCode===person.code}>12 เดือน <YearIcon name="arrow" size={15}/></button>
+              <button type="button" onClick={()=>setSelectedCode(person.code)}
+                aria-haspopup="dialog">12 เดือน <YearIcon name="arrow" size={15}/></button>
             </div>
             <div className="report-v2-person-metrics">
               <span>เข้างาน <strong>{digits(person.present)}</strong></span>
@@ -133,12 +134,12 @@ export default function ReportYearlyPreview(){
       </>}
       <p className="report-v2-footnote">กด “12 เดือน” เพื่อดูยอดของแต่ละเดือน · เข้างานรวมรายการสายแล้ว · การค้นหามีผลเฉพาะหน้าจอ ส่วน Excel ส่งออกพนักงานตัวอย่างทั้งหมด</p>
     </section>
-    {selected&&<section className="report-v2-detail" aria-labelledby="report-yearly-detail-title">
+    {selected&&<ReportDetailDialog titleId="report-yearly-detail-title" onClose={()=>setSelectedCode(null)}>
       <div className="report-v2-detail-heading">
         <div><span>สรุปการทำงาน 12 เดือน</span>
           <h3 id="report-yearly-detail-title">{selected.name}</h3>
           <p>{selected.code} · ปี พ.ศ. {year+543}</p></div>
-        <button type="button" aria-label="ปิดรายละเอียด" onClick={()=>setSelectedCode(null)}><YearIcon name="close" size={18}/></button>
+        <button className="report-v2-detail-close" type="button" aria-label="ปิดรายละเอียด" onClick={()=>setSelectedCode(null)}><YearIcon name="close" size={18}/></button>
       </div>
       <div className="report-v2-detail-scroll">
         <table className="report-v2-detail-table report-yearly-detail-table">
@@ -159,6 +160,6 @@ export default function ReportYearlyPreview(){
         </table>
       </div>
       <p className="report-v2-detail-footnote">ยอดรายปีเป็นผลรวมเดือนเดียวกันจากข้อมูลจำลอง ไม่มีการเชื่อมกับข้อมูลพนักงานจริง</p>
-    </section>}
+    </ReportDetailDialog>}
   </div>;
 }

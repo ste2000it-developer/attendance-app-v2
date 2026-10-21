@@ -1,0 +1,50 @@
+/* One modal behavior for both monthly daily logs and annual 12-month details. */
+.report-v2-dialog-backdrop {
+ position:fixed; inset:0; z-index:1200;
+ display:grid; place-items:center;
+ padding:clamp(12px,3vw,28px);
+ background:rgba(18,39,54,.57);
+}
+.report-v2-dialog {
+ box-sizing:border-box; width:min(100%,900px); max-height:calc(100dvh - 24px);
+ display:flex; flex-direction:column; min-height:0;
+ background:#fff; color:#29495f;
+ border:1px solid #dae7ef; border-radius:18px;
+ box-shadow:0 24px 80px rgba(13,35,53,.26); overflow:hidden;
+}
+.report-v2-dialog .report-v2-detail-heading {
+ flex:none; padding:19px 23px 16px; border-bottom:1px solid #e8f0f4;
+ background:#fff;
+}
+.report-v2-dialog .report-v2-detail-heading span {
+ color:#5783a0; text-transform:none;
+}
+.report-v2-dialog .report-v2-detail-heading h3 {
+ font-size:19px; line-height:1.4;
+}
+.report-v2-dialog .report-v2-detail-close {
+ flex:none; display:grid;place-items:center;
+ width:41px;height:41px;background:#edf4f8;
+ border:0;border-radius:11px;color:#436f88;cursor:pointer;
+}
+.report-v2-dialog .report-v2-detail-close:hover { background:#deedf5; color:#1e5a7d; }
+.report-v2-dialog .report-v2-detail-close:focus-visible {
+ outline:3px solid #91c5e2;outline-offset:2px;
+}
+.report-v2-dialog .report-v2-detail-scroll {
+ flex:1 1 auto; min-height:0; max-height:none;
+ overflow:auto; overscroll-behavior:contain;
+}
+.report-v2-dialog .report-v2-detail-table { width:100%; }
+.report-v2-dialog .report-v2-detail-table th { background:#f6f9fb; }
+.report-v2-dialog .report-v2-detail-footnote {
+ flex:none; padding:13px 23px;
+ border-top:1px solid #e9eff3;
+}
+@media(max-width:700px){
+ .report-v2-dialog-backdrop {align-items:end;padding:8px;}
+ .report-v2-dialog {width:100%;max-height:calc(100dvh - 16px);border-radius:16px;}
+ .report-v2-dialog .report-v2-detail-heading {padding:15px 16px;}
+ .report-v2-dialog .report-v2-detail-heading h3 {font-size:17px;}
+ .report-v2-dialog .report-v2-detail-footnote {padding:11px 16px;}
+}
