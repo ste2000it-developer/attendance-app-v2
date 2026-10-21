@@ -2,6 +2,7 @@ import { useState } from "react";
 import EmployeeManagerPreview from "./EmployeeManagerPreview";
 import type { EmployeeRecord } from "./EmployeeManagerPreview";
 import LeaveManagerPreview, { createDemoLeaveRequests } from "./LeaveManagerPreview";
+import ReportManagerPreview from "./ReportManagerPreview";
 import type { AdminLeaveRequest } from "./LeaveManagerPreview";
 import "./AdminPreviewPage.css";
 
@@ -17,7 +18,7 @@ type Tab = typeof tabs[number]["id"];
 const screens: Record<Exclude<Tab,"overview">, { title: string; detail: string; icon: string }> = {
   people: { title: "จัดการพนักงาน", detail: "เพิ่มพนักงาน กำหนดแผนก ตำแหน่ง สิทธิ์ และข้อมูลบัตรพนักงาน", icon: "people" },
   leave: { title: "จัดการคำขอลา", detail: "อนุมัติคำขอ ดูประวัติการลา และส่งออกใบลาทั้งหมดเป็น Excel", icon: "calendar" },
-  report: { title: "รายงานการทำงาน", detail: "สรุปเวลาเข้างาน ออกงาน และ OT เมื่อเชื่อมข้อมูลจริง", icon: "chart" },
+  report: { title: "รายงานการทำงาน", detail: "สรุปเข้างาน ขาด ลา สาย และ OT รายเดือน พร้อมรายงานรายพนักงานและ Excel", icon: "chart" },
   settings: { title: "ตั้งค่าระบบ", detail: "กำหนดสถานที่ทำงาน วันหยุด และสิทธิ์ผู้ใช้งาน", icon: "settings" }
 };
 function AdminIcon({ name, size = 21 }: {name: string; size?: number}) {
@@ -116,6 +117,8 @@ export default function AdminPreviewPage() {
             <EmployeeManagerPreview employees={demoEmployees} onChange={setDemoEmployees} />
           ) : active === "leave" ? (
             <LeaveManagerPreview requests={demoLeaveRequests} onChange={setDemoLeaveRequests} />
+          ) : active === "report" ? (
+            <ReportManagerPreview />
           ) : (
             <section className="admin-preview-panel admin-preview-empty">
               <span className="admin-preview-empty-icon"><AdminIcon name={active} size={30}/></span>
