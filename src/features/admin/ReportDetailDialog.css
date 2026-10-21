@@ -14,12 +14,13 @@
  padding:25px 28px 22px;border-bottom:0;background:#fff;
 }
 .report-v2-modal-person{min-width:0;display:flex;align-items:center;gap:15px;}
-.report-v2-modal-avatar{
+.report-v2-dialog .report-v2-modal-avatar{
  flex:none;width:54px;height:54px;display:grid;place-items:center;
  border-radius:15px;background:#e5f1f8;color:#226080;
  font-size:19px;font-weight:830;letter-spacing:-.02em;
 }
 .report-v2-modal-person-copy{min-width:0;}
+.report-v2-dialog .report-v2-modal-mobile-period{display:none;}
 .report-v2-dialog .report-v2-modal-eyebrow{
  display:block;margin-bottom:5px;color:#62889d;font-size:10px;
  font-weight:830;letter-spacing:.06em;
@@ -30,9 +31,9 @@
 .report-v2-dialog .report-v2-modal-person-copy p{
  margin:4px 0 0;color:#869ba9;font-size:12px;line-height:1.5;
 }
-.report-v2-modal-bullet{padding:0 8px;color:#acc0cb;}
+.report-v2-dialog .report-v2-modal-bullet{padding:0 8px;color:#acc0cb;}
 .report-v2-modal-top-actions{align-self:flex-start;display:flex;align-items:center;gap:11px;flex:none;}
-.report-v2-modal-period{
+.report-v2-dialog .report-v2-modal-period{
  display:inline-flex;align-items:center;justify-content:center;
  border-radius:8px;padding:9px 12px;background:#f2f7fa;
  color:#4b7891;font-size:12px;font-weight:775;white-space:nowrap;
@@ -117,10 +118,11 @@
  .report-v2-dialog-backdrop{align-items:end;padding:8px;}
  .report-v2-dialog{width:100%;max-height:calc(100dvh - 16px);border-radius:17px;}
  .report-v2-dialog .report-v2-modal-header{padding:16px;align-items:flex-start;}
- .report-v2-modal-avatar{width:42px;height:42px;font-size:15px;border-radius:11px;}
+ .report-v2-dialog .report-v2-modal-avatar{width:42px;height:42px;font-size:15px;border-radius:11px;}
  .report-v2-modal-person{gap:10px;}
  .report-v2-dialog .report-v2-modal-person-copy h3{font-size:17px;}
- .report-v2-modal-period{display:none;}
+ .report-v2-dialog .report-v2-modal-period{display:none;}
+ .report-v2-dialog .report-v2-modal-mobile-period{display:block;margin-top:4px;color:#6791a7;font-size:11px;font-weight:720;}
  .report-v2-modal-summary{margin:0 13px 16px;padding:12px 0;}
  .report-v2-modal-metric{padding:0 8px;gap:6px;}
  .report-v2-modal-metric>span{font-size:10px;}

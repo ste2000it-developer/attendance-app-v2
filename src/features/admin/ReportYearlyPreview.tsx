@@ -142,6 +142,7 @@ export default function ReportYearlyPreview(){
             <span className="report-v2-modal-eyebrow">รายงานการทำงาน / รายปี</span>
             <h3 id="report-yearly-detail-title">{selected.name}</h3>
             <p>{selected.code}<span className="report-v2-modal-bullet">·</span>{selected.department}</p>
+            <span className="report-v2-modal-mobile-period">พ.ศ. {year+543}</span>
           </div>
         </div>
         <div className="report-v2-modal-top-actions">

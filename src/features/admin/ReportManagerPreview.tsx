@@ -157,6 +157,7 @@ function ReportMonthlyPreview() {
             <span className="report-v2-modal-eyebrow">รายงานการทำงาน / รายวัน</span>
             <h3 id="report-v2-detail-title">{selected.name}</h3>
             <p>{selected.code}<span className="report-v2-modal-bullet">·</span>{selected.department}</p>
+            <span className="report-v2-modal-mobile-period">{reportMonthLabel(month)}</span>
           </div>
         </div>
         <div className="report-v2-modal-top-actions">
