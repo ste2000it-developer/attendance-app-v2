@@ -2,6 +2,7 @@ import {useMemo,useState} from "react";
 import {createDemoAttendanceYear,currentReportYear} from "./reportAnnualData";
 import {exportAnnualReportWorkbook} from "./reportWorkbook";
 import ReportPeopleView from "./ReportPeopleView";
+import type { ReportMode } from "./ReportPeopleView";
 import "./ReportYearlyPreview.css";
 
 function YearIcon({name,size=17}:{name:"left"|"right"|"download"|"search";size?:number}) {
@@ -22,7 +23,11 @@ const totals=[
 ] as const;
 const digits=(number:number)=>number.toLocaleString("th-TH",{maximumFractionDigits:1});
 
-export default function ReportYearlyPreview(){
+export default function ReportYearlyPreview({initialSelectedCode,onOpenMode,onResetSelection}:{
+  initialSelectedCode:string|null;
+  onOpenMode:(mode:ReportMode,employeeCode:string)=>void;
+  onResetSelection:()=>void;
+}){
   const [year,setYear]=useState(currentReportYear);
   const [error,setError]=useState("");
   const data=useMemo(()=>createDemoAttendanceYear(year),[year]);
@@ -31,6 +36,7 @@ export default function ReportYearlyPreview(){
   function moveYear(change:number){
     const target=year+change;
     if(target<earliest||target>latest)return;
+    onResetSelection();
     setYear(target);
     setError("");
   }
@@ -71,7 +77,8 @@ export default function ReportYearlyPreview(){
     </div>
     <ReportPeopleView key={year} mode="year" employees={data.employees}
       periodLabel={"พ.ศ. "+(year+543)} scheduledDays={data.scheduledDays}
-      availableMonths={data.includedMonths}/>
+      availableMonths={data.includedMonths}
+      initialSelectedCode={initialSelectedCode} onOpenMode={onOpenMode}/>
 
   </div>;
 }

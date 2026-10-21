@@ -187,3 +187,18 @@
 @container (max-width:760px){.report-split-grid.has-selection{grid-template-columns:minmax(0,1fr);} .report-split-profile{position:static;}}
 @media(max-width:900px){.report-split-grid.has-selection{grid-template-columns:minmax(0,1fr);}}
 @media(min-width:901px) and (max-width:1240px){.report-split-grid.has-selection{grid-template-columns:minmax(0,1.5fr) minmax(255px,1fr);}}
+
+/* Restore two direct employee actions; both route to the detail panel, never a popup. */
+.report-split-action-cell{padding-right:15px!important;}
+.report-split-actions{display:flex;align-items:center;justify-content:center;gap:5px;min-width:0;}
+.report-split-action{white-space:nowrap;min-height:32px;padding:7px 10px;
+ border:1px solid #dce9f1;border-radius:8px;background:#f7fafc;
+ color:#527a94;font:inherit;font-size:10px;font-weight:760;cursor:pointer;}
+.report-split-action:hover{background:#eaf3f9;border-color:#bcd8e7;color:#245f82;}
+.report-split-action.is-active{background:var(--employee-tint,#e6f3f9);border-color:var(--employee-accent,#2b7299);
+ color:var(--employee-accent,#2b7299);}
+.report-split-action:focus-visible{outline:3px solid #9fcee5;outline-offset:2px;}
+@media(max-width:700px){
+ .report-split-table{min-width:590px;}
+ .report-split-action{padding:6px 9px;}
+}

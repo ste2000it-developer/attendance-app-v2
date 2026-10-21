@@ -10,7 +10,10 @@ import "./ReportPeopleView.css";
  * All data is fictional preview data; no accounts or images are fetched.
  */
 type Person=ReportEmployee|AnnualEmployee;
+export type ReportMode="month"|"year";
 type Props={
+  initialSelectedCode?:string|null;
+  onOpenMode:(mode:ReportMode,employeeCode:string)=>void;
   mode:"month"|"year";
   employees:Person[];
   periodLabel:string;
@@ -116,15 +119,20 @@ function EmployeeProfile({person,periodLabel,scheduledDays,mode,availableMonths,
   </aside>;
 }
 
-export default function ReportPeopleView({mode,employees,periodLabel,scheduledDays,availableMonths}:Props){
+export default function ReportPeopleView({mode,employees,periodLabel,scheduledDays,availableMonths,initialSelectedCode=null,onOpenMode}:Props){
   const [query,setQuery]=useState("");
-  const [selectedCode,setSelectedCode]=useState<string|null>(null);
+  const [selectedCode,setSelectedCode]=useState<string|null>(initialSelectedCode);
   const search=query.trim().toLocaleLowerCase("th-TH");
   const visible=employees.filter(person=>[person.name,person.code,person.department].some(
     value=>value.toLocaleLowerCase("th-TH").includes(search)
   ));
   const selected=visible.find(person=>person.code===selectedCode)??null;
   const togglePerson=(code:string)=>setSelectedCode(current=>current===code?null:code);
+  // Restore the explicit employee actions: one opens daily records, the other yearly totals.
+  const openPersonMode=(nextMode:ReportMode,code:string)=>{
+    if(nextMode===mode) togglePerson(code);
+    else onOpenMode(nextMode,code);
+  };
   return <div className={"report-split-grid"+(selected?" has-selection":"")}>
     <section className="report-split-list" aria-label="รายชื่อพนักงานและยอดรายงาน">
       <div className="report-split-list-heading">
@@ -147,7 +155,7 @@ export default function ReportPeopleView({mode,employees,periodLabel,scheduledDa
       <div className="report-split-table-scroll">
         <table className="report-split-table">
           <thead><tr>
-            <th scope="col">พนักงาน</th><th scope="col">เข้างาน</th><th scope="col">ลา</th><th scope="col">สาย</th><th scope="col">OT</th>
+            <th scope="col">พนักงาน</th><th scope="col">เข้างาน</th><th scope="col">ลา</th><th scope="col">สาย</th><th scope="col">OT</th><th scope="col">ดูรายละเอียด</th>
           </tr></thead>
           <tbody>{visible.map(person=><tr key={person.code}
             className={colorStyle(person.code)+(selected?.code===person.code?" is-selected":"")}
@@ -165,12 +173,26 @@ export default function ReportPeopleView({mode,employees,periodLabel,scheduledDa
             <td className="report-split-number">{person.leave}</td>
             <td className="report-split-number">{person.late}</td>
             <td className="report-split-number is-ot">{readable(person.otHours)}</td>
+            <td className="report-split-action-cell">
+              <div className="report-split-actions">
+                <button type="button"
+                  className={"report-split-action"+(mode==="month"&&selected?.code===person.code?" is-active":"")}
+                  aria-pressed={mode==="month"&&selected?.code===person.code}
+                  aria-label={"ดูรายวันของ "+person.name}
+                  onClick={event=>{event.stopPropagation();openPersonMode("month",person.code);}}>รายวัน</button>
+                <button type="button"
+                  className={"report-split-action"+(mode==="year"&&selected?.code===person.code?" is-active":"")}
+                  aria-pressed={mode==="year"&&selected?.code===person.code}
+                  aria-label={"ดูรายปีของ "+person.name}
+                  onClick={event=>{event.stopPropagation();openPersonMode("year",person.code);}}>รายปี</button>
+              </div>
+            </td>
           </tr>)}</tbody>
         </table>
         {!visible.length&&<div className="report-split-empty">ไม่พบพนักงานที่ตรงกับคำค้นหา</div>}
       </div>
       <div className="report-split-list-footer">
-        <span>เลือกชื่อเพื่อดูโปรไฟล์และประวัติ</span>
+        <span>กดรายวันหรือรายปีเพื่อดูรายละเอียดของแต่ละคน</span>
         <span>{mode==="month"?"สรุปรายเดือน":"สรุปรายปี"} · ข้อมูลทดลอง</span>
       </div>
     </section>
