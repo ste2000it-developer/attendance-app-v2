@@ -1,5 +1,5 @@
 /**
- * Leave forms are exported as separate worksheets in one real XLSX file.
+ * Exports two A5-sized leave forms per worksheet in one XLSX workbook.
  * OOXML / ZIP STORE requires no external dependencies or network calls.
  * All dynamic values are inline strings, never spreadsheet formulas.
  */
@@ -272,19 +272,67 @@ function makeStyles():string {
     '</styleSheet>';
 }
 
+/**
+ * Pair two A5 landscape forms vertically on a single A4 portrait print page.
+ * A final unpaired form retains its own A5 landscape paper settings.
+ * The original per-form layout/colors/borders stay exactly the same.
+ */
+function pairedLeaveSheetXml(
+  first: AdminLeaveRequest,
+  second: AdminLeaveRequest | undefined,
+  typeLabel: (type: AdminLeaveRequest["type"]) => string,
+  statusLabels: Record<Status,string>
+): string {
+  const top=leaveSheetXml(first,typeLabel,statusLabels);
+  if (!second) return top;
+
+  const bottom=leaveSheetXml(second,typeLabel,statusLabels);
+  const bottomRows=bottom.match(/<sheetData>([\s\S]*?)<\/sheetData>/);
+  const bottomMerges=bottom.match(/<mergeCells count="(\d+)">([\s\S]*?)<\/mergeCells>/);
+  if (!bottomRows || !bottomMerges) throw new Error("Invalid leave form XML");
+
+  // Row 19 separates the two forms; the second begins at row 20.
+  const offset=19;
+  const shiftedRows=bottomRows[1]
+    .replace(/(<row r=")(\d+)(")/g,(_match,start:string,number:string,end:string)=>
+      start+String(Number(number)+offset)+end)
+    .replace(/(<c r=")([A-Z]+)(\d+)(")/g,(_match,start:string,column:string,number:string,end:string)=>
+      start+column+String(Number(number)+offset)+end);
+  const shiftedMerges=bottomMerges[2].replace(
+    /(<mergeCell ref=")([A-Z]+)(\d+):([A-Z]+)(\d+)(")/g,
+    (_match,start:string,col1:string,row1:string,col2:string,row2:string,end:string)=>
+      start+col1+String(Number(row1)+offset)+":"+col2+String(Number(row2)+offset)+end
+  );
+  const divider='<row r="19" ht="12" customHeight="1"/>';
+  return top
+    .replace("</sheetData>",divider+shiftedRows+"</sheetData>")
+    .replace(/(<mergeCells count=")(\d+)(">)([\s\S]*?)(<\/mergeCells>)/,
+      (_match,open:string,count:string,middle:string,existing:string,close:string)=>
+        open+String(Number(count)+Number(bottomMerges[1]))+middle+existing+shiftedMerges+close)
+    .replace('dimension ref="A1:F18"','dimension ref="A1:F37"')
+    .replace('paperSize="11" orientation="landscape"','paperSize="9" orientation="portrait"')
+    .replace('pageMargins left="0.22" right="0.22" top="0.22" bottom="0.22"',
+      'pageMargins left="0.20" right="0.20" top="0.20" bottom="0.20"');
+}
+
 export function exportLeaveWorkbook(
   requests: AdminLeaveRequest[],
   typeLabel: (type: AdminLeaveRequest["type"]) => string,
   statusLabels: Record<Status,string>
 ): void {
-  // One leave form per worksheet, all forms in a single workbook.
+  // One worksheet holds up to two independent leave forms.
   const items=[...requests].sort((a,b)=>b.submittedDate.localeCompare(a.submittedDate)||a.id.localeCompare(b.id));
   if(items.length===0) throw new Error("No leave requests to export");
-  const sheetList=items.map((item,index)=>({
-    title:"ใบลา "+String(index+1).padStart(3,"0"),
-    id:index+1,
-    xml:leaveSheetXml(item,typeLabel,statusLabels)
-  }));
+  const sheetList=Array.from({length:Math.ceil(items.length/2)},(_,index)=>{
+    const firstIndex=index*2;
+    const firstNumber=String(firstIndex+1).padStart(3,"0");
+    const lastNumber=String(Math.min(firstIndex+2,items.length)).padStart(3,"0");
+    return {
+      title:"ใบลา "+firstNumber+(firstIndex+1<items.length?"-"+lastNumber:""),
+      id:index+1,
+      xml:pairedLeaveSheetXml(items[firstIndex],items[firstIndex+1],typeLabel,statusLabels)
+    };
+  });
   const worksheetFiles=sheetList.map(sheet=>({name:"xl/worksheets/sheet"+sheet.id+".xml",data:sheet.xml}));
   const workbookSheets=sheetList.map(sheet=>
     '<sheet name="'+escapeXml(sheet.title)+'" sheetId="'+sheet.id+'" r:id="rId'+sheet.id+'"/>'
