@@ -5,8 +5,8 @@
  * Scoped to admin preview; doesn't affect the attendance employee UI.
  */
 .admin-preview-shell{
-  --admin-divider:#dbe5eb;
-  --admin-divider-soft:#eaf0f4;
+  --admin-divider:#b6c8d5;
+  --admin-divider-soft:#cbd8e1;
 }
 
 /* Overview: divide the card's label/icon from its value without a color stripe. */
@@ -202,5 +202,140 @@
   .admin-preview-shell .report-split-meta>div{
     padding-top:11px;
     padding-bottom:11px;
+  }
+}
+
+
+/*
+ * Visibly distinct separators (Oct 2026 refinement).
+ * Keep separators NEUTRAL instead of going back to colored card borders.
+ * A strong rule separates groups; a finer one separates individual records.
+ */
+.admin-preview-shell .admin-preview-intro{
+  border-bottom:2px solid var(--admin-divider);
+  padding-bottom:17px;
+}
+.admin-preview-shell .admin-preview-stat > strong{
+  border-top:2px solid var(--admin-divider);
+  padding-top:12px;
+}
+.admin-preview-shell .admin-preview-panel-head{
+  border-bottom:2px solid var(--admin-divider);
+  padding-bottom:17px;
+}
+.admin-preview-shell .admin-preview-shortcuts button+button{
+  border-color:var(--admin-divider);
+}
+.admin-preview-shell .employee-demo-directory-title{
+  border-bottom:2px solid var(--admin-divider);
+}
+.admin-preview-shell .employee-demo-filters{
+  border-bottom:2px solid var(--admin-divider);
+}
+.admin-preview-shell .employee-demo-table thead th,
+.admin-preview-shell .employee-demo-table tbody td{
+  border-bottom:1px solid var(--admin-divider);
+}
+.admin-preview-shell .employee-demo-table tbody tr:nth-child(even){
+  background:#f6f9fb;
+}
+.admin-preview-shell .employee-demo-mobile-meta{
+  border-top:1px solid var(--admin-divider);
+}
+.admin-preview-shell .leave-simple-heading{
+  border-bottom:2px solid var(--admin-divider);
+}
+.admin-preview-shell .leave-simple-card-top{
+  border-bottom:1px solid var(--admin-divider);
+  padding-bottom:12px;
+}
+.admin-preview-shell .leave-simple-table th,
+.admin-preview-shell .leave-simple-table td{
+  border-bottom:1px solid var(--admin-divider);
+}
+.admin-preview-shell .report-v2-stat-top{
+  border-bottom:2px solid var(--admin-divider);
+  padding-bottom:12px;
+}
+.admin-preview-shell .report-split-list-heading{
+  border-bottom:2px solid var(--admin-divider);
+}
+.admin-preview-shell .report-split-table td{
+  border-bottom:1px solid var(--admin-divider);
+}
+.admin-preview-shell .report-split-table th{
+  border-bottom:2px solid var(--admin-divider);
+}
+.admin-preview-shell .report-split-identity{
+  border-bottom:2px solid var(--admin-divider);
+}
+.admin-preview-shell .report-split-meta>div+div{
+  border-top:1px solid var(--admin-divider);
+}
+.admin-preview-shell .report-split-insights{
+  border-top:2px solid var(--admin-divider);
+}
+.admin-preview-shell .report-split-history{
+  border-top:2px solid var(--admin-divider);
+}
+.admin-preview-shell .report-split-history-entry{
+  border-top:1px solid var(--admin-divider);
+}
+.admin-preview-shell .report-split-history-head{
+  border-bottom:1px solid var(--admin-divider);
+}
+
+/* Mobile: important lines run fully across their respective information blocks. */
+@media(max-width:700px){
+  .admin-preview-shell .admin-preview-intro{
+    border-bottom:2px solid var(--admin-divider);
+    margin-bottom:18px;
+    padding-bottom:14px;
+  }
+  .admin-preview-shell .admin-preview-stat > strong{
+    border-top:2px solid var(--admin-divider);
+    padding-top:10px;
+  }
+  .admin-preview-shell .admin-preview-panel-head{
+    border-bottom:2px solid var(--admin-divider);
+    padding-bottom:13px;
+  }
+  .admin-preview-shell .employee-demo-mobile-person{
+    border-bottom:2px solid var(--admin-divider);
+  }
+  .admin-preview-shell .employee-demo-mobile-meta{
+    border-top:1px solid var(--admin-divider);
+    padding-top:10px;
+  }
+  .admin-preview-shell .leave-simple-card-top{
+    border-bottom:2px solid var(--admin-divider);
+  }
+  .admin-preview-shell .leave-simple-card-meta{
+    border-bottom:1px solid var(--admin-divider-soft);
+    padding-bottom:12px;
+  }
+  .admin-preview-shell .report-v2-stat-top{
+    border-bottom:2px solid var(--admin-divider);
+  }
+  .admin-preview-shell .report-split-table tbody tr{
+    border:1px solid var(--admin-divider);
+  }
+  .admin-preview-shell .report-split-table td:first-child{
+    border-bottom:2px solid var(--admin-divider);
+  }
+  .admin-preview-shell .report-split-table td:nth-child(3),
+  .admin-preview-shell .report-split-table td:nth-child(5){
+    border-left:1px solid var(--admin-divider)!important;
+  }
+  .admin-preview-shell .report-split-table td:last-child{
+    border-top:2px solid var(--admin-divider);
+    margin-top:10px;
+    padding-top:13px!important;
+  }
+  .admin-preview-shell .report-split-identity{
+    border-bottom:2px solid var(--admin-divider);
+  }
+  .admin-preview-shell .report-split-meta>div+div{
+    border-top:1px solid var(--admin-divider);
   }
 }
