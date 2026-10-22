@@ -5,6 +5,7 @@ import LeaveManagerPreview, { createDemoLeaveRequests } from "./LeaveManagerPrev
 import ReportManagerPreview from "./ReportManagerPreview";
 import type { AdminLeaveRequest } from "./LeaveManagerPreview";
 import "./AdminPreviewPage.css";
+import "./AdminVisualRefresh.css";
 
 const tabs = [
   { id: "overview", label: "ภาพรวม" },

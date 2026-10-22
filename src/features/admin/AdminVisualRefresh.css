@@ -1,0 +1,428 @@
+/*
+ * Attendance V2 — vibrant and readable admin theme.
+ * Scoped to the preview console only; employee UI and V1 are untouched.
+ * Mobile-first refinements supplement each feature's existing responsive CSS.
+ */
+.admin-preview-shell {
+  --admin-blue: #176fbd;
+  --admin-ink: #233f56;
+  --admin-muted: #627e91;
+  --admin-line: #dce9f3;
+  --admin-canvas: #f3f8fd;
+  font-size: 14px;
+  color: var(--admin-ink);
+  background: var(--admin-canvas);
+}
+.admin-preview-shell :is(button,a,input,select,textarea) { font-family: inherit; }
+.admin-preview-shell :is(button,a,input,select,textarea):focus-visible {
+  outline: 3px solid #71c1eb;
+  outline-offset: 2px;
+}
+.admin-preview-shell .admin-preview-sidebar {
+  background: #ffffff;
+  border-right-color: #e0eaf4;
+}
+.admin-preview-shell .admin-preview-brand-icon {
+  background: linear-gradient(145deg,#1472c8,#1f9dca);
+  box-shadow: 0 6px 15px rgba(23,111,189,.16);
+}
+.admin-preview-shell .admin-preview-brand strong { font-size: 20px; }
+.admin-preview-shell .admin-preview-brand small { font-size: 12px; color: #637f94; }
+.admin-preview-shell .admin-preview-side-heading { font-size: 13px; }
+.admin-preview-shell .admin-preview-nav button { font-size: 15px; min-height: 51px; }
+.admin-preview-shell .admin-preview-nav button.is-active {
+  background: #e6f3fe;
+  color: #126ca9;
+  box-shadow: inset 3px 0 #1c84ce;
+}
+.admin-preview-shell .admin-preview-side-note { font-size: 12px; color: #697e92; }
+.admin-preview-shell .admin-preview-header {
+  background: #fff;
+  border-bottom-color: #e0eaf3;
+}
+.admin-preview-shell .admin-preview-eyebrow,
+.admin-preview-shell .admin-preview-kicker {
+  font-size: 12px;
+  color: #2583bb;
+  letter-spacing: .06em;
+}
+.admin-preview-shell .admin-preview-header h1 { font-size: 23px; color: #1e4663; }
+.admin-preview-shell .admin-preview-back {
+  font-size: 13px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #eff8fd;
+  border-color: #d2e9f5;
+  color: #16699b;
+}
+.admin-preview-shell .admin-preview-content { width: min(100%, 1220px); }
+.admin-preview-shell .admin-preview-intro h2 {
+  font-size: clamp(24px,2.45vw,31px);
+  color: #1b425d;
+}
+.admin-preview-shell .admin-preview-intro p { font-size: 14px; color: #5e8099; }
+.admin-preview-shell .admin-preview-tag {
+  font-size: 11px;
+  color: #16699b;
+  background: #e1f3fc;
+}
+.admin-preview-shell .admin-preview-stat,
+.admin-preview-shell .admin-preview-panel {
+  border-color: #dce9f2;
+  box-shadow: 0 5px 22px rgba(37,100,143,.045);
+}
+.admin-preview-shell .admin-preview-stat {
+  border-top: 3px solid #41a9d8;
+  background: linear-gradient(180deg,#fff,#f8fcff);
+}
+.admin-preview-shell .admin-preview-stat:nth-child(2) { border-top-color: #2db99d; }
+.admin-preview-shell .admin-preview-stat:nth-child(3) { border-top-color: #f4a557; }
+.admin-preview-shell .admin-preview-stat:nth-child(4) { border-top-color: #8277db; }
+.admin-preview-shell .admin-preview-stat-icon {
+  color: #197cb4;
+  background: #e4f4fd;
+}
+.admin-preview-shell .admin-preview-stat:nth-child(2) .admin-preview-stat-icon {
+  color: #148f79;
+  background: #dcf8ef;
+}
+.admin-preview-shell .admin-preview-stat:nth-child(3) .admin-preview-stat-icon {
+  color: #bc7823;
+  background: #fff0d9;
+}
+.admin-preview-shell .admin-preview-stat:nth-child(4) .admin-preview-stat-icon {
+  color: #6556bb;
+  background: #eeebfe;
+}
+.admin-preview-shell .admin-preview-stat > span:not(.admin-preview-stat-icon) { font-size: 14px; color: #546f83; }
+.admin-preview-shell .admin-preview-stat strong { color: #1c4967; font-size: 32px; }
+.admin-preview-shell .admin-preview-stat small { font-size: 12px; }
+.admin-preview-shell .admin-preview-panel-head h3 { font-size: 20px; }
+.admin-preview-shell .admin-preview-panel-head p { font-size: 13px; }
+.admin-preview-shell .admin-preview-shortcuts button {
+  border-color: #d8e9f3;
+  background: #f6fbff;
+  min-height: 65px;
+}
+.admin-preview-shell .admin-preview-shortcuts button:hover {
+  background: #eaf6fe;
+  border-color: #80bde1;
+}
+.admin-preview-shell .admin-preview-shortcuts button strong { font-size: 15px; color: #2e5874; }
+.admin-preview-shell .admin-preview-shortcuts button > span { background: #e3f3fe; color: #1577b0; }
+.admin-preview-shell .admin-preview-shortcuts button:nth-child(2) > span { background: #dcf8ef; color: #188e75; }
+.admin-preview-shell .admin-preview-shortcuts button:nth-child(3) > span { background: #eeebff; color: #685fbe; }
+.admin-preview-shell .admin-preview-shortcuts button:nth-child(4) > span { background: #fff0df; color: #b87736; }
+.admin-preview-shell .admin-preview-empty h3 { font-size: 21px; }
+.admin-preview-shell .admin-preview-empty p { font-size: 14px; }
+.admin-preview-shell .admin-preview-empty-footnote,
+.admin-preview-shell .admin-preview-disclaimer { font-size: 12px; }
+
+/* EMPLOYEE — consistent readable desktop labels and controls */
+.admin-preview-shell .employee-demo-summary strong { font-size: 21px; }
+.admin-preview-shell .employee-demo-summary p { font-size: 14px; }
+.admin-preview-shell .employee-demo-mode { font-size: 12px; background: #e2f5fc; color: #1479a9; }
+.admin-preview-shell .employee-demo-add {
+  font-size: 14px;
+  background: #1879b5;
+}
+.admin-preview-shell .employee-demo-add:hover { background: #126799; }
+.admin-preview-shell .employee-demo-metrics > div {
+  border-color: #dce9f2;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(30,107,157,.045);
+}
+.admin-preview-shell .employee-demo-metrics > div:nth-child(1) .employee-demo-metric-icon { background: #e1f3ff; color: #167fb6; }
+.admin-preview-shell .employee-demo-metrics > div:nth-child(2) .employee-demo-metric-icon { background: #def8ef; color: #1c9a7c; }
+.admin-preview-shell .employee-demo-metrics > div:nth-child(3) .employee-demo-metric-icon { background: #f1ebff; color: #7768c6; }
+.admin-preview-shell .employee-demo-metrics p { font-size: 13px; }
+.admin-preview-shell .employee-demo-metrics strong { font-size: 27px; }
+.admin-preview-shell .employee-demo-directory-title h3 { font-size: 19px; }
+.admin-preview-shell .employee-demo-directory-title p { font-size: 13px; }
+.admin-preview-shell .employee-demo-directory-title > span { font-size: 12px; }
+.admin-preview-shell .employee-demo-directory,
+.admin-preview-shell .leave-simple-section {
+  border-color: #dce8f2;
+  box-shadow: 0 4px 18px rgba(37,93,135,.045);
+}
+.admin-preview-shell .employee-demo-filters :is(input,select),
+.admin-preview-shell .employee-demo-form-grid :is(input,select),
+.admin-preview-shell .preview-select-trigger,
+.admin-preview-shell .preview-date-trigger {
+  font-size: 14px;
+  color: #244d67;
+  border-color: #d4e5f0;
+  background-color: #fbfdff;
+}
+.admin-preview-shell .employee-demo-select-wrap label,
+.admin-preview-shell .preview-select-label,
+.admin-preview-shell .employee-demo-form-grid label > span { font-size: 13px; }
+.admin-preview-shell .employee-demo-table th { font-size: 13px; color: #58788e; }
+.admin-preview-shell .employee-demo-table td { font-size: 14px; }
+.admin-preview-shell .employee-demo-table .employee-demo-person strong,
+.admin-preview-shell .employee-demo-mobile-list .employee-demo-person strong { font-size: 15px; }
+.admin-preview-shell .employee-demo-table .employee-demo-person small,
+.admin-preview-shell .employee-demo-email,
+.admin-preview-shell .employee-demo-mobile-meta { font-size: 12px; }
+.admin-preview-shell .employee-demo-data-primary { font-size: 14px; }
+.admin-preview-shell .employee-demo-data-muted,
+.admin-preview-shell .employee-demo-role,
+.admin-preview-shell .employee-demo-status { font-size: 12px; }
+.admin-preview-shell .employee-demo-role-admin { background: #e0f0ff; color: #175e9a; }
+.admin-preview-shell .employee-demo-status-active { background: #dff8eb; color: #117c5d; }
+.admin-preview-shell .employee-demo-status-inactive { background: #fff0d9; color: #946827; }
+.admin-preview-shell .employee-demo-edit {
+  font-size: 13px;
+  min-height: 42px;
+  color: #176d9a;
+}
+.admin-preview-shell .employee-demo-listfoot { font-size: 12px; }
+.admin-preview-shell .employee-demo-modal-head h2 { font-size: 23px; }
+.admin-preview-shell .employee-demo-modal-head > div > span { font-size: 12px; }
+.admin-preview-shell .employee-demo-modal-desc { font-size: 13px; }
+.admin-preview-shell .employee-demo-form-grid input,
+.admin-preview-shell .employee-demo-form-grid select { font-size: 15px; }
+.admin-preview-shell .employee-demo-form-actions button { font-size: 14px; }
+
+/* LEAVE — accent by meaning, with comfortable reading sizes */
+.admin-preview-shell .leave-simple-eyebrow { font-size: 12px; color: #187fb0; }
+.admin-preview-shell .leave-simple-top h3 { font-size: 22px; }
+.admin-preview-shell .leave-simple-top p { font-size: 14px; }
+.admin-preview-shell .leave-simple-export {
+  font-size: 14px;
+  background: #197bb7;
+}
+.admin-preview-shell .leave-simple-export:hover { background: #12689e; }
+.admin-preview-shell .leave-simple-note { font-size: 13px; background: #e8f6fd; color: #356a89; }
+.admin-preview-shell .leave-simple-tabs button {
+  font-size: 14px;
+  min-height: 48px;
+}
+.admin-preview-shell .leave-simple-tabs button.is-active { color: #146fa7; border-bottom-color: #1d92c6; }
+.admin-preview-shell .leave-simple-tabs button > span { font-size: 12px; }
+.admin-preview-shell .leave-simple-heading h4 { font-size: 19px; }
+.admin-preview-shell .leave-simple-heading p { font-size: 13px; }
+.admin-preview-shell .leave-simple-heading > span { font-size: 12px; }
+.admin-preview-shell .leave-simple-card-top strong { font-size: 15px; }
+.admin-preview-shell .leave-simple-card-top small,
+.admin-preview-shell .leave-simple-card-meta span,
+.admin-preview-shell .leave-simple-card-meta small { font-size: 13px; }
+.admin-preview-shell .leave-simple-card-meta strong { font-size: 14px; }
+.admin-preview-shell .leave-simple-open { font-size: 14px; }
+.admin-preview-shell .leave-simple-table th { font-size: 13px; }
+.admin-preview-shell .leave-simple-table td,
+.admin-preview-shell .leave-simple-table td > strong { font-size: 14px; }
+.admin-preview-shell .leave-simple-table td > small { font-size: 12px; }
+.admin-preview-shell .leave-admin-status { font-size: 12px; }
+.admin-preview-shell .leave-admin-status.is-pending { color: #92621f; background: #fff0d5; }
+.admin-preview-shell .leave-admin-status.is-approved { color: #087f61; background: #ddf7e9; }
+.admin-preview-shell .leave-admin-status.is-rejected { color: #aa4c58; background: #ffedf0; }
+.admin-preview-shell .leave-admin-modal-head h2 { font-size: 23px; }
+.admin-preview-shell .leave-admin-modal-head > div > span { font-size: 12px; }
+.admin-preview-shell .leave-admin-modal-demo,
+.admin-preview-shell .leave-admin-modal-body,
+.admin-preview-shell .leave-admin-decision > p { font-size: 13px; }
+.admin-preview-shell .leave-admin-detail-grid dt { font-size: 12px; }
+.admin-preview-shell .leave-admin-detail-grid dd { font-size: 14px; }
+.admin-preview-shell .leave-admin-reason h3,
+.admin-preview-shell .leave-admin-attachment h3,
+.admin-preview-shell .leave-admin-history h3,
+.admin-preview-shell .leave-admin-decision h3 { font-size: 15px; }
+.admin-preview-shell .leave-admin-reason p { font-size: 14px; }
+.admin-preview-shell .leave-admin-history strong,
+.admin-preview-shell .leave-admin-attachment > p { font-size: 14px; }
+.admin-preview-shell .leave-admin-decision label,
+.admin-preview-shell .leave-admin-decision textarea { font-size: 14px; }
+.admin-preview-shell .leave-admin-modal-actions button { font-size: 14px; }
+.admin-preview-shell .leave-admin-feedback { font-size: 13px; }
+
+/* REPORT — four vivid-but-readable cards */
+.admin-preview-shell .report-v2-mode-tabs {
+  background: #e7f1fd;
+  border-color: #d2e4f7;
+}
+.admin-preview-shell .report-v2-mode-tabs button { font-size: 15px; color: #4c7394; }
+.admin-preview-shell .report-v2-mode-tabs button.is-active {
+  color: #fff;
+  background: #187ab7;
+  box-shadow: 0 3px 12px rgba(28,111,167,.19);
+}
+.admin-preview-shell .report-v2-period > span { font-size: 13px; color: #537f9f; }
+.admin-preview-shell .report-v2-period-nav strong { font-size: 15px; }
+.admin-preview-shell .report-v2-export {
+  font-size: 14px;
+  background: #197bb8;
+  border-color: #197bb8;
+}
+.admin-preview-shell .report-v2-export:hover { background: #12669c; }
+.admin-preview-shell .report-v2-note { font-size: 13px; color: #406e89; background: #e7f6fe; }
+.admin-preview-shell .report-v2-stat {
+  border-color: #dbe9f3;
+  border-top-width: 3px;
+  gap: 12px;
+  box-shadow: 0 5px 14px rgba(28,97,143,.05);
+}
+.admin-preview-shell .report-v2-stat-present { border-top-color: #24b692; background: #f3fefa; }
+.admin-preview-shell .report-v2-stat-leave { border-top-color: #9278df; background: #f9f7ff; }
+.admin-preview-shell .report-v2-stat-late { border-top-color: #efa54b; background: #fffcf5; }
+.admin-preview-shell .report-v2-stat-otHours { border-top-color: #299dd3; background: #f3fbff; }
+.admin-preview-shell .report-v2-stat-top { font-size: 14px; color: #476b83; }
+.admin-preview-shell .report-v2-stat-number { font-size: 33px; color: #204b67; }
+.admin-preview-shell .report-v2-stat-number span { font-size: 12px; }
+.admin-preview-shell .report-v2-stat small { font-size: 12px; color: #607e92; }
+
+/* Employee-specific profile colors: closer to the reference structure,
+ * but every employee gets their own vivid paired gradient. */
+.admin-preview-shell .report-split-color-1 { --employee-accent:#168fc7; --employee-bright:#22c5c6; --employee-tint:#e7f8fe; }
+.admin-preview-shell .report-split-color-2 { --employee-accent:#12a17e; --employee-bright:#55d49e; --employee-tint:#e4fbf0; }
+.admin-preview-shell .report-split-color-3 { --employee-accent:#8166d1; --employee-bright:#b4a0f2; --employee-tint:#f0ecff; }
+.admin-preview-shell .report-split-color-4 { --employee-accent:#dc8738; --employee-bright:#f5ba63; --employee-tint:#fff3df; }
+.admin-preview-shell .report-split-color-5 { --employee-accent:#3b6fcc; --employee-bright:#69b8f0; --employee-tint:#eaf2ff; }
+.admin-preview-shell .report-split-color-6 { --employee-accent:#ce5688; --employee-bright:#ef9ea9; --employee-tint:#fff0f5; }
+.admin-preview-shell .report-split-color-7 { --employee-accent:#198f9b; --employee-bright:#63d6c8; --employee-tint:#e7f9f7; }
+.admin-preview-shell .report-split-color-8 { --employee-accent:#88a838; --employee-bright:#c4d55d; --employee-tint:#f3f9e4; }
+.admin-preview-shell .report-split-cover {
+  height: 106px;
+  background: linear-gradient(117deg,var(--employee-accent,#1881b5),var(--employee-bright,#53c2df));
+  border: 0;
+  padding: 13px;
+}
+.admin-preview-shell .report-split-close { background: #ffffffd9; color: #2b5265; }
+.admin-preview-shell .report-split-profile-avatar {
+  width: 77px;
+  height: 77px;
+  border: 5px solid #fff;
+  background: var(--employee-accent,#187fac);
+  box-shadow: 0 6px 16px rgba(23,67,107,.14);
+}
+.admin-preview-shell .report-split-identity { margin-top: -38px; }
+.admin-preview-shell .report-split-identity h3 { font-size: 21px; }
+.admin-preview-shell .report-split-identity-sub { font-size: 13px; color: #688393; }
+.admin-preview-shell .report-split-meta dt,
+.admin-preview-shell .report-split-meta dd { font-size: 12px; }
+.admin-preview-shell .report-split-demo-label { font-size: 12px; }
+.admin-preview-shell .report-split-insights { gap: 10px; }
+.admin-preview-shell .report-split-insight { padding: 13px 14px; }
+.admin-preview-shell .report-split-insight.is-presence { background: #dffaf0; }
+.admin-preview-shell .report-split-insight.is-leave { background: #fff0dc; }
+.admin-preview-shell .report-split-insight > span:first-child { font-size: 12px; }
+.admin-preview-shell .report-split-insight strong { font-size: 28px; }
+.admin-preview-shell .report-split-insight small { font-size: 11px; }
+.admin-preview-shell .report-split-tiny-stats span { font-size: 12px; }
+.admin-preview-shell .report-split-tiny-stats strong { font-size: 18px; }
+.admin-preview-shell .report-split-tiny-stats strong small { font-size: 11px; }
+.admin-preview-shell .report-split-kicker { font-size: 12px; color: #2f88b7; }
+.admin-preview-shell .report-split-list-heading h3 { font-size: 20px; }
+.admin-preview-shell .report-split-list-heading p { font-size: 13px; }
+.admin-preview-shell .report-split-counter { font-size: 12px; }
+.admin-preview-shell .report-split-search input { font-size: 14px; }
+.admin-preview-shell .report-split-table th { font-size: 12px; color: #58788f; }
+.admin-preview-shell .report-split-table td { font-size: 14px; }
+.admin-preview-shell .report-split-person-text strong { font-size: 13px; color: #2c4d66; }
+.admin-preview-shell .report-split-person-text small { font-size: 11px; }
+.admin-preview-shell .report-split-number { font-size: 14px; }
+.admin-preview-shell .report-split-action { font-size: 13px; min-height: 41px; }
+.admin-preview-shell .report-split-history-head h4 { font-size: 15px; }
+.admin-preview-shell .report-split-history-head p,
+.admin-preview-shell .report-split-history-total { font-size: 12px; }
+.admin-preview-shell .report-split-entry-date { font-size: 12px; }
+.admin-preview-shell .report-split-entry-status,
+.admin-preview-shell .report-split-month-count { font-size: 12px; }
+.admin-preview-shell .report-split-entry-content small,
+.admin-preview-shell .report-split-entry-right { font-size: 11px; }
+.admin-preview-shell .report-split-history-toggle { font-size: 13px; }
+.admin-preview-shell .report-split-profile-footnote,
+.admin-preview-shell .report-split-list-footer { font-size: 11px; }
+.admin-preview-shell .report-split-history-entry { min-height: 46px; }
+
+/* Shared custom select/date dialogs and all input labels */
+.admin-preview-shell .preview-select-list > button,
+.admin-preview-shell .preview-date-day { font-size: 15px; }
+.admin-preview-shell .preview-date-weekdays span { font-size: 13px; }
+.admin-preview-shell .preview-date-modal-title h3 { font-size: 22px; }
+.admin-preview-shell .preview-date-modal-title span { font-size: 13px; }
+.admin-preview-shell .preview-date-bottom button { font-size: 13px; }
+
+/* PHONE — prioritize tap targets, legibility and one-column reading */
+@media (max-width:700px) {
+  .admin-preview-shell .admin-preview-header h1 { font-size: 19px; }
+  .admin-preview-shell .admin-preview-eyebrow { font-size: 11px; }
+  .admin-preview-shell .admin-preview-back { font-size: 12px; min-height: 44px; max-width: 128px; }
+  .admin-preview-shell .admin-preview-mobile-nav {
+    background: #fff;
+    border-bottom-color: #d7e9f4;
+    box-shadow: 0 5px 12px rgba(32,99,139,.06);
+  }
+  .admin-preview-shell .admin-preview-mobile-nav button {
+    font-size: 12px;
+    min-height: 48px;
+    color: #497b97;
+    background: #eff7fc;
+    font-weight: 770;
+  }
+  .admin-preview-shell .admin-preview-mobile-nav button.is-active { color: #fff; background: #187db8; }
+  .admin-preview-shell .admin-preview-content { padding: 18px 13px calc(38px + env(safe-area-inset-bottom)); }
+  .admin-preview-shell .admin-preview-intro h2 { font-size: 23px; }
+  .admin-preview-shell .admin-preview-intro p { font-size: 13px; }
+  .admin-preview-shell .admin-preview-tag { font-size: 10px; }
+  .admin-preview-shell .admin-preview-stat > span:not(.admin-preview-stat-icon) { font-size: 13px; }
+  .admin-preview-shell .admin-preview-stat strong { font-size: 28px; }
+  .admin-preview-shell .admin-preview-stat small { font-size: 11px; }
+  .admin-preview-shell .admin-preview-shortcuts button strong { font-size: 14px; }
+  .admin-preview-shell .employee-demo-add { min-height: 48px; font-size: 14px; }
+  .admin-preview-shell .employee-demo-metrics p { font-size: 12px; }
+  .admin-preview-shell .employee-demo-metrics strong { font-size: 23px; }
+  .admin-preview-shell .employee-demo-directory-title h3 { font-size: 17px; }
+  .admin-preview-shell .employee-demo-directory-title p { font-size: 12px; }
+  .admin-preview-shell .employee-demo-mobile-person { font-size: 14px; }
+  .admin-preview-shell .employee-demo-mobile-meta { font-size: 13px; }
+  .admin-preview-shell .employee-demo-form-grid input,
+  .admin-preview-shell .employee-demo-form-grid select,
+  .admin-preview-shell .employee-demo-search input,
+  .admin-preview-shell .preview-select-trigger,
+  .admin-preview-shell .preview-date-trigger {
+    font-size: 16px;
+    min-height: 46px;
+  }
+  .admin-preview-shell .leave-simple-top h3 { font-size: 20px; }
+  .admin-preview-shell .leave-simple-top p { font-size: 13px; }
+  .admin-preview-shell .leave-simple-tabs button { font-size: 13px; }
+  .admin-preview-shell .leave-simple-card-top strong { font-size: 15px; }
+  .admin-preview-shell .leave-simple-card-meta strong { font-size: 14px; }
+  .admin-preview-shell .leave-admin-modal-head h2 { font-size: 20px; }
+  .admin-preview-shell .leave-admin-decision textarea { font-size: 16px; }
+  .admin-preview-shell .report-v2-mode-tabs button { font-size: 14px; min-height: 44px; }
+  .admin-preview-shell .report-v2-period-nav strong { font-size: 14px; }
+  .admin-preview-shell .report-v2-stat { padding: 13px; }
+  .admin-preview-shell .report-v2-stat-top { font-size: 13px; }
+  .admin-preview-shell .report-v2-stat-number { font-size: 27px; }
+  .admin-preview-shell .report-v2-stat-number span { font-size: 11px; }
+  .admin-preview-shell .report-v2-stat small { font-size: 11px; }
+  .admin-preview-shell .report-split-list-heading h3 { font-size: 19px; }
+  .admin-preview-shell .report-split-list-heading p { font-size: 12px; }
+  .admin-preview-shell .report-split-person-text strong { font-size: 15px; }
+  .admin-preview-shell .report-split-person-text small { font-size: 12px; }
+  .admin-preview-shell .report-split-table td:nth-child(n+2):nth-child(-n+5)::before { font-size: 12px; }
+  .admin-preview-shell .report-split-table td { font-size: 15px; }
+  .admin-preview-shell .report-split-action { font-size: 14px; min-height: 46px; }
+  .admin-preview-shell .report-split-profile-avatar { width: 72px; height: 72px; }
+  .admin-preview-shell .report-split-cover { height: 98px; }
+  .admin-preview-shell .report-split-identity h3 { font-size: 20px; }
+  .admin-preview-shell .report-split-meta dt,
+  .admin-preview-shell .report-split-meta dd { font-size: 13px; }
+  .admin-preview-shell .report-split-entry-status,
+  .admin-preview-shell .report-split-month-count,
+  .admin-preview-shell .report-split-entry-date { font-size: 13px; }
+  .admin-preview-shell .report-split-entry-content small { font-size: 12px; }
+}
+@media (max-width:390px) {
+  .admin-preview-shell .admin-preview-mobile-nav button { font-size: 12px; }
+  .admin-preview-shell .report-split-table tbody { padding: 8px; }
+  .admin-preview-shell .report-split-history-entry {
+    grid-template-columns: 48px minmax(0,1fr);
+    row-gap: 4px;
+  }
+  .admin-preview-shell .report-split-entry-right { grid-column: 2; }
+}
