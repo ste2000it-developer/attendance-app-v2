@@ -1,0 +1,1179 @@
+/*
+ * Attendance V2: purpose-built PHONE layout.
+ * Intentionally all rules are scoped to <=700px.
+ * Tablet (701px+) and desktop use their existing CSS, without overrides.
+ * Native-style screen header, tab bar, list rows, and readable information.
+ */
+.admin-phone-heading { display:none; }
+@media (max-width:700px) {
+  .admin-phone-app {
+    --phone-accent:#0b3188;
+    --phone-ink:#1d324b;
+    --phone-secondary:#64758a;
+    --phone-line:#e2e8ef;
+    --phone-canvas:#f4f6fa;
+    --phone-surface:#fff;
+    --phone-tab-height:64px;
+    display:block;
+    min-width:0;
+    width:100%;
+    min-height:100dvh;
+    overflow-x:clip;
+    background:var(--phone-canvas);
+    color:var(--phone-ink);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .admin-phone-app *, .admin-phone-app *::before, .admin-phone-app *::after {
+    box-sizing:border-box;
+  }
+  .admin-phone-app button,
+  .admin-phone-app a {
+    touch-action:manipulation;
+  }
+  .admin-phone-app .admin-preview-sidebar {display:none;}
+  .admin-phone-app .admin-preview-main {display:block;min-width:0;width:100%;}
+  .admin-phone-app .admin-preview-header {
+    display:flex;
+    position:sticky;
+    top:0;
+    z-index:95;
+    align-items:center;
+    min-height:58px;
+    width:100%;
+    margin:0;
+    padding:8px 16px;
+    padding-top:calc(8px + env(safe-area-inset-top));
+    background:var(--phone-surface);
+    border:0;
+    border-bottom:1px solid var(--phone-line);
+    box-shadow:none;
+  }
+  .admin-phone-app .admin-preview-header .admin-preview-eyebrow,
+  .admin-phone-app .admin-preview-header h1 {display:none;}
+  .admin-phone-app .admin-phone-heading {display:grid;gap:1px;}
+  .admin-phone-app .admin-phone-heading small {
+    font-size:10px;
+    color:var(--phone-secondary);
+    font-weight:700;
+    letter-spacing:.045em;
+    line-height:1.25;
+  }
+  .admin-phone-app .admin-phone-heading strong {
+    font-size:19px;
+    font-weight:800;
+    letter-spacing:-.025em;
+    color:var(--phone-accent);
+    line-height:1.28;
+  }
+  .admin-phone-app .admin-preview-back {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    flex:none;
+    min-width:52px;
+    min-height:40px;
+    max-width:none;
+    padding:7px 10px;
+    border:1px solid var(--phone-line);
+    border-radius:11px;
+    color:#3c597a;
+    background:#fff;
+    font-size:12px;
+    text-decoration:none;
+  }
+  .admin-phone-app .admin-preview-back-long {display:none;}
+  .admin-phone-app .admin-preview-back-short {display:inline;font-size:12px;}
+  .admin-phone-app .admin-preview-back span:last-child {font-size:13px;}
+
+  /* Bottom tab bar. Every destination is present and easy to hit. */
+  .admin-phone-app .admin-preview-mobile-nav {
+    position:fixed!important;
+    inset:auto 0 0;
+    z-index:90;
+    display:grid!important;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    align-items:stretch;
+    gap:0;
+    width:100%;
+    max-width:none;
+    min-width:0;
+    margin:0;
+    padding:5px max(5px,env(safe-area-inset-left))
+            calc(5px + env(safe-area-inset-bottom))
+            max(5px,env(safe-area-inset-right));
+    border:0;
+    border-top:1px solid var(--phone-line);
+    border-radius:0;
+    background:#fff;
+    box-shadow:0 -2px 10px rgba(17,34,63,.045);
+    overflow:visible;
+  }
+  .admin-phone-app .admin-preview-mobile-nav button {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    min-width:0;
+    min-height:54px;
+    padding:6px 1px 5px;
+    border:0;
+    border-radius:10px;
+    background:transparent;
+    color:#788597;
+    font-family:inherit;
+    font-size:11px;
+    font-weight:700;
+    line-height:1.15;
+    white-space:nowrap;
+    cursor:pointer;
+  }
+  .admin-phone-app .admin-preview-mobile-nav button svg {
+    flex:none;
+    width:21px;
+    height:21px;
+  }
+  .admin-phone-app .admin-preview-mobile-nav button span {
+    display:block;
+    max-width:100%;
+    text-overflow:clip;
+    overflow:visible;
+  }
+  .admin-phone-app .admin-preview-mobile-nav button.is-active {
+    color:var(--phone-accent);
+    background:#eef3ff;
+    box-shadow:none;
+  }
+  .admin-phone-app .admin-preview-mobile-nav button:focus-visible {
+    outline:2px solid var(--phone-accent);
+    outline-offset:-2px;
+  }
+
+  /* A single title in the app bar; no repeat headings below it. */
+  .admin-phone-app .admin-preview-content {
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    margin:0;
+    padding:15px 14px calc(91px + env(safe-area-inset-bottom));
+    overflow:visible;
+  }
+  .admin-phone-app .admin-preview-intro {display:none;}
+  .admin-phone-app .admin-preview-disclaimer {
+    margin:18px 2px 0;
+    font-size:11px;
+    line-height:1.5;
+    text-align:center;
+    color:#8794a3;
+  }
+  .admin-phone-app input[type="search"], .admin-phone-app input[type="text"],
+  .admin-phone-app input[type="email"], .admin-phone-app input[type="date"],
+  .admin-phone-app textarea {
+    font-size:16px;
+  }
+  .admin-phone-app :is(button,a,input,textarea):focus-visible {
+    outline:2px solid #447aca;
+    outline-offset:2px;
+  }
+
+  /* Overview: dashboard snapshot + concise native menu rows. */
+  .admin-phone-app .admin-preview-stat-grid {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:9px;
+  }
+  .admin-phone-app .admin-preview-stat {
+    display:grid;
+    grid-template-columns:31px minmax(0,1fr);
+    grid-template-rows:auto auto;
+    align-content:center;
+    align-items:center;
+    column-gap:9px;
+    row-gap:4px;
+    min-width:0;
+    min-height:77px;
+    padding:12px;
+    border:1px solid var(--phone-line);
+    border-radius:13px;
+    background:#fff;
+  }
+  .admin-phone-app .admin-preview-stat-icon {
+    grid-column:1;grid-row:1/3;
+    display:grid;place-items:center;
+    width:31px;height:31px;
+    margin:0;
+    border-radius:9px;
+    background:#eef3ff;color:#24559c;
+  }
+  .admin-phone-app .admin-preview-stat-icon svg {width:19px;height:19px;}
+  .admin-phone-app .admin-preview-stat>span:not(.admin-preview-stat-icon) {
+    grid-column:2;grid-row:1;
+    min-width:0;
+    color:#5c7088;
+    font-size:12px;
+    font-weight:650;
+    line-height:1.25;
+    overflow-wrap:anywhere;
+  }
+  .admin-phone-app .admin-preview-stat>strong {
+    grid-column:2;grid-row:2;
+    min-width:0;
+    margin:0;padding:0;border:0;
+    color:var(--phone-ink);
+    font-size:22px;
+    font-weight:800;
+    line-height:1;
+  }
+  .admin-phone-app .admin-preview-stat small {display:none;}
+  .admin-phone-app .admin-preview-panel {
+    margin-top:18px;
+    padding:0;
+    border:1px solid var(--phone-line);
+    border-radius:14px;
+    background:#fff;
+    overflow:hidden;
+    box-shadow:none;
+  }
+  .admin-phone-app .admin-preview-panel-head {
+    margin:0;
+    padding:13px 14px;
+    border:0;
+    border-bottom:1px solid var(--phone-line);
+  }
+  .admin-phone-app .admin-preview-panel-head h3 {
+    margin:0;font-size:15px;line-height:1.3;color:var(--phone-ink);
+  }
+  .admin-phone-app .admin-preview-panel-head p {display:none;}
+  .admin-phone-app .admin-preview-shortcuts {
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    gap:0;
+    margin:0;
+  }
+  .admin-phone-app .admin-preview-shortcuts button {
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+    justify-content:flex-start;
+    min-height:56px;
+    width:100%;
+    gap:11px;
+    margin:0;
+    padding:9px 13px;
+    background:#fff;
+    border:0;
+    border-radius:0;
+    box-shadow:none;
+    text-align:left;
+  }
+  .admin-phone-app .admin-preview-shortcuts button+button {
+    border-top:1px solid var(--phone-line);
+  }
+  .admin-phone-app .admin-preview-shortcuts button>span {
+    display:grid;place-items:center;
+    width:32px;height:32px;
+    border-radius:9px;
+    background:#eef3ff;
+    color:#315b98;
+    flex:none;
+  }
+  .admin-phone-app .admin-preview-shortcuts button>span svg {width:18px;height:18px;}
+  .admin-phone-app .admin-preview-shortcuts button strong {
+    flex:1;min-width:0;
+    font-size:14px;
+    line-height:1.4;
+    font-weight:700;
+    color:var(--phone-ink);
+  }
+  .admin-phone-app .admin-preview-shortcuts button>svg {
+    display:block;
+    flex:none;
+    width:17px;height:17px;
+    color:#91a1b4;
+  }
+
+  /* Employee directory: a small summary rail and proper searchable list. */
+  .admin-phone-app .employee-demo {display:grid;gap:13px;min-width:0;}
+  .admin-phone-app .employee-demo-topbar {
+    display:flex;flex-direction:row;
+    align-items:center;justify-content:space-between;
+    flex-wrap:nowrap;gap:9px;
+  }
+  .admin-phone-app .employee-demo-summary {flex:1;min-width:0;}
+  .admin-phone-app .employee-demo-mode {font-size:10px;}
+  .admin-phone-app .employee-demo-summary strong {
+    font-size:16px;line-height:1.3;
+  }
+  .admin-phone-app .employee-demo-summary p {display:none;}
+  .admin-phone-app .employee-demo-add {
+    display:inline-flex;
+    flex:0 0 auto;
+    width:auto;
+    min-height:44px;
+    margin:0;
+    padding:9px 11px;
+    gap:5px;
+    font-size:12px;
+    border-radius:10px;
+    background:var(--phone-accent);
+  }
+  .admin-phone-app .employee-demo-add svg {width:17px;height:17px;}
+  .admin-phone-app .employee-demo-metrics {
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:0;
+    overflow:hidden;
+    border:1px solid var(--phone-line);
+    border-radius:12px;
+    background:#fff;
+  }
+  .admin-phone-app .employee-demo-metrics>div {
+    display:grid;
+    grid-template-columns:1fr;
+    justify-items:center;
+    align-content:center;
+    min-width:0;
+    min-height:70px;
+    margin:0;
+    gap:2px;
+    padding:9px 4px;
+    border:0;
+    border-radius:0;
+    text-align:center;
+    background:transparent;
+  }
+  .admin-phone-app .employee-demo-metrics>div+div {
+    border-left:1px solid var(--phone-line);
+  }
+  .admin-phone-app .employee-demo-metric-icon {display:none;}
+  .admin-phone-app .employee-demo-metrics p {
+    margin:0;
+    font-size:11px;
+    font-weight:650;
+    line-height:1.3;
+    color:var(--phone-secondary);
+  }
+  .admin-phone-app .employee-demo-metrics strong {
+    font-size:22px;
+    line-height:1.2;
+    font-weight:800;
+    color:var(--phone-ink);
+  }
+  .admin-phone-app .employee-demo-directory {
+    overflow:visible;
+    border:0;
+    border-radius:0;
+    background:transparent;
+  }
+  .admin-phone-app .employee-demo-directory-title {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+    padding:0 0 10px;
+    border:0;
+  }
+  .admin-phone-app .employee-demo-directory-title h3 {
+    font-size:16px;line-height:1.3;margin:0;
+  }
+  .admin-phone-app .employee-demo-directory-title p {display:none;}
+  .admin-phone-app .employee-demo-directory-title>span {font-size:11px;}
+  .admin-phone-app .employee-demo-filters {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:7px;
+    align-items:end;
+    margin:0 0 10px;
+    padding:0;
+    border:0;
+  }
+  .admin-phone-app .employee-demo-search {
+    grid-column:1/-1;
+  }
+  .admin-phone-app .employee-demo-search input {
+    width:100%;
+    height:44px;
+    border:1px solid var(--phone-line);
+    border-radius:11px;
+    background:#fff;
+    font-size:16px;
+  }
+  .admin-phone-app .employee-demo-filters>.preview-select:last-child {
+    grid-column:1/-1;
+  }
+  .admin-phone-app .employee-demo-filters .preview-select-trigger {
+    min-height:44px;
+    padding-block:7px;
+    background:#fff;
+  }
+  .admin-phone-app .employee-demo-table-wrap {
+    min-width:0;
+    border:1px solid var(--phone-line);
+    border-radius:12px;
+    overflow:hidden;
+    background:#fff;
+  }
+  .admin-phone-app .employee-demo-table-scroll {display:none;}
+  .admin-phone-app .employee-demo-mobile-list {
+    display:grid;
+    gap:0;
+    border:0;
+  }
+  .admin-phone-app .employee-demo-mobile-person {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    column-gap:7px;
+    row-gap:6px;
+    padding:11px 12px;
+    border:0;
+    border-radius:0;
+    min-width:0;
+    background:#fff;
+  }
+  .admin-phone-app .employee-demo-mobile-person+.employee-demo-mobile-person {
+    border-top:1px solid var(--phone-line);
+  }
+  .admin-phone-app .employee-demo-mobile-person>.employee-demo-person {
+    grid-column:1;
+    min-width:0;
+    gap:9px;
+    align-items:center;
+  }
+  .admin-phone-app .employee-demo-avatar {
+    width:34px;height:34px;
+    border-radius:10px;
+    flex:none;
+  }
+  .admin-phone-app .employee-demo-avatar svg {width:18px;height:18px;}
+  .admin-phone-app .employee-demo-person strong {font-size:14px;line-height:1.35;}
+  .admin-phone-app .employee-demo-person small {font-size:11px;line-height:1.3;}
+  .admin-phone-app .employee-demo-mobile-meta {
+    grid-column:1;
+    grid-row:2;
+    min-width:0;
+    gap:2px;
+    padding:0 0 0 43px;
+    border:0;
+    font-size:12px;
+    line-height:1.35;
+  }
+  .admin-phone-app .employee-demo-mobile-meta span {
+    min-width:0;overflow-wrap:anywhere;
+  }
+  .admin-phone-app .employee-demo-mobile-meta span:last-child {
+    color:#8a97a7;font-size:11px;
+  }
+  .admin-phone-app .employee-demo-mobile-bottom {
+    display:flex;
+    grid-column:2;
+    grid-row:1/3;
+    align-items:center;
+    align-content:center;
+    justify-content:flex-end;
+    flex-wrap:wrap;
+    max-width:105px;
+    gap:5px;
+    padding:0;
+    margin:0;
+    border:0;
+  }
+  .admin-phone-app .employee-demo-mobile-bottom>.employee-demo-role,
+  .admin-phone-app .employee-demo-mobile-bottom>.employee-demo-status {
+    font-size:10px;
+    line-height:1.25;
+    padding:4px 6px;
+  }
+  .admin-phone-app .employee-demo-edit {
+    display:inline-flex;
+    min-width:64px;
+    min-height:44px;
+    margin:0!important;
+    padding:8px;
+    font-size:12px;
+  }
+  .admin-phone-app .employee-demo-listfoot {
+    margin:9px 0 0;
+    font-size:11px;
+    line-height:1.5;
+  }
+  .admin-phone-app .employee-demo-empty {padding:24px 14px;}
+  .admin-phone-app .employee-demo-empty p {font-size:12px;}
+
+  /* Reports: app-like segmented view + period picker and compact export. */
+  .admin-phone-app .report-v2-mode-tabs {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    width:100%;
+    margin:0 0 13px;
+    gap:3px;
+    padding:3px;
+    border:1px solid var(--phone-line);
+    border-radius:11px;
+    background:#edf1f7;
+  }
+  .admin-phone-app .report-v2-mode-tabs button {
+    display:block;
+    min-width:0;
+    min-height:42px;
+    padding:7px;
+    border-radius:8px;
+    font-size:13px;
+    font-weight:700;
+  }
+  .admin-phone-app .report-v2-mode-tabs button.is-active {
+    color:var(--phone-accent);
+    background:#fff;
+    box-shadow:0 1px 4px rgba(28,50,86,.06);
+  }
+  .admin-phone-app .report-v2 {display:flex;flex-direction:column;gap:12px;}
+  .admin-phone-app .report-v2-top {
+    order:1;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+    gap:8px;
+    width:100%;
+  }
+  .admin-phone-app .report-v2-period {
+    min-width:0;
+    width:100%;
+    display:block;
+  }
+  .admin-phone-app .report-v2-period>span {display:none;}
+  .admin-phone-app .report-v2-period-nav {
+    width:100%;
+    min-width:0;
+    min-height:44px;
+    padding:2px;
+    gap:0;
+    justify-content:space-between;
+    border:1px solid var(--phone-line);
+    border-radius:10px;
+    background:#fff;
+    box-shadow:none;
+  }
+  .admin-phone-app .report-v2-period-nav button {
+    display:grid;
+    place-items:center;
+    flex:none;
+    width:40px;
+    height:40px;
+    min-width:40px;
+    min-height:40px;
+    padding:0;
+    border:0;
+    border-radius:8px;
+    color:var(--phone-accent);
+  }
+  .admin-phone-app .report-v2-period-nav strong,
+  .admin-phone-app .report-yearly .report-v2-period-nav strong {
+    min-width:0;
+    flex:1;
+    padding:0 2px;
+    font-size:13px;
+    line-height:1.25;
+    font-weight:800;
+    color:var(--phone-ink);
+    text-align:center;
+    white-space:nowrap;
+  }
+  .admin-phone-app .report-v2-export {
+    display:inline-flex;
+    width:auto;
+    max-width:100%;
+    min-width:81px;
+    min-height:44px;
+    margin:0;
+    padding:7px 10px;
+    gap:5px;
+    justify-content:center;
+    white-space:nowrap;
+    font-size:0;
+    line-height:1.2;
+    border:0;
+    border-radius:10px;
+    color:#fff;
+    background:var(--phone-accent);
+  }
+  .admin-phone-app .report-v2-export::after {content:"Excel";font-size:12px;font-weight:760;}
+  .admin-phone-app .report-v2-export svg {flex:none;width:17px;height:17px;}
+  .admin-phone-app .report-v2-stats {
+    order:2;
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:0;
+    overflow:hidden;
+    border:1px solid var(--phone-line);
+    border-radius:12px;
+    background:#fff;
+  }
+  .admin-phone-app .report-v2-stat {
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    justify-content:center;
+    gap:4px;
+    min-width:0;
+    min-height:66px;
+    margin:0;
+    padding:10px 12px;
+    border:0;
+    border-radius:0;
+    box-shadow:none;
+    background:transparent;
+  }
+  .admin-phone-app .report-v2-stat:nth-child(even){border-left:1px solid var(--phone-line);}
+  .admin-phone-app .report-v2-stat:nth-child(n+3){border-top:1px solid var(--phone-line);}
+  .admin-phone-app .report-v2-stat-top {
+    display:block;
+    margin:0;padding:0;border:0;
+    font-size:11px;line-height:1.25;
+    font-weight:650;
+    color:#6a7b90;
+  }
+  .admin-phone-app .report-v2-stat-top>span:first-child {display:inline;}
+  .admin-phone-app .report-v2-stat-symbol,
+  .admin-phone-app .report-yearly-stat-mark {display:none;}
+  .admin-phone-app .report-v2-stat-number {
+    margin:0;
+    padding:0;
+    font-size:22px;
+    line-height:1.18;
+    font-weight:800;
+    color:var(--phone-ink);
+    letter-spacing:-.025em;
+    white-space:normal;
+    overflow-wrap:anywhere;
+  }
+  .admin-phone-app .report-v2-stat-number span {
+    display:inline;
+    margin-left:4px;
+    font-size:10px;
+    line-height:1.2;
+    font-weight:650;
+    color:#748496;
+  }
+  .admin-phone-app .report-v2-stat small {display:none;}
+  .admin-phone-app .report-split-grid {
+    order:3;
+    display:block;
+    min-width:0;
+    width:100%;
+  }
+  .admin-phone-app .report-v2-note {
+    order:5;
+    margin:0;
+    padding:10px 11px;
+    border:1px solid var(--phone-line);
+    border-radius:10px;
+    background:#fff;
+    color:#718095;
+    font-size:11px;
+    line-height:1.55;
+  }
+  .admin-phone-app .report-v2-error {order:4;}
+  .admin-phone-app .report-split-list-heading {
+    padding:0 0 9px;
+    border:0;
+  }
+  .admin-phone-app .report-split-list-heading h3 {
+    margin:0;
+    font-size:16px;
+    line-height:1.3;
+  }
+  .admin-phone-app .report-split-list-heading p,
+  .admin-phone-app .report-split-kicker {display:none;}
+  .admin-phone-app .report-split-counter {
+    font-size:11px;padding:4px 7px;
+  }
+  .admin-phone-app .report-split-search {
+    display:flex;
+    align-items:center;
+    width:100%;
+    min-height:44px;
+    margin:0 0 10px;
+    border:1px solid var(--phone-line);
+    border-radius:11px;
+    background:#fff;
+  }
+  .admin-phone-app .report-split-search input {
+    min-width:0;width:100%;
+    font-size:16px;
+  }
+  .admin-phone-app .report-split-table-scroll {display:none!important;}
+  .admin-phone-app .report-phone-directory {
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    gap:0;
+    margin:0;
+    overflow:hidden;
+    border:1px solid var(--phone-line);
+    border-radius:12px;
+    background:#fff;
+  }
+  .admin-phone-app .report-phone-person-card {
+    display:block;
+    min-width:0;
+    margin:0;
+    padding:0;
+    overflow:hidden;
+    border:0;
+    border-radius:0;
+    background:transparent;
+    box-shadow:none;
+  }
+  .admin-phone-app .report-phone-person-card+.report-phone-person-card {
+    border-top:1px solid var(--phone-line);
+  }
+  .admin-phone-app .report-phone-person-trigger {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    min-width:0;
+    width:100%;
+    min-height:54px;
+    gap:9px;
+    padding:8px 12px;
+    border:0;
+    border-radius:0;
+    background:transparent;
+    color:var(--phone-ink);
+    font:inherit;
+    text-align:left;
+    cursor:pointer;
+  }
+  .admin-phone-app .report-phone-person-trigger .report-phone-person-heading {
+    display:flex;
+    flex:1 1 auto;
+    align-items:center;
+    gap:9px;
+    min-width:0;
+    padding:0;
+    border:0;
+    background:transparent;
+  }
+  .admin-phone-app .report-phone-person-trigger .report-split-row-avatar {
+    flex:none;
+    width:34px;height:34px;
+    border-radius:10px;
+    font-size:11px;
+  }
+  .admin-phone-app .report-phone-name {display:grid;gap:1px;min-width:0;}
+  .admin-phone-app .report-phone-name strong {
+    min-width:0;font-size:14px;line-height:1.35;font-weight:780;color:var(--phone-ink);
+  }
+  .admin-phone-app .report-phone-name small {
+    min-width:0;font-size:11px;line-height:1.3;color:#7a8798;
+  }
+  .admin-phone-app .report-phone-open-hint {
+    display:flex;flex:none;align-items:center;gap:3px;
+    min-width:0;
+    padding:4px 0;
+    color:var(--phone-accent);
+    font-size:11px;
+    font-weight:750;
+  }
+  .admin-phone-app .report-phone-open-hint svg {width:15px;height:15px;}
+  .admin-phone-app .report-phone-metrics {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:0;
+    margin:0;
+    padding:0 12px 8px;
+    border:0;
+    background:transparent;
+  }
+  .admin-phone-app .report-phone-metrics>div:nth-child(n) {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    min-width:0;
+    min-height:33px;
+    gap:5px;
+    margin:0;
+    padding:5px 7px!important;
+    border:0;
+    border-top:1px solid #edf1f5;
+    text-align:left;
+  }
+  .admin-phone-app .report-phone-metrics>div:nth-child(even) {
+    border-left:1px solid #edf1f5;
+  }
+  .admin-phone-app .report-phone-metrics dt {
+    font-size:11px;line-height:1.2;font-weight:650;color:#6a7a8e;
+  }
+  .admin-phone-app .report-phone-metrics dd {
+    flex:none;
+    margin:0;
+    font-size:15px;
+    line-height:1.2;
+    font-weight:800;
+    color:#284f80;
+    white-space:nowrap;
+  }
+  .admin-phone-app .report-phone-metrics dd small {font-size:9px;color:#7b8b9b;}
+  .admin-phone-app .report-split-list-footer {
+    margin:8px 0 0;
+    padding:3px 1px;
+    font-size:10px;
+    line-height:1.45;
+    color:#8b97a3;
+  }
+
+  /* Detail stays a full-width screen on phones, not a narrow sidebar. */
+  .admin-phone-app .report-split-grid.has-selection .report-split-list {display:none;}
+  .admin-phone-app .report-split-profile-shell {width:100%;min-width:0;position:static;}
+  .admin-phone-app .report-mobile-detail-back {
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    width:100%;
+    min-height:44px;
+    margin:0 0 10px;
+    padding:8px 11px;
+    gap:7px;
+    border:1px solid var(--phone-line);
+    border-radius:10px;
+    background:#fff;
+    color:var(--phone-accent);
+    font:inherit;
+    font-size:13px;
+    font-weight:700;
+  }
+  .admin-phone-app .report-split-profile {
+    width:100%;
+    border:1px solid var(--phone-line);
+    border-radius:12px;
+    background:#fff;
+    box-shadow:none;
+  }
+  .admin-phone-app .report-split-cover {
+    height:48px;
+    background:#eaf0fa;
+    border-radius:11px 11px 0 0;
+  }
+  .admin-phone-app .report-split-profile-avatar {
+    width:50px;height:50px;border-width:3px;
+  }
+  .admin-phone-app .report-split-identity {
+    margin-top:-25px;
+    margin-bottom:3px;
+    padding-bottom:9px;
+    border-bottom:1px solid var(--phone-line);
+  }
+  .admin-phone-app .report-split-identity h3 {font-size:17px;}
+  .admin-phone-app .report-split-meta {
+    margin:0 10px 8px;padding:0;
+  }
+  .admin-phone-app .report-split-meta>div {
+    padding:7px 2px;
+    border-top:1px solid var(--phone-line);
+  }
+  .admin-phone-app .report-split-insights {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:7px;
+    margin:8px 10px;
+    padding-top:8px;
+    border-top:1px solid var(--phone-line);
+  }
+  .admin-phone-app .report-split-insight {padding:9px;gap:4px;}
+  .admin-phone-app .report-split-insight strong {font-size:20px;}
+  .admin-phone-app .report-split-tiny-stats {margin:0 10px 8px;gap:6px;}
+  .admin-phone-app .report-split-history {border-top:1px solid var(--phone-line);}
+  .admin-phone-app .report-split-history-entry {
+    display:grid;
+    grid-template-columns:49px minmax(0,1fr);
+    gap:3px 8px;
+    min-height:0;
+    padding:9px 11px;
+    border-top:1px solid var(--phone-line);
+  }
+  .admin-phone-app .report-split-entry-right {grid-column:2;font-size:11px;}
+
+  /* Leave management: clean single queue, one row per request. */
+  .admin-phone-app .leave-simple {display:grid;gap:11px;}
+  .admin-phone-app .leave-simple-top {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:nowrap;
+    gap:10px;
+  }
+  .admin-phone-app .leave-simple-top>div {min-width:0;}
+  .admin-phone-app .leave-simple-eyebrow {display:none;}
+  .admin-phone-app .leave-simple-top h3 {
+    margin:0;
+    font-size:16px;
+    line-height:1.3;
+    color:var(--phone-ink);
+  }
+  .admin-phone-app .leave-simple-top p {display:none;}
+  .admin-phone-app .leave-simple-export {
+    width:auto;
+    min-height:44px;
+    flex:none;
+    align-self:center;
+    gap:5px;
+    padding:9px 10px;
+    border-radius:10px;
+    font-size:12px;
+    background:var(--phone-accent);
+    white-space:nowrap;
+  }
+  .admin-phone-app .leave-simple-export svg {width:16px;height:16px;}
+  .admin-phone-app .leave-simple-note {
+    margin:0;
+    padding:8px 10px;
+    border:1px solid var(--phone-line);
+    border-radius:9px;
+    background:#fff;
+    color:#718096;
+    font-size:11px;
+    line-height:1.45;
+  }
+  .admin-phone-app .leave-simple-section {
+    min-width:0;
+    border:1px solid var(--phone-line);
+    border-radius:12px;
+    background:#fff;
+    overflow:hidden;
+  }
+  .admin-phone-app .leave-simple-tabs {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:0;
+    margin:0;
+    padding:0;
+    border:0;
+    border-bottom:1px solid var(--phone-line);
+    border-radius:0;
+    background:#fff;
+  }
+  .admin-phone-app .leave-simple-tabs button {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:nowrap;
+    gap:4px;
+    min-height:48px;
+    min-width:0;
+    margin:0;
+    padding:9px 3px;
+    border:0;
+    border-bottom:2px solid transparent;
+    background:#fff;
+    color:#77869a;
+    font-size:12px;
+    line-height:1.25;
+    font-weight:700;
+    white-space:nowrap;
+  }
+  .admin-phone-app .leave-simple-tabs button.is-active {
+    background:#fff;
+    color:var(--phone-accent);
+    border-bottom-color:var(--phone-accent);
+  }
+  .admin-phone-app .leave-simple-tabs button svg {width:16px;height:16px;flex:none;}
+  .admin-phone-app .leave-simple-tabs button>span {
+    margin:0 0 0 1px;
+    padding:1px 5px;
+    border-radius:999px;
+    font-size:10px;
+  }
+  .admin-phone-app .leave-simple-heading {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 12px;
+    gap:7px;
+    border:0;
+    border-bottom:1px solid var(--phone-line);
+    background:#fff;
+  }
+  .admin-phone-app .leave-simple-heading h4 {font-size:14px;line-height:1.3;}
+  .admin-phone-app .leave-simple-heading p {display:none;}
+  .admin-phone-app .leave-simple-heading>span {font-size:11px;padding:4px 6px;}
+  .admin-phone-app .leave-simple-cards {
+    display:grid;
+    gap:0;
+    margin:0;
+    padding:0;
+    background:#fff;
+  }
+  .admin-phone-app .leave-simple-card {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 49px;
+    grid-template-rows:auto auto;
+    gap:0;
+    margin:0;
+    padding:10px 12px;
+    border:0;
+    border-radius:0;
+    box-shadow:none;
+    background:transparent;
+    min-width:0;
+  }
+  .admin-phone-app .leave-simple-card+.leave-simple-card {
+    border-top:1px solid var(--phone-line);
+  }
+  .admin-phone-app .leave-simple-card-top {
+    grid-column:1;
+    grid-row:1;
+    display:flex;
+    align-items:flex-start;
+    justify-content:flex-start;
+    flex-wrap:wrap;
+    gap:5px 9px;
+    min-width:0;
+    padding:0;
+    border:0;
+    background:transparent;
+  }
+  .admin-phone-app .leave-simple-card-top>div {display:grid;gap:2px;min-width:0;}
+  .admin-phone-app .leave-simple-card-top strong {
+    min-width:0;
+    font-size:14px;
+    line-height:1.35;
+    color:var(--phone-ink);
+  }
+  .admin-phone-app .leave-simple-card-top small {
+    font-size:10px;
+    line-height:1.3;
+    color:#8a98a9;
+    overflow-wrap:anywhere;
+  }
+  .admin-phone-app .leave-simple-card-top>.leave-admin-status {
+    flex:none;
+    margin:0;
+    padding:3px 7px;
+    font-size:10px;
+    line-height:1.35;
+    white-space:nowrap;
+  }
+  .admin-phone-app .leave-simple-card-meta {
+    grid-column:1;
+    grid-row:2;
+    display:grid;
+    min-width:0;
+    gap:3px;
+    margin:6px 0 0;
+    padding:0;
+    border:0;
+  }
+  .admin-phone-app .leave-simple-type-row {
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .admin-phone-app .leave-simple-type-row>strong {font-size:12px;line-height:1.35;}
+  .admin-phone-app .leave-simple-day-pill {
+    padding:2px 5px;font-size:10px;
+    border-radius:6px;
+  }
+  .admin-phone-app .leave-simple-dates {
+    display:flex;
+    align-items:center;
+    gap:5px;
+    min-width:0;
+  }
+  .admin-phone-app .leave-simple-dates svg {flex:none;width:14px;height:14px;}
+  .admin-phone-app .leave-simple-dates span {
+    min-width:0;
+    overflow-wrap:anywhere;
+    font-size:12px;
+    line-height:1.35;
+  }
+  .admin-phone-app .leave-simple-decided {font-size:11px;}
+  .admin-phone-app .leave-simple-card>.leave-simple-open {
+    grid-column:2;grid-row:1/3;
+    display:flex;
+    align-self:center;
+    justify-self:end;
+    justify-content:center;
+    align-items:center;
+    width:44px;
+    min-width:44px;
+    min-height:44px;
+    gap:0;
+    margin:0;
+    padding:8px;
+    border:0;
+    border-radius:9px;
+    background:#eef3ff;
+    color:var(--phone-accent);
+    font-size:0;
+    line-height:1;
+  }
+  .admin-phone-app .leave-simple-card>.leave-simple-open::before {content:none;}
+  .admin-phone-app .leave-simple-card>.leave-simple-open svg {width:20px;height:20px;}
+  .admin-phone-app .leave-simple-card>.leave-simple-open:focus-visible {outline-offset:-2px;}
+  .admin-phone-app .leave-admin-empty {padding:22px 14px;}
+
+  /* Bottom-sheet edit and leave dialogs: stay above the nav bar. */
+  .admin-phone-app .employee-demo-backdrop,
+  .leave-admin-backdrop {
+    z-index:350;
+    align-items:end;
+    padding:0;
+  }
+  .admin-phone-app .employee-demo-modal,
+  .leave-admin-modal {
+    width:100%;
+    max-width:100%;
+    height:auto;
+    max-height:calc(100dvh - env(safe-area-inset-top));
+    min-height:0;
+    border:0;
+    border-radius:18px 18px 0 0;
+    background:#fff;
+    box-shadow:0 -6px 26px rgba(16,36,58,.08);
+  }
+  .admin-phone-app .employee-demo-modal-head,
+  .leave-admin-modal-head {padding:14px 15px 9px;}
+  .admin-phone-app .employee-demo-modal-head h2,
+  .leave-admin-modal-head h2 {font-size:18px;}
+  .admin-phone-app .employee-demo-form {padding:12px 15px 16px;}
+  .admin-phone-app .employee-demo-form-grid {grid-template-columns:minmax(0,1fr);gap:12px;}
+  .admin-phone-app .employee-demo-form-grid label,
+  .admin-phone-app .employee-demo-form-grid>.preview-date-control,
+  .admin-phone-app .employee-demo-form-grid>.preview-select {grid-column:1/-1;min-width:0;}
+  .admin-phone-app .employee-demo-form-grid input {min-height:45px;font-size:16px;}
+  .admin-phone-app .employee-demo-form-actions {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;}
+  .admin-phone-app .employee-demo-form-actions button {min-height:44px;padding:10px;}
+  .leave-admin-modal {display:flex;flex-direction:column;overflow:hidden;}
+  .leave-admin-modal-body {flex:1 1 auto;overflow-y:auto;min-height:0;padding:12px 15px;gap:12px;}
+  .leave-admin-modal-actions {
+    position:relative;
+    z-index:1;
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+    margin:0;
+    padding:10px 15px calc(10px + env(safe-area-inset-bottom));
+    border-top:1px solid var(--phone-line,#e2e8ef);
+    background:#fff;
+  }
+  .leave-admin-modal-actions button {min-height:44px;font-size:13px;}
+  .leave-admin-modal-actions:has(>button:nth-child(3))>button:first-child {
+    display:none;
+  }
+}
+@media (max-width:360px) {
+  .admin-phone-app .admin-preview-content {padding-inline:10px;}
+  .admin-phone-app .admin-preview-header {padding-inline:12px;}
+  .admin-phone-app .admin-preview-mobile-nav button {font-size:10px;}
+  .admin-phone-app .admin-preview-mobile-nav button svg {width:20px;height:20px;}
+  .admin-phone-app .report-v2-period-nav button {
+    min-width:35px;width:35px;
+  }
+  .admin-phone-app .report-v2-period-nav strong,
+  .admin-phone-app .report-yearly .report-v2-period-nav strong {font-size:12px;}
+  .admin-phone-app .report-v2-export {min-width:72px;padding-inline:7px;}
+  .admin-phone-app .leave-simple-tabs button {font-size:11px;}
+  .admin-phone-app .leave-simple-tabs button>span {padding-inline:4px;font-size:9px;}
+  .admin-phone-app .leave-simple-card-top>.leave-admin-status {font-size:9px;}
+  .admin-phone-app .employee-demo-mobile-bottom {max-width:82px;}
+  .admin-phone-app .employee-demo-metrics p {font-size:10px;}
+}

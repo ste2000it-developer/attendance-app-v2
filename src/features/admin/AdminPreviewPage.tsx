@@ -9,6 +9,7 @@ import "./AdminVisualRefresh.css";
 import "./AdminMobileVibrant.css";
 import "./AdminSeparators.css";
 import "./AdminPhoneReportsLeave.css";
+import "./AdminPhoneApp.css";
 
 const tabs = [
   { id: "overview", label: "ภาพรวม" },
@@ -48,6 +49,8 @@ export default function AdminPreviewPage() {
   const [demoLeaveRequests, setDemoLeaveRequests] = useState<AdminLeaveRequest[]>(createDemoLeaveRequests);
   function navigate(next: Tab) {
     setActive(next);
+    // Phone tab navigation starts each screen at the top, like a native app.
+    if (window.matchMedia("(max-width:700px)").matches) window.scrollTo(0, 0);
     const url = new URL(window.location.href);
     url.searchParams.set("section", next);
     window.history.replaceState(null, "", url);
@@ -55,7 +58,7 @@ export default function AdminPreviewPage() {
   const selected = active === "overview" ? null : screens[active];
 
   return (
-    <div className="admin-preview-shell">
+    <div className={"admin-preview-shell admin-phone-app admin-page-" + active}>
       <aside className="admin-preview-sidebar">
         <div className="admin-preview-brand">
           <span className="admin-preview-brand-icon"><AdminIcon name="overview" size={24}/></span>
@@ -75,7 +78,14 @@ export default function AdminPreviewPage() {
 
       <main className="admin-preview-main">
         <header className="admin-preview-header">
-          <div><span className="admin-preview-eyebrow">ADMIN / ATTENDANCE V2</span><h1>จัดการระบบ</h1></div>
+          <div>
+            <span className="admin-preview-eyebrow">ADMIN / ATTENDANCE V2</span>
+            <h1>จัดการระบบ</h1>
+            <div className="admin-phone-heading">
+              <small>STE2000 · ADMIN</small>
+              <strong>{active==="overview"?"ภาพรวม":active==="people"?"พนักงาน":active==="leave"?"คำขอลา":active==="report"?"รายงาน":"ตั้งค่า"}</strong>
+            </div>
+          </div>
           <a href="?preview=login" className="admin-preview-back"><span className="admin-preview-back-long">กลับหน้าเข้าสู่ระบบ</span><span className="admin-preview-back-short">ออก</span><span aria-hidden="true">↗</span></a>
         </header>
         <div className="admin-preview-mobile-nav" role="navigation" aria-label="เมนูแอดมินบนมือถือ">
