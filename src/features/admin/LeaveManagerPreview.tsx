@@ -246,7 +246,8 @@ export default function LeaveManagerPreview({ requests, onChange }: {
                     </div>
                     {view==="history" && <small className="leave-simple-decided">พิจารณาเมื่อ {item.decisionDate ? formatDate(item.decisionDate):"—"}</small>}
                   </div>
-                  <button type="button" className="leave-simple-open" onClick={event=>openDetail(item,event.currentTarget)}>
+                  <button type="button" className="leave-simple-open" aria-label={"ดูรายละเอียดคำขอของ "+item.employeeName}
+                    onClick={event=>openDetail(item,event.currentTarget)}>
                     ดูรายละเอียดคำขอ <Icon name="arrow" size={17}/></button>
                 </article>
               ))}

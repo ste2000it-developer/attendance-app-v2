@@ -162,23 +162,24 @@ export default function ReportPeopleView({mode,employees,periodLabel,scheduledDa
       </label>
       <div className="report-phone-directory">
         {visible.map(person=><article className={"report-phone-person-card "+colorStyle(person.code)} key={person.code}>
-          <div className="report-phone-person-top">
-            <div className="report-phone-person-heading">
+          <button type="button" className="report-phone-person-top report-phone-person-trigger"
+            aria-label={(mode==="month"?"ดูรายวันของ ":"ดูรายเดือนของ ")+person.name}
+            onClick={()=>togglePerson(person.code)}>
+            <span className="report-phone-person-heading">
               <span className={"report-split-avatar report-split-row-avatar "+colorStyle(person.code)}
                 aria-hidden="true">{person.code.slice(-2)}</span>
-              <div className="report-phone-name">
+              <span className="report-phone-name">
                 <strong>{person.name}</strong><small>{person.code} · {person.department}</small>
-              </div>
-            </div>
-            <button type="button" className="report-phone-details-button"
-              aria-label={(mode==="month"?"ดูรายวันของ ":"ดูรายเดือนของ ")+person.name}
-              onClick={()=>togglePerson(person.code)}>
-              <span>{mode==="month"?"รายวัน":"รายเดือน"}</span>
+              </span>
+            </span>
+            <span className="report-phone-open-hint" aria-hidden="true">
+              {mode==="month"?"รายวัน":"รายเดือน"}
               <svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor"
-                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"
-                aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-            </button>
-          </div>
+                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none">
+                <path d="m9 18 6-6-6-6"/>
+              </svg>
+            </span>
+          </button>
           <dl className="report-phone-metrics">
             <div><dt>เข้างาน</dt><dd>{person.present}<small> วัน</small></dd></div>
             <div><dt>ลา</dt><dd>{person.leave}<small> วัน</small></dd></div>

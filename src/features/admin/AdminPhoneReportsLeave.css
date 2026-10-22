@@ -662,3 +662,135 @@
   .admin-preview-shell .report-phone-details-button{min-width:70px;padding-inline:6px;}
   .admin-preview-shell .report-phone-name strong{font-size:13px;}
 }
+
+/* Phone UI refinement: use compact label/value rows instead of tiny crowded tiles. */
+@media(max-width:700px){
+ .admin-preview-shell .admin-preview-content{padding-inline:12px;}
+ .admin-preview-shell .admin-preview-intro{
+  margin-bottom:11px;padding-bottom:9px;border-bottom:1px solid #dbe5eb;
+ }
+ .admin-preview-shell .admin-preview-intro h2{font-size:18px;}
+ /* Overview summary: icon beside label and value, not above them. */
+ .admin-preview-shell .admin-preview-stat{
+  display:grid;grid-template-columns:27px minmax(0,1fr);grid-template-rows:auto auto;
+  align-items:center;align-content:center;column-gap:8px;row-gap:2px;
+  padding:9px 10px;min-height:65px;
+ }
+ .admin-preview-shell .admin-preview-stat-icon{grid-column:1;grid-row:1/3;margin:0;}
+ .admin-preview-shell .admin-preview-stat>span:not(.admin-preview-stat-icon){
+  grid-column:2;grid-row:1;min-width:0;line-height:1.3;font-size:11px;
+ }
+ .admin-preview-shell .admin-preview-stat>strong{
+  grid-column:2;grid-row:2;border:0;padding:0;font-size:21px;line-height:1.15;
+ }
+ .admin-preview-shell .admin-preview-shortcuts button{min-height:52px;padding:8px;}
+ .admin-preview-shell .admin-preview-panel-head{padding-bottom:10px;border-bottom:1px solid #dbe5eb;}
+
+ /* Reports: two readable columns rather than four narrow summary cards. */
+ .admin-preview-shell .report-v2-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;}
+ .admin-preview-shell .report-v2-stat{
+  display:flex;align-items:center;justify-content:space-between;
+  min-width:0;min-height:49px;padding:9px 10px;gap:6px;
+  border:1px solid #dce6ec;background:#fff;border-radius:10px;
+ }
+ .admin-preview-shell .report-v2-stat-top{
+  flex:1 1 auto;min-width:0;padding:0;border:0;font-size:11px;line-height:1.3;
+ }
+ .admin-preview-shell .report-v2-stat-number{
+  flex:none;margin:0;font-size:19px;line-height:1.1;white-space:nowrap;
+ }
+ .admin-preview-shell .report-v2-stat-number span{display:inline;margin:0;font-size:10px;}
+
+ /* Employee card: entire heading opens details; split key figures into two lines. */
+ .admin-preview-shell .report-phone-person-card{
+  border:1px solid #dbe5eb;background:#fff;border-radius:11px;box-shadow:none;
+ }
+ .admin-preview-shell .report-phone-person-trigger{
+  display:flex;width:100%;align-items:center;justify-content:space-between;min-height:58px;
+  padding:9px 10px;gap:8px;border:0;border-bottom:1px solid #dce6eb;
+  background:#fff;color:inherit;font:inherit;text-align:left;cursor:pointer;
+ }
+ .admin-preview-shell .report-phone-person-trigger:focus-visible{
+  outline:2px solid #357fa1;outline-offset:-2px;
+ }
+ .admin-preview-shell .report-phone-person-trigger .report-phone-person-heading{
+  display:flex;flex:1 1 auto;min-width:0;gap:8px;align-items:center;
+ }
+ .admin-preview-shell .report-phone-person-trigger .report-split-row-avatar{
+  flex:none;width:34px;height:34px;font-size:11px;
+ }
+ .admin-preview-shell .report-phone-name strong{font-size:14px;line-height:1.35;}
+ .admin-preview-shell .report-phone-name small{font-size:11px;line-height:1.3;}
+ .admin-preview-shell .report-phone-open-hint{
+  display:inline-flex;align-items:center;justify-content:center;
+  flex:none;gap:2px;min-width:55px;padding:6px 1px;
+  font-size:11px;font-weight:760;color:#36708f;
+ }
+ .admin-preview-shell .report-phone-open-hint svg{flex:none;width:15px;height:15px;}
+ .admin-preview-shell .report-phone-metrics{
+  grid-template-columns:repeat(2,minmax(0,1fr));margin:0;padding:4px 9px;gap:0;
+ }
+ .admin-preview-shell .report-phone-metrics>div:nth-child(n){
+  display:flex;min-width:0;min-height:35px;align-items:center;justify-content:space-between;
+  justify-items:initial;gap:5px;padding:6px 8px!important;margin:0;border:0;
+ }
+ .admin-preview-shell .report-phone-metrics>div:nth-child(even){border-left:1px solid #dce6eb;}
+ .admin-preview-shell .report-phone-metrics>div:nth-child(n+3){border-top:1px solid #e6edf1;}
+ .admin-preview-shell .report-phone-metrics dt{font-size:12px;line-height:1.3;}
+ .admin-preview-shell .report-phone-metrics dd{font-size:16px;line-height:1.2;}
+ .admin-preview-shell .report-phone-metrics dd small{font-size:10px;}
+
+ /* Leave queue: a short name/status row and a modest details action beside dates. */
+ .admin-preview-shell .leave-simple-section{border:0;border-radius:0;background:transparent;}
+ .admin-preview-shell .leave-simple-tabs{
+  background:#fff;border:1px solid #dce6eb;border-bottom:0;border-radius:10px 10px 0 0;
+ }
+ .admin-preview-shell .leave-simple-heading{
+  padding:9px 10px;border:1px solid #dce6eb;background:#fff;
+ }
+ .admin-preview-shell .leave-simple-cards{gap:7px;padding:9px 0 0;}
+ .admin-preview-shell .leave-simple-card{
+  display:grid;grid-template-columns:minmax(0,1fr) 65px;gap:0;
+  border:1px solid #dce6eb;border-radius:10px;box-shadow:none;background:#fff;
+ }
+ .admin-preview-shell .leave-simple-card-top{
+  grid-column:1/-1;display:flex;align-items:center;min-width:0;
+  padding:9px 10px;gap:8px;border-bottom:1px solid #dce6eb;background:#fff;
+ }
+ .admin-preview-shell .leave-simple-card-top>div{min-width:0;}
+ .admin-preview-shell .leave-simple-card-top strong{font-size:14px;line-height:1.3;}
+ .admin-preview-shell .leave-simple-card-top small{font-size:10px;line-height:1.3;}
+ .admin-preview-shell .leave-simple-card-meta{
+  grid-column:1;grid-row:2;min-width:0;gap:5px;padding:8px 8px 9px 10px;border:0;
+ }
+ .admin-preview-shell .leave-simple-type-row{gap:6px;}
+ .admin-preview-shell .leave-simple-type-row>strong{font-size:13px;}
+ .admin-preview-shell .leave-simple-day-pill{font-size:10px;padding:3px 6px;white-space:nowrap;}
+ .admin-preview-shell .leave-simple-dates{gap:4px;align-items:flex-start;}
+ .admin-preview-shell .leave-simple-dates span{font-size:12px;line-height:1.4;}
+ .admin-preview-shell .leave-simple-decided{font-size:11px;line-height:1.35;}
+ .admin-preview-shell .leave-simple-card>.leave-simple-open{
+  grid-column:2;grid-row:2;display:flex;align-self:center;justify-self:center;
+  justify-content:center;align-items:center;
+  width:52px;min-width:52px;min-height:44px;margin:0 9px 0 0;padding:7px 4px;
+  gap:3px;font-size:0;white-space:nowrap;
+  border:1px solid #d9e6ed;border-radius:9px;color:#2d6a8a;background:#f0f6f9;
+ }
+ .admin-preview-shell .leave-simple-card>.leave-simple-open::before{
+  content:"ดู";font-size:12px;font-weight:760;
+ }
+ .admin-preview-shell .leave-simple-card>.leave-simple-open svg{
+  flex:none;width:15px;height:15px;
+ }
+ .admin-preview-shell .leave-simple-note{font-size:11px;}
+ .admin-preview-shell .leave-admin-modal-actions button{min-height:44px;}
+}
+@media(max-width:360px){
+ .admin-preview-shell .report-phone-open-hint{min-width:18px;font-size:0;}
+ .admin-preview-shell .report-phone-metrics dt{font-size:11px;}
+ .admin-preview-shell .report-phone-metrics dd{font-size:15px;}
+ .admin-preview-shell .leave-simple-card{grid-template-columns:minmax(0,1fr) 53px;}
+ .admin-preview-shell .leave-simple-card>.leave-simple-open{
+  width:44px;min-width:44px;margin-right:7px;
+ }
+}
