@@ -319,3 +319,346 @@
   }
   .leave-admin-modal-actions button{font-size:13px;}
 }
+
+
+/*
+ * Compact phone density. Stop treating each data point as a giant tile.
+ * Values and labels remain legible (12–15px); primary touch targets >= 44px.
+ * Desktop and iPad remain unchanged.
+ */
+@media(max-width:700px){
+  /* Console chrome and bottom navigation: return screen space to work. */
+  .admin-preview-shell .admin-preview-header{
+    min-height:54px;padding:8px 12px;
+  }
+  .admin-preview-shell .admin-preview-eyebrow{display:none;}
+  .admin-preview-shell .admin-preview-header h1{font-size:18px;line-height:1.3;}
+  .admin-preview-shell .admin-preview-back{
+    min-height:44px;min-width:50px;padding:7px 9px;font-size:12px;
+  }
+  .admin-preview-shell .admin-preview-mobile-nav{
+    padding:4px 5px calc(4px + env(safe-area-inset-bottom));
+    box-shadow:0 -2px 9px rgba(35,67,89,.065);
+  }
+  .admin-preview-shell .admin-preview-mobile-nav button{
+    min-height:50px;gap:3px;padding:4px 1px;font-size:11px;
+  }
+  .admin-preview-shell .admin-preview-mobile-nav button svg{
+    width:19px;height:19px;
+  }
+  .admin-preview-shell .admin-preview-content{
+    padding:10px 11px calc(79px + env(safe-area-inset-bottom));
+  }
+  .admin-preview-shell .admin-preview-intro{
+    margin-bottom:10px;padding-bottom:9px;gap:4px;
+  }
+  .admin-preview-shell .admin-preview-kicker{display:none;}
+  .admin-preview-shell .admin-preview-intro h2{
+    font-size:19px;line-height:1.3;margin:0;
+  }
+  /* Section titles already explain the task; avoid the duplicate paragraph. */
+  .admin-preview-shell .admin-preview-intro p{display:none;}
+  .admin-preview-shell .admin-preview-disclaimer{
+    margin-top:13px;font-size:11px;
+  }
+
+  /* Overview: stats only need their label and value, not three large rows. */
+  .admin-preview-shell .admin-preview-stat-grid{gap:7px;}
+  .admin-preview-shell .admin-preview-stat{
+    min-height:0;gap:5px;padding:10px;border-radius:11px;
+  }
+  .admin-preview-shell .admin-preview-stat-icon{
+    width:27px;height:27px;margin:0;border-radius:8px;
+  }
+  .admin-preview-shell .admin-preview-stat-icon svg{width:17px;height:17px;}
+  .admin-preview-shell .admin-preview-stat>span:not(.admin-preview-stat-icon){
+    font-size:12px;line-height:1.35;
+  }
+  .admin-preview-shell .admin-preview-stat>strong{
+    font-size:23px;padding-top:6px;margin:0;border-top:1px solid #d4e0e8;
+  }
+  .admin-preview-shell .admin-preview-stat small{display:none;}
+  .admin-preview-shell .admin-preview-panel{
+    margin-top:10px;padding:11px;border-radius:12px;
+  }
+  .admin-preview-shell .admin-preview-panel-head{
+    padding-bottom:9px;
+  }
+  .admin-preview-shell .admin-preview-panel-head h3{font-size:16px;}
+  .admin-preview-shell .admin-preview-panel-head p{font-size:11px;}
+  .admin-preview-shell .admin-preview-shortcuts{
+    margin-top:10px;gap:7px;
+  }
+  .admin-preview-shell .admin-preview-shortcuts button{
+    min-height:59px;padding:9px;gap:7px;
+    flex-direction:row;align-items:center;justify-content:flex-start;
+  }
+  .admin-preview-shell .admin-preview-shortcuts button>span{
+    flex:none;width:30px;height:30px;
+  }
+  .admin-preview-shell .admin-preview-shortcuts button>span svg{width:17px;height:17px;}
+  .admin-preview-shell .admin-preview-shortcuts button strong{
+    font-size:12px;line-height:1.35;
+  }
+
+  /* Staff manager: condensed metrics and filters, but not tiny controls. */
+  .admin-preview-shell .employee-demo{gap:9px;}
+  .admin-preview-shell .employee-demo-topbar{gap:8px;}
+  .admin-preview-shell .employee-demo-summary strong{font-size:18px;}
+  .admin-preview-shell .employee-demo-summary p{font-size:12px;line-height:1.4;}
+  .admin-preview-shell .employee-demo-add{min-height:44px;}
+  .admin-preview-shell .employee-demo-metrics{gap:6px;}
+  .admin-preview-shell .employee-demo-metrics>div{
+    padding:8px 7px;gap:3px;
+  }
+  .admin-preview-shell .employee-demo-metric-icon{
+    width:27px;height:27px;
+  }
+  .admin-preview-shell .employee-demo-metric-icon svg{width:17px;height:17px;}
+  .admin-preview-shell .employee-demo-metrics p{font-size:11px;}
+  .admin-preview-shell .employee-demo-metrics strong{font-size:20px;}
+  .admin-preview-shell .employee-demo-directory-title{
+    padding:11px 10px;gap:6px;
+  }
+  .admin-preview-shell .employee-demo-directory-title h3{font-size:16px;}
+  .admin-preview-shell .employee-demo-directory-title p{font-size:11px;}
+  .admin-preview-shell .employee-demo-filters{gap:7px;padding:8px 10px;}
+  .admin-preview-shell .employee-demo-mobile-person{padding:10px;}
+  .admin-preview-shell .employee-demo-mobile-bottom{gap:6px;}
+  .admin-preview-shell .employee-demo-edit{min-height:44px;}
+  .admin-preview-shell .employee-demo-form{padding:11px;}
+  .admin-preview-shell .employee-demo-form-grid{gap:9px;}
+  .admin-preview-shell .employee-demo-form-actions button{min-height:44px;}
+
+  /* Reports: small 4-item snapshot rather than four enormous summary cards. */
+  .admin-preview-shell .report-v2{gap:9px;}
+  .admin-preview-shell .report-v2-top{gap:7px;}
+  .admin-preview-shell .report-v2-period{gap:4px;}
+  .admin-preview-shell .report-v2-period>span{font-size:12px;}
+  .admin-preview-shell .report-v2-period-nav{min-height:43px;padding:1px;}
+  .admin-preview-shell .report-v2-period-nav button{
+    width:41px;height:41px;min-height:41px;min-width:41px;
+  }
+  .admin-preview-shell .report-v2-period-nav strong{font-size:13px;}
+  .admin-preview-shell .report-v2-export{min-height:44px;padding:8px 11px;font-size:13px;}
+  .admin-preview-shell .report-v2-mode-tabs{
+    padding:3px;margin-bottom:7px;
+  }
+  .admin-preview-shell .report-v2-mode-tabs button{
+    min-height:42px;padding:7px;font-size:13px;
+  }
+  .admin-preview-shell .report-v2-stats{
+    grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;
+  }
+  .admin-preview-shell .report-v2-stat{
+    min-height:0;padding:9px 6px;gap:4px;border-radius:9px;
+  }
+  .admin-preview-shell .report-v2-stat-top{
+    border-bottom:0;padding:0;font-size:11px;line-height:1.25;
+  }
+  .admin-preview-shell .report-v2-stat-symbol,
+  .admin-preview-shell .report-yearly-stat-mark{display:none;}
+  .admin-preview-shell .report-v2-stat-number{
+    font-size:21px;line-height:1.15;white-space:normal;
+  }
+  .admin-preview-shell .report-v2-stat-number span{
+    display:block;margin:2px 0 0;font-size:9px;line-height:1.2;
+  }
+  .admin-preview-shell .report-v2-note{
+    padding:8px 10px;font-size:11px;line-height:1.45;
+  }
+
+  /* Report employees: each record is a compact row + four figures. */
+  .admin-preview-shell .report-split-list-heading{
+    padding:3px 0 8px;gap:7px;
+  }
+  .admin-preview-shell .report-split-list-heading h3{font-size:17px;}
+  .admin-preview-shell .report-split-list-heading p{display:none;}
+  .admin-preview-shell .report-split-kicker{display:none;}
+  .admin-preview-shell .report-split-counter{font-size:11px;padding:5px 7px;}
+  .admin-preview-shell .report-split-search{
+    margin:0 0 8px;min-height:43px;
+  }
+  .admin-preview-shell .report-phone-directory{gap:7px;}
+  .admin-preview-shell .report-phone-person-card{border-radius:11px;}
+  .admin-preview-shell .report-phone-person-top{
+    display:flex;align-items:center;justify-content:space-between;gap:7px;
+    padding:9px 10px;background:#fff;
+    border-bottom:1px solid #d9e3e9;
+  }
+  .admin-preview-shell .report-phone-person-heading{
+    padding:0;gap:8px;flex:1;min-width:0;
+    background:transparent;border:0;
+  }
+  .admin-preview-shell .report-phone-person-heading .report-split-row-avatar{
+    flex:none;width:34px;height:34px;font-size:11px;
+  }
+  .admin-preview-shell .report-phone-name strong{
+    font-size:14px;line-height:1.25;
+  }
+  .admin-preview-shell .report-phone-name small{
+    font-size:11px;line-height:1.25;
+  }
+  .admin-preview-shell .report-phone-details-button{
+    flex:none;display:inline-flex;align-items:center;justify-content:center;gap:3px;
+    width:auto;min-width:79px;min-height:44px;margin:0;padding:7px 8px;
+    font-size:12px;white-space:nowrap;border-radius:9px;
+  }
+  .admin-preview-shell .report-phone-details-button svg{width:15px;height:15px;}
+  .admin-preview-shell .report-phone-metrics{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:0;padding:7px 5px;
+  }
+  .admin-preview-shell .report-phone-metrics>div,
+  .admin-preview-shell .report-phone-metrics>div:nth-child(odd),
+  .admin-preview-shell .report-phone-metrics>div:nth-child(even){
+    display:grid;align-content:center;justify-content:center;justify-items:center;
+    gap:2px;min-width:0;min-height:40px;
+    padding:3px!important;margin:0;
+    border-top:0;border-left:0;
+  }
+  .admin-preview-shell .report-phone-metrics>div+div{
+    border-left:1px solid #d7e1e8;
+  }
+  .admin-preview-shell .report-phone-metrics dt{
+    font-size:10px;line-height:1.25;
+  }
+  .admin-preview-shell .report-phone-metrics dd{
+    font-size:16px;line-height:1.15;
+  }
+  .admin-preview-shell .report-phone-metrics dd small{
+    font-size:9px;
+  }
+  .admin-preview-shell .report-split-list-footer{
+    padding:8px 1px;margin-top:6px;font-size:11px;
+  }
+  /* Selected employee profile: show key information without tall decorative blocks. */
+  .admin-preview-shell .report-split-cover{height:57px;}
+  .admin-preview-shell .report-split-profile-avatar{
+    width:51px;height:51px;border-width:3px;font-size:16px;
+  }
+  .admin-preview-shell .report-split-identity{
+    margin-top:-26px;padding-bottom:9px;margin-bottom:4px;
+  }
+  .admin-preview-shell .report-split-identity h3{font-size:17px;}
+  .admin-preview-shell .report-split-identity-sub{font-size:12px;}
+  .admin-preview-shell .report-split-meta{
+    padding:0 12px;margin:3px 0 8px;
+  }
+  .admin-preview-shell .report-split-meta>div{
+    padding:6px 0;
+  }
+  .admin-preview-shell .report-split-meta dt,
+  .admin-preview-shell .report-split-meta dd{font-size:12px;}
+  .admin-preview-shell .report-split-insights{
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:7px;margin:0 11px 9px;padding-top:9px;
+  }
+  .admin-preview-shell .report-split-insight{
+    min-width:0;padding:9px;gap:4px;
+  }
+  .admin-preview-shell .report-split-insight>span:first-child{font-size:11px;}
+  .admin-preview-shell .report-split-insight strong{font-size:20px;}
+  .admin-preview-shell .report-split-insight small{
+    font-size:10px;line-height:1.35;
+  }
+  .admin-preview-shell .report-split-tiny-stats{
+    gap:7px;margin:0 11px 9px;
+  }
+  .admin-preview-shell .report-split-tiny-stats>div{padding:7px;gap:2px;}
+  .admin-preview-shell .report-split-tiny-stats span{font-size:11px;}
+  .admin-preview-shell .report-split-tiny-stats strong{font-size:15px;}
+  .admin-preview-shell .report-split-history-head{padding:10px 12px;}
+  .admin-preview-shell .report-split-history-entry{
+    min-height:0;padding:8px 11px;gap:3px 8px;
+  }
+  .admin-preview-shell .report-split-history-toggle{min-height:44px;}
+  .admin-preview-shell .report-mobile-detail-back{
+    min-height:44px;margin-bottom:7px;padding:8px 10px;font-size:13px;
+  }
+
+  /* Leave list: each application occupies one short, scannable card. */
+  .admin-preview-shell .leave-simple{gap:9px;}
+  .admin-preview-shell .leave-simple-top{gap:6px;}
+  .admin-preview-shell .leave-simple-eyebrow{display:none;}
+  .admin-preview-shell .leave-simple-top h3{font-size:17px;}
+  .admin-preview-shell .leave-simple-top p{display:none;}
+  .admin-preview-shell .leave-simple-export{
+    min-height:44px;font-size:13px;
+  }
+  .admin-preview-shell .leave-simple-note{
+    padding:8px 10px;font-size:11px;line-height:1.45;
+  }
+  .admin-preview-shell .leave-simple-tabs{padding:6px 6px 0;gap:3px;}
+  .admin-preview-shell .leave-simple-tabs button{
+    min-height:43px;font-size:12px;padding:6px 4px;
+  }
+  .admin-preview-shell .leave-simple-tabs button svg{width:16px;height:16px;}
+  .admin-preview-shell .leave-simple-tabs button>span{font-size:10px;padding:1px 5px;}
+  .admin-preview-shell .leave-simple-heading{padding:9px 10px;}
+  .admin-preview-shell .leave-simple-heading h4{font-size:14px;}
+  .admin-preview-shell .leave-simple-heading p{display:none;}
+  .admin-preview-shell .leave-simple-heading>span{font-size:11px;padding:5px;}
+  .admin-preview-shell .leave-simple-cards{gap:7px;padding:8px;}
+  .admin-preview-shell .leave-simple-card{border-radius:10px;}
+  .admin-preview-shell .leave-simple-card-top{
+    padding:9px 10px;gap:7px;
+  }
+  .admin-preview-shell .leave-simple-card-top strong{font-size:14px;}
+  .admin-preview-shell .leave-simple-card-top small{font-size:11px;}
+  .admin-preview-shell .leave-simple-card-top .leave-admin-status{
+    font-size:10px;padding:5px 6px;
+  }
+  .admin-preview-shell .leave-simple-card-meta{
+    padding:9px 10px 8px;gap:5px;
+  }
+  .admin-preview-shell .leave-simple-type-row>strong{font-size:13px;}
+  .admin-preview-shell .leave-simple-day-pill{font-size:11px;padding:4px 7px;}
+  .admin-preview-shell .leave-simple-dates{gap:5px;}
+  .admin-preview-shell .leave-simple-dates span{font-size:12px;}
+  .admin-preview-shell .leave-simple-decided{font-size:11px;}
+  .admin-preview-shell .leave-simple-card>.leave-simple-open{
+    min-height:44px;margin:6px 10px 9px;
+    width:calc(100% - 20px);padding:8px 11px;font-size:13px;
+  }
+  /* Leave dialog: compact field grid, no 3-row action-bar monster. */
+  .leave-admin-modal{max-height:100dvh;height:auto;min-height:0;}
+  .leave-admin-modal-head{padding:10px 12px 8px;}
+  .leave-admin-modal-head h2{font-size:17px;}
+  .leave-admin-modal-demo{padding:7px 12px;font-size:11px;}
+  .leave-admin-modal-body{
+    padding:10px 12px;gap:10px;
+  }
+  .leave-admin-modal-person{gap:8px;}
+  .leave-admin-avatar{width:35px;height:35px;border-radius:9px;}
+  .leave-admin-avatar svg{width:19px;height:19px;}
+  .leave-admin-modal-person strong{font-size:14px;}
+  .leave-admin-modal-person>div:nth-child(2)>span{font-size:11px;}
+  .leave-admin-detail-grid>div{padding:8px;}
+  .leave-admin-detail-grid dt{font-size:11px;margin-bottom:3px;}
+  .leave-admin-detail-grid dd{font-size:13px;}
+  .leave-admin-reason p{padding:9px 10px;line-height:1.55;}
+  .leave-admin-attachment>p{padding:8px 10px;}
+  .leave-admin-decision{padding:10px;gap:6px;}
+  .leave-admin-modal-actions{
+    padding:8px 12px calc(9px + env(safe-area-inset-bottom));
+    gap:7px;
+  }
+  .leave-admin-modal-actions button{
+    min-height:44px;font-size:12px;padding:7px 5px;
+  }
+  /* X in the header already closes pending items: no duplicate 3rd action. */
+  .leave-admin-modal-actions:has(>button:nth-child(3))>button:first-child{
+    display:none;
+  }
+}
+@media(min-width:390px) and (max-width:700px){
+  /* Four overview metrics in one small row if the phone is wide enough. */
+  .admin-preview-shell .report-v2-stats{grid-template-columns:repeat(4,minmax(0,1fr));}
+}
+@media(max-width:370px){
+  .admin-preview-shell .report-phone-metrics dt{font-size:9px;}
+  .admin-preview-shell .report-phone-metrics dd{font-size:15px;}
+  .admin-preview-shell .report-phone-details-button{min-width:70px;padding-inline:6px;}
+  .admin-preview-shell .report-phone-name strong{font-size:13px;}
+}
