@@ -6,6 +6,7 @@ import ReportManagerPreview from "./ReportManagerPreview";
 import type { AdminLeaveRequest } from "./LeaveManagerPreview";
 import "./AdminPreviewPage.css";
 import "./AdminVisualRefresh.css";
+import "./AdminMobileVibrant.css";
 
 const tabs = [
   { id: "overview", label: "ภาพรวม" },
@@ -71,16 +72,18 @@ export default function AdminPreviewPage() {
       <main className="admin-preview-main">
         <header className="admin-preview-header">
           <div><span className="admin-preview-eyebrow">ADMIN / ATTENDANCE V2</span><h1>จัดการระบบ</h1></div>
-          <a href="?preview=login" className="admin-preview-back">กลับหน้าเข้าสู่ระบบ <span aria-hidden="true">↗</span></a>
+          <a href="?preview=login" className="admin-preview-back"><span className="admin-preview-back-long">กลับหน้าเข้าสู่ระบบ</span><span className="admin-preview-back-short">ออก</span><span aria-hidden="true">↗</span></a>
         </header>
         <div className="admin-preview-mobile-nav" role="navigation" aria-label="เมนูแอดมินบนมือถือ">
           {tabs.map(t=>(
             <button key={t.id} className={active===t.id?"is-active":""} type="button"
-              aria-current={active===t.id?"page":undefined} onClick={()=>navigate(t.id)}>{t.label}</button>
+              aria-current={active===t.id?"page":undefined} onClick={()=>navigate(t.id)}>
+              <AdminIcon name={t.id} size={20}/><span>{t.label}</span>
+            </button>
           ))}
         </div>
 
-        <div className="admin-preview-content">
+        <div className="admin-preview-content" id="admin-main-content">
           <div className="admin-preview-intro">
             <div><span className="admin-preview-kicker">{selected ? "ส่วนจัดการ" : "ภาพรวม"}</span>
               <h2>{selected?.title ?? "ภาพรวมระบบลงเวลางาน"}</h2>

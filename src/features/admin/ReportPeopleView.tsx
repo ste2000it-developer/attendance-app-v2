@@ -120,6 +120,7 @@ export default function ReportPeopleView({mode,employees,periodLabel,scheduledDa
   const [query,setQuery]=useState("");
   const [selectedCode,setSelectedCode]=useState<string|null>(null);
   const profileRef=useRef<HTMLDivElement|null>(null);
+  const listRef=useRef<HTMLElement|null>(null);
   // On phones a selected profile appears above the cards, and becomes visible immediately.
   useEffect(()=>{
     if(!selectedCode || !window.matchMedia("(max-width:700px)").matches)return;
@@ -133,9 +134,15 @@ export default function ReportPeopleView({mode,employees,periodLabel,scheduledDa
     value=>value.toLocaleLowerCase("th-TH").includes(search)
   ));
   const selected=visible.find(person=>person.code===selectedCode)??null;
+  const closePerson=()=>{
+    setSelectedCode(null);
+    if(window.matchMedia("(max-width:700px)").matches){
+      window.requestAnimationFrame(()=>listRef.current?.scrollIntoView({behavior:"smooth",block:"start"}));
+    }
+  };
   const togglePerson=(code:string)=>setSelectedCode(current=>current===code?null:code);
   return <div className={"report-split-grid"+(selected?" has-selection":"")}>
-    <section className="report-split-list" aria-label="รายชื่อพนักงานและยอดรายงาน">
+    <section className="report-split-list" ref={listRef} aria-label="รายชื่อพนักงานและยอดรายงาน">
       <div className="report-split-list-heading">
         <div>
           <span className="report-split-kicker">ATTENDANCE / {mode==="month"?"MONTHLY":"YEARLY"}</span>
@@ -195,9 +202,16 @@ export default function ReportPeopleView({mode,employees,periodLabel,scheduledDa
       </div>
     </section>
     {selected?<div ref={profileRef} className="report-split-profile-shell">
+      <button type="button" className="report-mobile-detail-back" onClick={closePerson}>
+        <svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"
+          strokeLinecap="round" strokeLinejoin="round" fill="none" aria-hidden="true">
+          <path d="m15 18-6-6 6-6"/>
+        </svg>
+        กลับไปรายชื่อพนักงาน
+      </button>
       <EmployeeProfile key={mode+"-"+periodLabel+"-"+selected.code}
         person={selected} periodLabel={periodLabel} mode={mode}
-        scheduledDays={scheduledDays} availableMonths={availableMonths} onClose={()=>setSelectedCode(null)}/>
+        scheduledDays={scheduledDays} availableMonths={availableMonths} onClose={closePerson}/>
       </div>:null}
   </div>;
 }
