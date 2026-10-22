@@ -8,6 +8,7 @@ import "./AdminPreviewPage.css";
 import "./AdminVisualRefresh.css";
 import "./AdminMobileVibrant.css";
 import "./AdminSeparators.css";
+import "./AdminPhoneReportsLeave.css";
 
 const tabs = [
   { id: "overview", label: "ภาพรวม" },

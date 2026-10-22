@@ -235,12 +235,19 @@ export default function LeaveManagerPreview({ requests, onChange }: {
                 <article className="leave-simple-card" key={item.id}>
                   <div className="leave-simple-card-top"><div><strong>{item.employeeName}</strong><small>{item.employeeCode} · {item.id}</small></div>
                     <span className={"leave-admin-status is-"+item.status}>{statusLabels[item.status]}</span></div>
-                  <div className="leave-simple-card-meta"><strong>{typeLabel(item.type)}</strong>
-                    <span>{formatDate(item.startDate)}{item.startDate!==item.endDate?" – "+formatDate(item.endDate):""} · {daysBetween(item.startDate,item.endDate)} วัน</span>
-                    {view==="history" && <small>พิจารณา {item.decisionDate ? formatDate(item.decisionDate):"—"}</small>}
+                  <div className="leave-simple-card-meta">
+                    <div className="leave-simple-type-row">
+                      <strong>{typeLabel(item.type)}</strong>
+                      <span className="leave-simple-day-pill">{daysBetween(item.startDate,item.endDate)} วัน</span>
+                    </div>
+                    <div className="leave-simple-dates">
+                      <Icon name="calendar" size={16}/>
+                      <span>{formatDate(item.startDate)}{item.startDate!==item.endDate?" – "+formatDate(item.endDate):""}</span>
+                    </div>
+                    {view==="history" && <small className="leave-simple-decided">พิจารณาเมื่อ {item.decisionDate ? formatDate(item.decisionDate):"—"}</small>}
                   </div>
                   <button type="button" className="leave-simple-open" onClick={event=>openDetail(item,event.currentTarget)}>
-                    รายละเอียด <Icon name="arrow" size={17}/></button>
+                    ดูรายละเอียดคำขอ <Icon name="arrow" size={17}/></button>
                 </article>
               ))}
             </div>

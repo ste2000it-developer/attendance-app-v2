@@ -160,6 +160,31 @@ export default function ReportPeopleView({mode,employees,periodLabel,scheduledDa
         <input type="search" value={query} onChange={event=>setQuery(event.target.value)}
           placeholder="ค้นหาพนักงาน ชื่อ รหัส หรือแผนก" />
       </label>
+      <div className="report-phone-directory">
+        {visible.map(person=><article className={"report-phone-person-card "+colorStyle(person.code)} key={person.code}>
+          <div className="report-phone-person-heading">
+            <span className={"report-split-avatar report-split-row-avatar "+colorStyle(person.code)}
+              aria-hidden="true">{person.code.slice(-2)}</span>
+            <div className="report-phone-name">
+              <strong>{person.name}</strong><small>{person.code} · {person.department}</small>
+            </div>
+          </div>
+          <dl className="report-phone-metrics">
+            <div><dt>เข้างาน</dt><dd>{person.present}<small> วัน</small></dd></div>
+            <div><dt>ลา</dt><dd>{person.leave}<small> วัน</small></dd></div>
+            <div><dt>มาสาย</dt><dd>{person.late}<small> ครั้ง</small></dd></div>
+            <div><dt>OT</dt><dd>{readable(person.otHours)}<small> ชม.</small></dd></div>
+          </dl>
+          <button type="button" className="report-phone-details-button"
+            aria-label={(mode==="month"?"ดูรายวันของ ":"ดูรายเดือนของ ")+person.name}
+            onClick={()=>togglePerson(person.code)}>
+            <span>{mode==="month"?"ดูรายวัน":"ดูรายเดือน"}</span>
+            <svg width="19" height="19" viewBox="0 0 24 24" stroke="currentColor"
+              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"
+              aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </article>)}
+      </div>
       <div className="report-split-table-scroll">
         <table className="report-split-table">
           <thead><tr>

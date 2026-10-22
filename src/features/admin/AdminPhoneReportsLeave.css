@@ -1,0 +1,321 @@
+/*
+ * Mobile-only attendance admin UX: two purpose-built screens.
+ * Desktop/iPad existing table + split profile remains untouched.
+ * Lightweight neutral dividers keep the system aligned with the clock-in app.
+ */
+.report-phone-directory{display:none;}
+@media(max-width:700px){
+  /* Report: important tasks first (period, totals, people), demo notes last. */
+  .admin-preview-shell .report-v2{display:flex;flex-direction:column;gap:12px;}
+  .admin-preview-shell .report-v2-top{order:1;gap:9px;}
+  .admin-preview-shell .report-v2-error{order:2;}
+  .admin-preview-shell .report-v2-stats{order:3;gap:8px;}
+  .admin-preview-shell .report-split-grid{order:4;min-width:0;}
+  .admin-preview-shell .report-v2-note{order:5;font-size:12px;line-height:1.6;}
+  .admin-preview-shell .report-v2-period-nav{
+    min-height:48px;border:1px solid #cbdce7;
+    box-shadow:none;
+  }
+  .admin-preview-shell .report-v2-period-nav strong{font-size:15px;}
+  .admin-preview-shell .report-v2-mode-tabs{
+    width:100%;margin-bottom:12px;gap:3px;
+    border-radius:11px;padding:4px;
+  }
+  .admin-preview-shell .report-v2-mode-tabs button{min-height:43px;}
+  .admin-preview-shell .report-v2-export{min-height:46px;}
+  .admin-preview-shell .report-v2-stat{
+    border:1px solid #d7e2e9;
+    background:#fff;
+    min-height:0;padding:12px;
+    display:grid;gap:7px;
+  }
+  .admin-preview-shell .report-v2-stat-top{
+    padding:0 0 7px;border-bottom:1px solid #cbd8e1;
+    font-size:12px;
+  }
+  .admin-preview-shell .report-v2-stat-number{font-size:26px;}
+  .admin-preview-shell .report-v2-stat small{display:none;}
+  .admin-preview-shell .report-v2-stat-symbol{width:30px;height:30px;}
+  /* Replace the old CSS-disguised HTML table with clear mobile cards. */
+  .admin-preview-shell .report-split-list{
+    border:0;background:transparent;box-shadow:none;overflow:visible;
+  }
+  .admin-preview-shell .report-split-list-heading{
+    padding:4px 0 12px;border:0;
+  }
+  .admin-preview-shell .report-split-list-heading h3{font-size:19px;}
+  .admin-preview-shell .report-split-list-heading p{font-size:12px;}
+  .admin-preview-shell .report-split-search{
+    margin:0 0 12px;min-height:46px;background:#fff;
+    border:1px solid #cfdee8;
+  }
+  .admin-preview-shell .report-split-table-scroll{display:none!important;}
+  .admin-preview-shell .report-phone-directory{
+    display:grid;grid-template-columns:minmax(0,1fr);
+    gap:10px;
+  }
+  .admin-preview-shell .report-phone-person-card{
+    display:block;min-width:0;overflow:hidden;
+    background:#fff;border:1px solid #cbdbe6;
+    border-radius:13px;
+    box-shadow:0 2px 7px rgba(36,69,91,.035);
+  }
+  .admin-preview-shell .report-phone-person-heading{
+    display:flex;align-items:center;gap:11px;
+    min-width:0;padding:13px 14px;
+    background:#fbfdfe;border-bottom:1px solid #cfdae3;
+  }
+  .admin-preview-shell .report-phone-person-heading .report-split-row-avatar{
+    display:grid;flex:none;width:42px;height:42px;font-size:13px;
+  }
+  .admin-preview-shell .report-phone-name{display:grid;gap:3px;min-width:0;}
+  .admin-preview-shell .report-phone-name strong{
+    font-size:15px;color:#26475c;line-height:1.4;
+    overflow-wrap:anywhere;
+  }
+  .admin-preview-shell .report-phone-name small{
+    font-size:12px;color:#718b9c;line-height:1.45;
+    overflow-wrap:anywhere;
+  }
+  .admin-preview-shell .report-phone-metrics{
+    margin:0;padding:10px 13px;
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:0;
+  }
+  .admin-preview-shell .report-phone-metrics>div{
+    display:flex;align-items:center;justify-content:space-between;
+    min-width:0;padding:10px 7px;gap:8px;
+  }
+  .admin-preview-shell .report-phone-metrics>div:nth-child(odd){
+    padding-right:12px;
+  }
+  .admin-preview-shell .report-phone-metrics>div:nth-child(even){
+    padding-left:12px;border-left:1px solid #d7e1e8;
+  }
+  .admin-preview-shell .report-phone-metrics>div:nth-child(n+3){
+    border-top:1px solid #e0e8ed;
+  }
+  .admin-preview-shell .report-phone-metrics dt{
+    min-width:0;font-size:12px;color:#647e8f;font-weight:710;white-space:nowrap;
+  }
+  .admin-preview-shell .report-phone-metrics dd{
+    margin:0;color:#264d67;font-size:18px;
+    font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;
+  }
+  .admin-preview-shell .report-phone-metrics dd small{
+    font-size:10px;font-weight:690;color:#7690a1;
+  }
+  .admin-preview-shell .report-phone-metrics>div:first-child dd{color:#23734f;}
+  .admin-preview-shell .report-phone-metrics>div:last-child dd{color:#356e91;}
+  .admin-preview-shell .report-phone-details-button{
+    display:flex;justify-content:space-between;align-items:center;
+    width:calc(100% - 24px);margin:0 12px 12px;
+    min-height:46px;padding:10px 14px;
+    border:1px solid #c6ddea;border-radius:10px;
+    color:#2c6688;background:#edf5fa;
+    font-size:14px;font-weight:785;cursor:pointer;
+  }
+  .admin-preview-shell .report-phone-details-button:hover{background:#e2eff6;}
+  .admin-preview-shell .report-phone-details-button:focus-visible{
+    outline:3px solid #8cc1dd;outline-offset:2px;
+  }
+  .admin-preview-shell .report-split-list-footer{
+    padding:11px 1px;margin-top:10px;line-height:1.55;
+  }
+  /* Selected employee becomes a clean single-column detail screen. */
+  .admin-preview-shell .report-split-grid.has-selection .report-split-list{display:none;}
+  .admin-preview-shell .report-split-profile-shell{position:static;width:100%;}
+  .admin-preview-shell .report-mobile-detail-back{
+    min-height:47px;font-size:14px;
+    display:flex;align-items:center;gap:8px;
+    padding:11px;border:1px solid #c8dce7;
+    border-radius:10px;background:#f0f6fa;color:#306781;
+  }
+  .admin-preview-shell .report-split-profile{
+    border:1px solid #cbdbe5;border-radius:13px;
+  }
+  .admin-preview-shell .report-split-cover{height:83px;}
+  .admin-preview-shell .report-split-meta>div{gap:12px;align-items:flex-start;}
+  .admin-preview-shell .report-split-meta dt,
+  .admin-preview-shell .report-split-meta dd{font-size:13px;}
+  .admin-preview-shell .report-split-history-entry{
+    display:grid;grid-template-columns:49px minmax(0,1fr);
+    gap:4px 10px;align-items:start;
+    padding:12px 14px;border-top:1px solid #cbd9e3;
+  }
+  .admin-preview-shell .report-split-entry-content{min-width:0;}
+  .admin-preview-shell .report-split-entry-right{
+    grid-column:2;
+    min-width:0;font-size:12px;justify-self:start;
+  }
+  .admin-preview-shell .report-split-entry-date{font-size:12px;}
+  .admin-preview-shell .report-split-entry-content small{
+    white-space:normal;font-size:12px;line-height:1.5;
+  }
+  /* Leave management: a small readable queue, with status visible instantly. */
+  .admin-preview-shell .leave-simple{gap:12px;}
+  .admin-preview-shell .leave-simple-top{
+    display:flex;flex-direction:column;align-items:stretch;gap:9px;
+  }
+  .admin-preview-shell .leave-simple-top h3{font-size:19px;}
+  .admin-preview-shell .leave-simple-top p{font-size:12px;line-height:1.55;}
+  .admin-preview-shell .leave-simple-export{
+    align-self:stretch;width:100%;min-height:45px;
+  }
+  .admin-preview-shell .leave-simple-note{
+    padding:10px 11px;font-size:12px;line-height:1.55;
+  }
+  .admin-preview-shell .leave-simple-section{
+    border:1px solid #cddce7;border-radius:13px;
+  }
+  .admin-preview-shell .leave-simple-tabs{
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:5px;padding:8px 8px 0;
+  }
+  .admin-preview-shell .leave-simple-tabs button{
+    display:flex;flex-wrap:wrap;justify-content:center;align-content:center;
+    min-width:0;min-height:48px;padding:7px 4px;gap:3px 5px;
+    font-size:12px;line-height:1.3;text-align:center;
+  }
+  .admin-preview-shell .leave-simple-tabs button>span{font-size:11px;}
+  .admin-preview-shell .leave-simple-heading{
+    display:flex;align-items:center;gap:8px;padding:13px 12px;
+    border-bottom:1px solid #c9d8e2;
+  }
+  .admin-preview-shell .leave-simple-heading h4{font-size:16px;}
+  .admin-preview-shell .leave-simple-heading p{
+    font-size:12px;line-height:1.5;
+  }
+  .admin-preview-shell .leave-simple-heading>span{
+    font-size:11px;padding:6px 8px;
+  }
+  .admin-preview-shell .leave-simple-cards{
+    display:grid;gap:11px;padding:11px;
+  }
+  .admin-preview-shell .leave-simple-card{
+    display:grid;gap:0;padding:0;
+    background:#fff;border:1px solid #cbdbe6;
+    border-radius:12px;overflow:hidden;min-width:0;
+  }
+  .admin-preview-shell .leave-simple-card-top{
+    display:flex;align-items:flex-start;justify-content:space-between;
+    gap:9px;min-width:0;
+    padding:13px 12px;
+    background:#fafcfe;border-bottom:1px solid #cbd9e2;
+  }
+  .admin-preview-shell .leave-simple-card-top>div{
+    min-width:0;display:grid;gap:3px;
+  }
+  .admin-preview-shell .leave-simple-card-top strong{
+    color:#27465b;font-size:15px;line-height:1.4;
+    overflow-wrap:anywhere;
+  }
+  .admin-preview-shell .leave-simple-card-top small{
+    color:#7b91a0;font-size:11px;
+    overflow-wrap:anywhere;
+  }
+  .admin-preview-shell .leave-simple-card-top .leave-admin-status{
+    flex:none;font-size:11px;white-space:nowrap;padding:6px 8px;
+  }
+  .admin-preview-shell .leave-simple-card-meta{
+    display:grid;gap:10px;
+    padding:13px 12px 12px;
+    border-bottom:1px solid #d8e2e8;
+  }
+  .admin-preview-shell .leave-simple-type-row{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    min-width:0;
+  }
+  .admin-preview-shell .leave-simple-type-row>strong{
+    color:#284d65;font-size:15px;font-weight:800;
+  }
+  .admin-preview-shell .leave-simple-day-pill{
+    flex:none;display:inline-flex;align-items:center;justify-content:center;
+    color:#31688a;background:#edf5f9;border-radius:7px;
+    padding:5px 9px;font-size:12px;font-weight:750;
+  }
+  .admin-preview-shell .leave-simple-dates{
+    display:flex;align-items:flex-start;gap:7px;min-width:0;
+  }
+  .admin-preview-shell .leave-simple-dates svg{flex:none;color:#577e98;margin-top:1px;}
+  .admin-preview-shell .leave-simple-dates span{
+    min-width:0;font-size:13px;line-height:1.5;color:#4e6b80;
+    overflow-wrap:anywhere;
+  }
+  .admin-preview-shell .leave-simple-decided{
+    font-size:12px;color:#607e92;line-height:1.4;
+  }
+  .admin-preview-shell .leave-simple-card>.leave-simple-open{
+    display:flex;justify-content:space-between;
+    width:calc(100% - 24px);margin:11px 12px 12px;
+    min-height:46px;padding:10px 13px;
+    font-size:14px;border-radius:9px;
+    color:#2d6687;background:#edf5f9;border:1px solid #c8dce8;
+  }
+  .admin-preview-shell .leave-simple-card>.leave-simple-open:hover{
+    background:#e2eff6;
+  }
+  /* Leave details sheet: readable content with separate action row. */
+  .leave-admin-backdrop{padding:0;align-items:end;}
+  .leave-admin-modal{
+    height:min(100dvh,850px);max-height:100dvh;
+    border-radius:16px 16px 0 0;box-shadow:none;
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  .leave-admin-modal-head{
+    flex:none;padding:15px 15px 12px;
+    border-bottom:1px solid #c4d5df;
+  }
+  .leave-admin-modal-head h2{font-size:19px;}
+  .leave-admin-close{width:44px;height:44px;}
+  .leave-admin-modal-demo{
+    flex:none;font-size:12px;padding:10px 15px;
+  }
+  .leave-admin-modal-body{
+    flex:1 1 auto;min-height:0;overflow-y:auto;
+    padding:15px;gap:14px;
+  }
+  .leave-admin-modal-person{gap:10px;flex-wrap:wrap;}
+  .leave-admin-modal-person>div:nth-child(2){flex:1 1 150px;}
+  .leave-admin-modal-person>.leave-admin-status{margin:0;}
+  .leave-admin-detail-grid{
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+    border:1px solid #c6d6e1;background:#c6d6e1;gap:1px;
+  }
+  .leave-admin-detail-grid>div{
+    min-width:0;padding:12px;background:#fff;
+  }
+  .leave-admin-detail-grid>div:first-child{
+    grid-column:1/-1;
+  }
+  .leave-admin-detail-grid dt{font-size:12px;line-height:1.4;}
+  .leave-admin-detail-grid dd{font-size:14px;line-height:1.5;}
+  .leave-admin-modal-actions{
+    flex:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;padding:12px 15px calc(13px + env(safe-area-inset-bottom));
+    background:#fff;border-top:1px solid #bfcfda;
+  }
+  .leave-admin-modal-actions button{
+    min-width:0;min-height:48px;width:100%;margin:0;
+    white-space:normal;font-size:14px;padding:10px 9px;
+  }
+  .leave-admin-modal-actions:has(>button:nth-child(3))>button:first-child{
+    grid-column:1/-1;
+    min-height:40px;
+  }
+  .leave-admin-modal-actions button:only-child{grid-column:1/-1;}
+  .leave-admin-decision textarea{font-size:16px;}
+}
+@media(max-width:370px){
+  .admin-preview-shell .report-phone-metrics{
+    padding-inline:9px;
+  }
+  .admin-preview-shell .report-phone-metrics>div{
+    padding-left:6px;padding-right:6px;
+  }
+  .admin-preview-shell .report-phone-metrics dd{font-size:16px;}
+  .admin-preview-shell .leave-simple-card-top .leave-admin-status{
+    font-size:10px;padding:6px;
+  }
+  .leave-admin-modal-actions button{font-size:13px;}
+}
