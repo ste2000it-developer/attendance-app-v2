@@ -151,3 +151,40 @@
  .leave-admin-modal-person > .leave-admin-status {margin-left:61px;}
  .leave-admin-modal-actions button {font-size:12px;padding:9px 11px;}
 }
+
+/* Mobile leave operations: no clipped columns or cramped approve/reject controls. */
+@media(max-width:700px){
+ .leave-simple{min-width:0;gap:12px;}
+ .leave-simple-top{flex-wrap:wrap;align-items:stretch;gap:12px;}
+ .leave-simple-top>div{flex:1 1 180px;}
+ .leave-simple-export{min-height:46px;flex:1 1 auto;}
+ .leave-simple-section{min-width:0;}
+ .leave-simple-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;padding:8px 9px 0;}
+ .leave-simple-tabs button{min-width:0;justify-content:center;min-height:46px;padding:10px 6px;font-size:12px;}
+ .leave-simple-heading{padding:14px 12px;gap:8px;}
+ .leave-simple-heading h4{font-size:15px;}
+ .leave-simple-heading p{font-size:11px;}
+ .leave-simple-cards{padding:10px;}
+ .leave-simple-card{padding:13px;gap:10px;}
+ .leave-simple-card-top{gap:6px;}
+ .leave-simple-card .leave-simple-open{justify-self:stretch;width:100%;min-height:44px;}
+ .leave-admin-backdrop{padding:0;align-items:end;}
+ .leave-admin-modal{height:auto;max-height:100dvh;max-width:100%;border-radius:18px 18px 0 0;}
+ .leave-admin-modal-head{padding:15px 14px 10px;}
+ .leave-admin-close{width:44px;height:44px;}
+ .leave-admin-modal-demo{padding:10px 14px;}
+ .leave-admin-modal-body{padding:14px;gap:15px;}
+ .leave-admin-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+ .leave-admin-detail-grid>div{padding:12px;}
+ .leave-admin-decision{padding:12px;}
+ .leave-admin-decision textarea{font-size:16px;min-height:90px;}
+ .leave-admin-modal-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+   padding:11px 14px calc(12px + env(safe-area-inset-bottom));gap:9px;}
+ .leave-admin-modal-actions button{width:100%;min-width:0;min-height:46px;padding:10px 7px;white-space:normal;}
+ .leave-admin-modal-actions button:only-child{grid-column:1/-1;}
+}
+@media(max-width:370px){
+ .leave-simple-top .leave-simple-export{width:100%;}
+ .leave-admin-detail-grid{grid-template-columns:minmax(0,1fr);}
+ .leave-admin-modal-actions button{font-size:12px;}
+}

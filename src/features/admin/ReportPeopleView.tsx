@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useEffect,useRef,useState} from "react";
 import type {ReportEmployee} from "./reportDemoData";
 import type {AnnualEmployee} from "./reportAnnualData";
 import {reportDateLabel,reportStatusLabels} from "./reportDemoData";
@@ -119,6 +119,15 @@ function EmployeeProfile({person,periodLabel,scheduledDays,mode,availableMonths,
 export default function ReportPeopleView({mode,employees,periodLabel,scheduledDays,availableMonths}:Props){
   const [query,setQuery]=useState("");
   const [selectedCode,setSelectedCode]=useState<string|null>(null);
+  const profileRef=useRef<HTMLDivElement|null>(null);
+  // On phones a selected profile appears above the cards, and becomes visible immediately.
+  useEffect(()=>{
+    if(!selectedCode || !window.matchMedia("(max-width:700px)").matches)return;
+    const frame=window.requestAnimationFrame(()=>profileRef.current?.scrollIntoView({
+      behavior:"smooth",block:"start"
+    }));
+    return ()=>window.cancelAnimationFrame(frame);
+  },[selectedCode]);
   const search=query.trim().toLocaleLowerCase("th-TH");
   const visible=employees.filter(person=>[person.name,person.code,person.department].some(
     value=>value.toLocaleLowerCase("th-TH").includes(search)
@@ -161,10 +170,10 @@ export default function ReportPeopleView({mode,employees,periodLabel,scheduledDa
               <span className="report-split-person-text"><strong>{person.name}</strong>
                 <small>{person.department}</small></span>
             </button></td>
-            <td className="report-split-number is-present">{person.present}</td>
-            <td className="report-split-number">{person.leave}</td>
-            <td className="report-split-number">{person.late}</td>
-            <td className="report-split-number is-ot">{readable(person.otHours)}</td>
+            <td className="report-split-number is-present" data-label="เข้างาน">{person.present}</td>
+            <td className="report-split-number" data-label="ลา">{person.leave}</td>
+            <td className="report-split-number" data-label="สาย">{person.late}</td>
+            <td className="report-split-number is-ot" data-label="OT (ชม.)">{readable(person.otHours)}</td>
             <td className="report-split-action-cell">
               <div className="report-split-actions">
                 <button type="button"
@@ -185,8 +194,10 @@ export default function ReportPeopleView({mode,employees,periodLabel,scheduledDa
         <span>{mode==="month"?"สรุปรายเดือน":"สรุปรายปี"} · ข้อมูลทดลอง</span>
       </div>
     </section>
-    {selected?<EmployeeProfile key={mode+"-"+periodLabel+"-"+selected.code}
-      person={selected} periodLabel={periodLabel} mode={mode}
-      scheduledDays={scheduledDays} availableMonths={availableMonths} onClose={()=>setSelectedCode(null)}/>:null}
+    {selected?<div ref={profileRef} className="report-split-profile-shell">
+      <EmployeeProfile key={mode+"-"+periodLabel+"-"+selected.code}
+        person={selected} periodLabel={periodLabel} mode={mode}
+        scheduledDays={scheduledDays} availableMonths={availableMonths} onClose={()=>setSelectedCode(null)}/>
+      </div>:null}
   </div>;
 }

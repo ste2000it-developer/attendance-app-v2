@@ -202,3 +202,60 @@
  .report-split-table{min-width:590px;}
  .report-split-action{padding:6px 9px;}
 }
+
+/* Phone card directory: no sideways table scrolling. The selected profile comes first. */
+@media(max-width:700px){
+ .report-split-grid,.report-split-grid.has-selection{display:flex;flex-direction:column;gap:12px;min-width:0;}
+ .report-split-profile-shell{order:-1;width:100%;min-width:0;scroll-margin-top:122px;}
+ .report-split-profile{width:100%;position:static;}
+ .report-split-list{width:100%;min-width:0;}
+ .report-split-list-heading{padding:15px 12px 11px;gap:8px;}
+ .report-split-list-heading h3{font-size:16px;}
+ .report-split-list-heading p{font-size:11px;}
+ .report-split-search{margin:0 12px 12px;min-height:44px;}
+ .report-split-search input{font-size:16px;}
+ .report-split-table-scroll{overflow:visible;max-height:none;min-height:0;}
+ .report-split-table{min-width:0!important;width:100%;display:block;}
+ .report-split-table thead{display:none;}
+ .report-split-table tbody{display:grid;gap:10px;padding:10px;}
+ .report-split-table tbody tr{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+   min-width:0;overflow:hidden;border:1px solid #e1ecf1;border-radius:13px;background:#fff;}
+ .report-split-table tbody tr.is-selected{border-color:var(--employee-accent,#4e86a5);}
+ .report-split-table td,.report-split-table td:nth-child(3),.report-split-table td:nth-child(4){
+   display:grid!important;min-width:0;min-height:0;padding:10px 3px;border-bottom:0;
+   text-align:center;white-space:normal;place-items:center;align-content:center;}
+ .report-split-table td:first-child{
+   display:block!important;grid-column:1/-1;min-height:58px;
+   padding:11px 12px!important;text-align:left;
+   border-bottom:1px solid #edf2f5;}
+ .report-split-table td:nth-child(n+2):nth-child(-n+5)::before{
+   content:attr(data-label);display:block;font-size:10px;color:#8b9dac;
+   line-height:1.4;font-weight:650;}
+ .report-split-table td:last-child{
+   display:block!important;grid-column:1/-1;text-align:left;
+   padding:0 10px 10px!important;}
+ .report-split-actions{justify-content:stretch;}
+ .report-split-action{display:block;width:100%;min-height:44px;font-size:12px;}
+ .report-split-number{font-size:14px!important;}
+ .report-split-row-avatar{width:39px;height:39px;}
+ .report-split-person-text strong{font-size:13px;}
+ .report-split-person-text small{font-size:11px;}
+ .report-split-person-button{min-height:40px;}
+ .report-split-list-footer{padding:12px;font-size:10px;}
+ .report-split-meta{padding-inline:14px;}
+ .report-split-insights{margin-inline:14px;}
+ .report-split-tiny-stats{margin-inline:14px;}
+ .report-split-history-entry{padding-inline:13px;}
+ .report-split-history-head{padding-inline:13px;}
+ .report-split-entry-content small{white-space:normal;}
+ .report-split-history-rows.is-all{max-height:290px;}
+ .report-split-history-toggle{min-height:46px;}
+ .report-split-close{width:44px;height:44px;}
+}
+
+/* Wrap the desktop sticky profile without changing desktop column layout. */
+.report-split-profile-shell{min-width:0;position:sticky;top:15px;}
+.report-split-profile-shell .report-split-profile{position:static;}
+@media(max-width:700px){
+ .report-split-profile-shell{position:static;order:-1;}
+}

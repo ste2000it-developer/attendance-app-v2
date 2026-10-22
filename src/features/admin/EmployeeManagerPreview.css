@@ -186,3 +186,42 @@
  .employee-demo-filters > .preview-select:last-child { grid-column:1/-1; }
  .employee-demo-form-grid > .preview-select,.employee-demo-form-grid > .preview-date-control { grid-column:1/-1; }
 }
+
+/* Urgent admin access on phones: larger touch targets and full-width forms. */
+@media(max-width:700px){
+ .employee-demo{min-width:0;gap:12px;}
+ .employee-demo-topbar{flex-wrap:wrap;align-items:stretch;}
+ .employee-demo-summary{flex:1 1 180px;}
+ .employee-demo-add{min-height:46px;justify-content:center;flex:1 1 auto;}
+ .employee-demo-metrics{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;}
+ .employee-demo-metrics > div{min-width:0;padding:11px 8px;}
+ .employee-demo-metrics p{font-size:10px;line-height:1.4;}
+ .employee-demo-metrics strong{font-size:20px;}
+ .employee-demo-directory-title{padding:14px 12px 11px;gap:8px;}
+ .employee-demo-directory-title h3{font-size:15px;}
+ .employee-demo-directory-title p{font-size:11px;}
+ .employee-demo-filters{grid-template-columns:repeat(2,minmax(0,1fr));padding:0 12px 13px;gap:8px;}
+ .employee-demo-search{grid-column:1/-1;}
+ .employee-demo-filters>.preview-select,.employee-demo-filters>.employee-demo-select-wrap{min-width:0;}
+ .employee-demo-select-wrap:last-child{grid-column:auto;}
+ .employee-demo-filters .preview-select button,.employee-demo-filters select,.employee-demo-search input{min-height:44px;}
+ .employee-demo-mobile-person{padding:13px 12px;}
+ .employee-demo-mobile-bottom{padding-left:0;gap:8px;}
+ .employee-demo-mobile-bottom .employee-demo-edit{min-height:44px;padding-inline:12px;}
+ .employee-demo-listfoot{padding:12px;font-size:10px;}
+ .employee-demo-backdrop{padding:0;align-items:end;}
+ .employee-demo-modal{max-height:100dvh;border-radius:18px 18px 0 0;padding-bottom:env(safe-area-inset-bottom);}
+ .employee-demo-modal-head{padding:15px 15px 11px;}
+ .employee-demo-modal-desc{padding:0 15px 12px;}
+ .employee-demo-form{padding:15px 15px 18px;}
+ .employee-demo-form-grid{grid-template-columns:minmax(0,1fr);gap:13px;}
+ .employee-demo-form-grid label,.employee-demo-form-grid .preview-select,.employee-demo-form-grid .preview-date-control{grid-column:1/-1;min-width:0;}
+ .employee-demo-form-grid input,.employee-demo-form-grid select{font-size:16px;min-height:46px;}
+ .employee-demo-close{width:44px;height:44px;}
+ .employee-demo-form-actions button{min-height:46px;}
+}
+@media(max-width:390px){
+ .employee-demo-filters{grid-template-columns:repeat(2,minmax(0,1fr));}
+ .employee-demo-select-wrap:last-child{grid-column:1/-1;}
+ .employee-demo-metrics strong{font-size:18px;}
+}
