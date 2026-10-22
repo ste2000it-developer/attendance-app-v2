@@ -28,6 +28,8 @@ function AdminIcon({ name, size = 21 }: {name: string; size?: number}) {
     overview: <><rect x="3" y="3" width="7" height="7" rx="1.3"/><rect x="14" y="3" width="7" height="7" rx="1.3"/><rect x="3" y="14" width="7" height="7" rx="1.3"/><rect x="14" y="14" width="7" height="7" rx="1.3"/></>,
     people: <><circle cx="9" cy="8" r="3.2"/><path d="M3 20v-1a6 6 0 0 1 12 0v1H3Z"/><path d="M16 5a3 3 0 0 1 0 6M17 15a5 5 0 0 1 4 5"/></>,
     calendar: <><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18M8 15l2.5 2.5L16 12"/></>,
+    leave: <><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18M8 15l2.5 2.5L16 12"/></>,
+    report: <><path d="M3 21h18M6 17v-6m6 6V5m6 12v-8" strokeWidth="2.5"/></>,
     chart: <><path d="M3 21h18M6 17v-6m6 6V5m6 12v-8" strokeWidth="2.5"/></>,
     settings: <><circle cx="12" cy="12" r="3"/><path d="M10 2h4l.8 3.1a8.2 8.2 0 0 1 2.2 1.3L20 5l2 3.5-2.2 2.2a8 8 0 0 1 0 2.6L22 15.5 20 19l-3-1.4a8 8 0 0 1-2.2 1.3L14 22h-4l-.8-3.1A8 8 0 0 1 7 17.6L4 19l-2-3.5 2.2-2.2a8 8 0 0 1 0-2.6L2 8.5 4 5l3 1.4a8 8 0 0 1 2.2-1.3Z"/></>
   };
