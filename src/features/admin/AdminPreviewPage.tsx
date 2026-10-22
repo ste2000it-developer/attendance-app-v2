@@ -7,6 +7,7 @@ import type { AdminLeaveRequest } from "./LeaveManagerPreview";
 import "./AdminPreviewPage.css";
 import "./AdminVisualRefresh.css";
 import "./AdminMobileVibrant.css";
+import "./AdminSeparators.css";
 
 const tabs = [
   { id: "overview", label: "ภาพรวม" },
