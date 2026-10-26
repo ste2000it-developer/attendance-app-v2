@@ -19,8 +19,8 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   --page-bg: #fffdf7;
   --body-text: #162c38;
   --subtext: #516574;
-  --hero-text: #152d39;
-  --hero-subtext: #455d69;
+  --hero-text: #285e64;
+  --hero-subtext: #406674;
   --sky: linear-gradient(180deg, #fff4d5 0%, #fff9e7 65%, #f5f1dc 100%);
   --panel: #ffffffee;
   --panel-border: #e4e8e5;
@@ -47,6 +47,8 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 }
 .app-shell[data-period="day"] {
   --page-bg: #f7fcff;
+  --hero-text: #16517c;
+  --hero-subtext: #365f79;
   --sky: linear-gradient(180deg, #c9edff 0%, #e5f6ff 63%, #f1faf8 100%);
   --panel: #fffffff2;
   --status-bg: #f0f6f8;
@@ -57,8 +59,8 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 .app-shell[data-period="evening"] {
   --page-bg: #fff9f5;
   --sky: linear-gradient(180deg, #af8bab 0%, #f3a4a0 50%, #ffca93 87%, #f9dac0 100%);
-  --hero-text: #142838;
-  --hero-subtext: #253c4a;
+  --hero-text: #563f67;
+  --hero-subtext: #594765;
   --panel: #fffdfaef;
   --status-bg: #f7f2ef;
   --card-bg: #fffaf5;
@@ -69,7 +71,7 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   --page-bg: #0e233b;
   --body-text: #f0f6ff;
   --subtext: #b1c4d5;
-  --hero-text: #fff;
+  --hero-text: #f0f5ff;
   --hero-subtext: #d5e1ef;
   --sky: linear-gradient(180deg, #0b1e37 0%, #1a2750 58%, #344064 92%, #223651 100%);
   --panel: #182e47;
@@ -101,19 +103,14 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 }
 .sky-scene { position: absolute; z-index: -1; inset: 0; pointer-events: none; background: var(--sky); }
 .sky-scene__art {
-  /* Push detailed scenery below the live date and clock, leaving a calm sky
-     behind the digits on short and tall phones alike. */
+  /* Keep the full illustrated scene visible; sky space is built into the image. */
   position: absolute;
   display: block;
-  top: clamp(68px, 9dvh, 92px);
-  right: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center bottom;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 22%);
-  mask-image: linear-gradient(to bottom, transparent 0%, #000 22%);
   user-select: none;
 }
 .app-header {
