@@ -101,13 +101,19 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 }
 .sky-scene { position: absolute; z-index: -1; inset: 0; pointer-events: none; background: var(--sky); }
 .sky-scene__art {
+  /* Push detailed scenery below the live date and clock, leaving a calm sky
+     behind the digits on short and tall phones alike. */
   position: absolute;
   display: block;
-  inset: 0;
+  top: clamp(68px, 9dvh, 92px);
+  right: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center bottom;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 22%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 22%);
   user-select: none;
 }
 .app-header {
