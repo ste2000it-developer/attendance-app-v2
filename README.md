@@ -1,26 +1,29 @@
 # Attendance App V2
 
-เริ่มต้นออกแบบใหม่จากศูนย์ โดยโฟกัสหน้า Home สำหรับพนักงานก่อน
+โปรเจกต์เริ่มใหม่จากศูนย์ โดยโฟกัสหน้า Home สำหรับพนักงานก่อน
 
-## เทคโนโลยี
-- React + TypeScript + Vite
-- CSS แบบ mobile-first
-- Lucide icons
+## ทดลองบน GitHub Pages
+
+เปิด [เว็บไซต์ทดสอบ](https://ste2000it-developer.github.io/attendance-app-v2/)
+
+เมื่อเปิดใช้งาน Pages (Settings → Pages → Source = GitHub Actions) แล้ว ทุกครั้งที่ Push ไปที่ `main` ระบบ GitHub Actions จะ Build และ Deploy หน้าเว็บทดสอบให้อัตโนมัติ
+
+ดูสถานะการ Deploy: [Actions](https://github.com/ste2000it-developer/attendance-app-v2/actions)
 
 ## ทดลองบนเครื่อง
+
 ```bash
 npm install
 npm run dev
 ```
-เปิด URL ที่ Vite แสดงบนมือถือหรือคอมพิวเตอร์ในเครือข่ายที่เข้าถึงได้
 
 ## สถานะ
-- หน้า Home: ออกแบบแล้วตามแนว Fresh & Friendly (เขียวมิ้นต์)
-- เวลาปัจจุบัน: แสดงเวลาประเทศไทย (Asia/Bangkok)
-- เมนูหลัก: วางโครงนำทางแล้ว
-- ระบบลงเวลา, Firebase, หน้าอื่น และสิทธิ์ผู้ใช้: **ยังไม่เชื่อม/ยังไม่พัฒนา**
-- ปุ่มเข้างานแสดงคำอธิบายเมื่อกด และ **ไม่บันทึกข้อมูลจำลอง**
 
-`npm run build` ตรวจ TypeScript และสร้างเว็บใน `dist/` ได้
+- React + TypeScript + Vite
+- หน้า Home: Fresh & Friendly (เขียวมิ้นต์)
+- นาฬิกาปัจจุบัน: ประเทศไทย (Asia/Bangkok)
+- เมนูหลัก: วางโครงนำทาง
+- ระบบลงเวลา / Firebase / หน้าอื่น / สิทธิ์ผู้ใช้: **ยังไม่เชื่อม**
+- ปุ่มเข้างานยังไม่บันทึกข้อมูลจริง; จะแสดงคำอธิบายเมื่อกด
 
-โครงการนี้ยังเป็น UI prototype ไม่ใช่ระบบตอกบัตรสำหรับใช้งานจริง
+**คำเตือน:** เว็บไซต์นี้ยังเป็นเพียง UI prototype ไม่ใช่ระบบลงเวลาใช้งานจริง
