@@ -126,6 +126,8 @@ button:not(:disabled) {
 }
 
 .clock-panel {
+  position: relative;
+  z-index: 2;
   margin: clamp(42px, 9dvh, 94px) 0 0;
   text-align: center;
 }
@@ -151,17 +153,17 @@ button:not(:disabled) {
 
 .action-area {
   position: relative;
-  z-index: 0;
+  z-index: 1;
   display: grid;
   place-items: center;
-  margin: clamp(35px, 6dvh, 66px) 0 clamp(33px, 6dvh, 64px);
+  margin: clamp(42px, 6dvh, 66px) 0 clamp(33px, 6dvh, 64px);
 }
 
 .action-area__halo {
   position: absolute;
-  z-index: -1;
-  width: 282px;
-  height: 245px;
+  z-index: 0;
+  width: min(260px, 78vw);
+  height: 216px;
   border-radius: 44% 56% 49% 51%;
   background: #eef8f2;
   transform: rotate(-9deg);
@@ -169,6 +171,8 @@ button:not(:disabled) {
 }
 
 .clock-button {
+  position: relative;
+  z-index: 1;
   width: 194px;
   height: 184px;
   display: flex;
@@ -399,7 +403,7 @@ button:not(:disabled) {
   }
 
   .action-area {
-    margin-top: 24px;
+    margin-top: 34px;
     margin-bottom: 24px;
   }
 
