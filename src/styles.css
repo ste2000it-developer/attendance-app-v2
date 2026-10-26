@@ -155,8 +155,17 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 .header-icon:active { transform: scale(.97); }
 .clock-panel { position: relative; text-align: center; margin-top: clamp(40px, 6.1dvh, 64px); padding: 0 12px; }
 .clock-panel__date { color: var(--hero-subtext); font-size: 16px; font-weight: 600; line-height: 1.5; margin: 0 0 5px; }
-.app-shell[data-period="evening"] .clock-panel__date { color: #ffffff; }
 .clock-panel__time { display: block; font-size: clamp(57px, 14vw, 67px); font-weight: 800; letter-spacing: -2.5px; line-height: 1.13; color: var(--hero-text); font-variant-numeric: tabular-nums; }
+/* Readable clock colors chosen for the four approved Pixel Art scenes.
+   Scope overrides to the date/time so the header logo and navigation keep their contrast. */
+.app-shell[data-period="morning"] .clock-panel__time { color: #204d62; }
+.app-shell[data-period="morning"] .clock-panel__date { color: #426574; }
+.app-shell[data-period="day"] .clock-panel__time { color: #164c78; }
+.app-shell[data-period="day"] .clock-panel__date { color: #35627f; }
+.app-shell[data-period="evening"] .clock-panel__time { color: #fff0c2; text-shadow: 0 1px 2px rgba(48, 27, 77, .40); }
+.app-shell[data-period="evening"] .clock-panel__date { color: #ffe7c2; text-shadow: 0 1px 2px rgba(48, 27, 77, .40); }
+.app-shell[data-period="night"] .clock-panel__time,
+.app-shell[data-period="night"] .clock-panel__date { color: #ffffff; }
 .home-content { position: relative; z-index: 2; margin-top: -29px; padding: 0 22px 17px; }
 .attendance-card {
   width: 100%;
