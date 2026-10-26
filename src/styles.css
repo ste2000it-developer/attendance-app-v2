@@ -59,7 +59,7 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 .app-shell[data-period="evening"] {
   --page-bg: #fff9f5;
   --sky: linear-gradient(180deg, #af8bab 0%, #f3a4a0 50%, #ffca93 87%, #f9dac0 100%);
-  --hero-text: #563f67;
+  --hero-text: #ffffff;
   --hero-subtext: #594765;
   --panel: #fffdfaef;
   --status-bg: #f7f2ef;
@@ -156,7 +156,7 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 .clock-panel { position: relative; text-align: center; margin-top: clamp(40px, 6.1dvh, 64px); padding: 0 12px; }
 .clock-panel__date { color: var(--hero-subtext); font-size: 16px; font-weight: 600; line-height: 1.5; margin: 0 0 5px; }
 .clock-panel__time { display: block; font-size: clamp(57px, 14vw, 67px); font-weight: 800; letter-spacing: -2.5px; line-height: 1.13; color: var(--hero-text); font-variant-numeric: tabular-nums; }
-.home-content { position: relative; z-index: 2; margin-top: -53px; padding: 0 22px 17px; }
+.home-content { position: relative; z-index: 2; margin-top: -29px; padding: 0 22px 17px; }
 .attendance-card {
   width: 100%;
   min-height: 229px;
@@ -257,7 +257,7 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 @media (max-height: 770px) {
   .hero { min-height: 255px; }
   .clock-panel { margin-top: 25px; }
-  .home-content { margin-top: -41px; }
+  .home-content { margin-top: -17px; }
   .attendance-card { min-height: 199px; padding: 18px 12px; }
   .attendance-card__symbol { width: 76px; height: 76px; margin-bottom: 11px; }
   .attendance-card__symbol svg { width: 44px; height: 44px; }
