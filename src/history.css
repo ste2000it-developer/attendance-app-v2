@@ -1,112 +1,45 @@
-/* Timecard History: four colorful stationery palettes follow the Home sky period. */
-.app-shell[data-view="history"] {
-  --page-bg: #fff8eb;
-  --body-text: #483b30;
-  --subtext: #7b6f59;
-  --accent: #a46b1f;
-  --nav-bg: #fffbf2;
-  --line: #e8d9b9;
-}
-.app-shell[data-view="history"][data-period="day"] {
-  --page-bg: #eff8ff;
-  --body-text: #23475b;
-  --subtext: #617f8f;
-  --accent: #167ba6;
-  --nav-bg: #faffff;
-  --line: #cee5ee;
-}
-.app-shell[data-view="history"][data-period="evening"] {
-  --page-bg: #fff1ee;
-  --body-text: #573c49;
-  --subtext: #8c6878;
-  --accent: #ab4e70;
-  --nav-bg: #fffaf8;
-  --line: #efd2d1;
+/* History uses one consistent light palette in morning/day/evening
+   and a complementary dark palette only at night. */
+.app-shell[data-view="history"]:not([data-period="night"]) {
+  --page-bg: #f0f5f5;
+  --body-text: #2b4651;
+  --subtext: #607a87;
+  --accent: #205d73;
+  --nav-bg: #ffffff;
+  --line: #e0e9eb;
 }
 .app-shell[data-view="history"][data-period="night"] {
   --page-bg: #0e233b;
   --body-text: #f0f6ff;
   --subtext: #b1c4d5;
-  --accent: #1dcbaa;
+  --accent: #53cbbb;
   --nav-bg: #10263e;
   --line: #2d4259;
 }
 .history-page {
-  /* Morning – warm sunrise gold, with a stamped-paper feel. */
-  --history-page: #fff8eb;
-  --history-text: #493c30;
-  --history-muted: #7c705b;
-  --history-panel: #fffcf5;
-  --history-panel-line: #e9d8b8;
-  --history-action: #fff0d3;
-  --history-card: #fff9ec;
-  --history-card-line: #e3cfac;
-  --history-card-ink: #473b31;
-  --history-card-muted: #7f725e;
-  --history-rule: #eadfca;
-  --history-accent: #955e17;
-  --history-title: #98621e;
-  --history-ot: #b56578;
-  --history-highlight: #ffedcb;
-  --history-wash: #fff0d8;
-  --history-punch: #d9a04d;
-  --history-leave: #5078b5;
-  --history-leave-wash: #eaf1ff;
-  --history-holiday-wash: #f2e9da;
-  --history-ot-fill: #865a17;
+  --history-page: #f0f5f5;
+  --history-text: #2b4651;
+  --history-muted: #607a87;
+  --history-panel: #ffffff;
+  --history-panel-line: #dce6e9;
+  --history-action: #e5f1f4;
+  --history-card: #ffffff;
+  --history-card-line: #cedfe4;
+  --history-card-ink: #2b4651;
+  --history-card-muted: #67828c;
+  --history-rule: #e2eaed;
+  --history-accent: #205d73;
+  --history-title: #205d73;
+  --history-highlight: #e5f1f4;
+  --history-wash: #e9f2f5;
+  --history-punch: #205d73;
+  --history-ot-fill: #177963;
+  --history-leave-fill: #526bc2;
+  --history-holiday-fill: #7d8e9b;
   min-height: 100%;
   padding: calc(21px + env(safe-area-inset-top, 0px)) 17px 34px;
   background: var(--history-page);
   color: var(--history-text);
-}
-
-/* Midday – blue sky and turquoise ink. */
-.app-shell[data-period="day"] .history-page {
-  --history-page: #eff8ff;
-  --history-text: #23475b;
-  --history-muted: #607d8f;
-  --history-panel: #ffffff;
-  --history-panel-line: #cde5f1;
-  --history-action: #e0f2fb;
-  --history-card: #f8fcff;
-  --history-card-line: #c9e0ee;
-  --history-card-ink: #2a4557;
-  --history-card-muted: #67818d;
-  --history-rule: #dcecf3;
-  --history-accent: #116d96;
-  --history-title: #147ba8;
-  --history-ot: #ae6580;
-  --history-highlight: #dff4fc;
-  --history-wash: #e8f6fc;
-  --history-punch: #60b8dd;
-  --history-leave: #496cc1;
-  --history-leave-wash: #eaf0ff;
-  --history-holiday-wash: #eef4f7;
-  --history-ot-fill: #196b93;
-}
-/* Evening – coral, peach and a touch of sunset pink. */
-.app-shell[data-period="evening"] .history-page {
-  --history-page: #fff1ee;
-  --history-text: #573c49;
-  --history-muted: #896d79;
-  --history-panel: #fffaf8;
-  --history-panel-line: #efd3d3;
-  --history-action: #fbe6e7;
-  --history-card: #fff7f2;
-  --history-card-line: #eccbc8;
-  --history-card-ink: #503e48;
-  --history-card-muted: #90737b;
-  --history-rule: #f0ded9;
-  --history-accent: #a84668;
-  --history-title: #b45475;
-  --history-ot: #b35276;
-  --history-highlight: #ffe6df;
-  --history-wash: #ffe8e5;
-  --history-punch: #d789a1;
-  --history-leave: #6175bc;
-  --history-leave-wash: #f0eefe;
-  --history-holiday-wash: #f6e9e7;
-  --history-ot-fill: #934c70;
 }
 .app-shell[data-period="night"] .history-page {
   --history-page: #0e233b;
@@ -115,21 +48,19 @@
   --history-panel: #192f49;
   --history-panel-line: #3c5267;
   --history-action: #243f59;
-  --history-card: #22364a;
+  --history-card: #1b3046;
   --history-card-line: #496078;
   --history-card-ink: #ebf3fa;
-  --history-card-muted: #a9bfce;
-  --history-rule: #455b70;
-  --history-accent: #99dbfa;
-  --history-title: #89e8d0;
-  --history-ot: #f0b1ca;
-  --history-highlight: #2d495c;
-  --history-wash: #24485c;
-  --history-punch: #56c8c4;
-  --history-leave: #bdc5ff;
-  --history-leave-wash: #2b3659;
-  --history-holiday-wash: #293e51;
-  --history-ot-fill: #205676;
+  --history-card-muted: #b1c4d5;
+  --history-rule: #405569;
+  --history-accent: #9fdae2;
+  --history-title: #8ecfd5;
+  --history-highlight: #29465b;
+  --history-wash: #25455e;
+  --history-punch: #55a6b3;
+  --history-ot-fill: #177963;
+  --history-leave-fill: #465eaa;
+  --history-holiday-fill: #526878;
 }
 .history-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
 .history-heading__back {
@@ -204,9 +135,13 @@
   text-align: center;
   margin: 0 -13px 0 -23px;
   padding: 13px 13px 14px 23px;
-  background: var(--history-ot-fill);
+  background: var(--history-punch);
   color: #fff;
-  border-bottom: 2px solid var(--history-punch);
+  border-bottom: 2px solid var(--history-card-line);
+}
+/* The night header remains legible without sharing the OT status color. */
+.app-shell[data-period="night"] .history-timecard__heading {
+  background: #25455e;
 }
 .history-timecard__eyebrow {
   display: block; color: rgba(255,255,255,.88);
@@ -248,7 +183,7 @@
   border-radius: 6px 6px 0 0;
   padding: 9px 3px 10px;
 }
-.history-timecard__row--header span:first-child { text-align: left; }
+.history-timecard__row--header span:first-child { text-align: left; padding-left: 7px; }
 .history-timecard__row--entry {
   position: relative;
   appearance: none; font: inherit; color: inherit;
@@ -261,35 +196,38 @@
 }
 .history-timecard__row--entry:hover,
 .history-timecard__row--entry:active { background: var(--history-highlight); }
+/* A full-width, solid color strip identifies each status; no left marker. */
 .history-timecard__row--ot,
 .history-timecard__row--ot:hover,
 .history-timecard__row--ot:active {
   background: var(--history-ot-fill);
   color: #fff;
 }
-.history-timecard__row--ot .history-timecard__stamp,
-.history-timecard__row--ot .history-timecard__ot,
-.history-timecard__row--ot .history-timecard__date small {
+.history-timecard__row--leave,
+.history-timecard__row--leave:hover,
+.history-timecard__row--leave:active {
+  background: var(--history-leave-fill);
   color: #fff;
 }
-.history-timecard__row--ot::before {
-  background: rgba(255, 255, 255, .86);
+.history-timecard__row--holiday,
+.history-timecard__row--holiday:hover,
+.history-timecard__row--holiday:active {
+  background: var(--history-holiday-fill);
+  color: #fff;
 }
-.history-timecard__row--leave { background: var(--history-leave-wash); }
-.history-timecard__row--holiday { background: var(--history-holiday-wash); }
-.history-timecard__row--ot::before,
-.history-timecard__row--leave::before {
-  content: "";
-  position: absolute;
-  left: 3px; top: 10px; bottom: 10px;
-  width: 3px; border-radius: 3px;
-  background: var(--history-ot);
+.history-timecard__row--ot .history-timecard__stamp,
+.history-timecard__row--ot .history-timecard__ot,
+.history-timecard__row--ot .history-timecard__date small,
+.history-timecard__row--leave .history-timecard__date small,
+.history-timecard__row--holiday .history-timecard__date small,
+.history-timecard__row--leave .history-timecard__special,
+.history-timecard__row--holiday .history-timecard__special {
+  color: #fff;
 }
-.history-timecard__row--leave::before { background: var(--history-leave); }
 .history-timecard__row--future { opacity: .65; }
 .history-timecard__date {
   display: flex; align-items: baseline; gap: 6px; text-align: left;
-  padding-left: 13px; /* keep date digits clearly separated from status bars */
+  padding-left: 7px;
 }
 .history-timecard__date strong {
   font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums;
@@ -305,12 +243,15 @@
   font-size: 14px; font-weight: 800;
   color: var(--history-card-muted); font-variant-numeric: tabular-nums;
 }
-.history-timecard__ot--earned { color: var(--history-ot); }
+.history-timecard__ot--earned { color: var(--history-ot-fill); }
 .history-timecard__special {
   grid-column: 2 / 5; font-size: 12px; color: var(--history-card-muted);
 }
-.history-timecard__row--leave .history-timecard__special { color: var(--history-leave); font-weight: 800; }
-.history-timecard__row--holiday .history-timecard__special { font-weight: 700; }
+.history-timecard__row--leave .history-timecard__special,
+.history-timecard__row--holiday .history-timecard__special {
+  color: #fff;
+  font-weight: 800;
+}
 .history-timecard__no-data {
   padding: 48px 15px; display: flex; flex-direction: column;
   align-items: center; gap: 9px; text-align: center;
@@ -379,25 +320,14 @@
 .history-popup__status-dot {
   background: #a4b2b6; width: 10px; height: 10px; border-radius: 50%;
 }
-.history-popup__status--work .history-popup__status-dot { background: #10a487; }
-.history-popup__status--ot .history-popup__status-dot { background: #eba52b; }
-.history-popup__status--leave .history-popup__status-dot { background: #718fe2; }
+.history-popup__status--work .history-popup__status-dot { background: #168973; }
+.history-popup__status--ot .history-popup__status-dot { background: var(--history-ot-fill); }
+.history-popup__status--leave .history-popup__status-dot { background: var(--history-leave-fill); }
+.history-popup__status--holiday .history-popup__status-dot { background: var(--history-holiday-fill); }
 /* Share the time-of-day accent with the daily detail sheet. */
 .history-popup__heading h2 { color: var(--history-title); }
 .history-page .history-popup__times strong { color: var(--history-accent); }
 .history-page .history-popup__done { background: var(--accent); }
-.app-shell[data-period="day"] .history-popup {
-  background: #f8fcff; color: #274353; border: 1px solid #cce5ee; border-bottom: 0;
-}
-.app-shell[data-period="evening"] .history-popup {
-  background: #fff9f8; color: #563e49; border: 1px solid #efd5d4; border-bottom: 0;
-}
-.app-shell[data-period="day"] .history-popup__times > div { background: #e5f4fb; }
-.app-shell[data-period="evening"] .history-popup__times > div { background: #fceced; }
-.app-shell[data-period="day"] .history-popup__note,
-.app-shell[data-period="day"] .history-popup__empty { background: #eaf6fa; }
-.app-shell[data-period="evening"] .history-popup__note,
-.app-shell[data-period="evening"] .history-popup__empty { background: #fff0ef; }
 .history-popup__times {
   display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 9px;
 }
