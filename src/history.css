@@ -158,6 +158,100 @@
   from { transform: translateY(28px); opacity: .72; }
   to { transform: translateY(0); opacity: 1; }
 }
+
+/* Same dark-night design as Home: apply to History, cards, controls and sheet. */
+.app-shell[data-view="history"][data-period="night"] {
+  --page-bg: #0e233b;
+  --body-text: #f0f6ff;
+  --subtext: #b1c4d5;
+  --accent: #1dcbaa;
+  --nav-bg: #10263e;
+  --line: #2d4259;
+}
+.app-shell[data-period="night"] .history-page {
+  background: #0e233b;
+  color: #f0f6ff;
+}
+.app-shell[data-period="night"] .history-heading__back,
+.app-shell[data-period="night"] .history-month-select {
+  background: #182e47;
+  border-color: #35516e;
+  color: #e2eef9;
+}
+.app-shell[data-period="night"] .history-heading__back:active,
+.app-shell[data-period="night"] .history-month-select button:active {
+  background: #28465f;
+}
+.app-shell[data-period="night"] .history-heading__icon {
+  background: #173f49;
+  color: #55dec0;
+}
+.app-shell[data-period="night"] .history-heading p,
+.app-shell[data-period="night"] .history-calendar__weekday,
+.app-shell[data-period="night"] .history-legend span,
+.app-shell[data-period="night"] .history-tap-hint,
+.app-shell[data-period="night"] .history-footer-note,
+.app-shell[data-period="night"] .history-empty-month,
+.app-shell[data-period="night"] .history-empty-month span {
+  color: #bacdde;
+}
+.app-shell[data-period="night"] .history-demo-notice {
+  background: #193b4c;
+  color: #c0e9e1;
+}
+.app-shell[data-period="night"] .history-month-select button {
+  background: #233f59;
+  color: #e2eef9;
+}
+.app-shell[data-period="night"] .history-summary__item {
+  background: #18394a;
+  border-color: #2c5963;
+}
+.app-shell[data-period="night"] .history-summary__item svg,
+.app-shell[data-period="night"] .history-summary__item strong {
+  color: #71ead0;
+}
+.app-shell[data-period="night"] .history-summary__item span { color: #bbd5d8; }
+.app-shell[data-period="night"] .history-calendar {
+  background: #182e47;
+  border-color: #35516e;
+}
+.app-shell[data-period="night"] .history-calendar__day { color: #e6f1fb; }
+.app-shell[data-period="night"] .history-calendar__day:active { background: #29465e; }
+.app-shell[data-period="night"] .history-calendar__day--today { border-color: #56dabc; }
+.app-shell[data-period="night"] .history-calendar__day--future { color: #8195a6; }
+.app-shell[data-period="night"] .history-empty-month {
+  border-color: #3a5970;
+}
+.app-shell[data-period="night"] .history-popup {
+  background: #182e47;
+  color: #f0f6ff;
+  border: 1px solid #35516e;
+  border-bottom: 0;
+  box-shadow: 0 -15px 48px rgba(0, 0, 0, .33);
+}
+.app-shell[data-period="night"] .history-popup__handle { background: #557087; }
+.app-shell[data-period="night"] .history-popup__heading p,
+.app-shell[data-period="night"] .history-popup__line span,
+.app-shell[data-period="night"] .history-popup__times span {
+  color: #b1c4d5;
+}
+.app-shell[data-period="night"] .history-popup__close {
+  background: #29455f;
+  color: #e8f2fa;
+}
+.app-shell[data-period="night"] .history-popup__times > div,
+.app-shell[data-period="night"] .history-popup__note,
+.app-shell[data-period="night"] .history-popup__empty {
+  background: #243e57;
+  color: #c6d9e8;
+}
+.app-shell[data-period="night"] .history-popup__times strong { color: #f0f6ff; }
+.app-shell[data-period="night"] .history-popup__line { border-color: #35516e; }
+.app-shell[data-period="night"] .history-popup__done {
+  background: #21ab91;
+  color: #071f2d;
+}
 @media (max-width: 355px) {
   .history-page { padding-left: 13px; padding-right: 13px; }
   .history-calendar { padding-left: 6px; padding-right: 6px; }

@@ -88,6 +88,8 @@ function App() {
     : active
       ? 'กำลังทำงาน (สาธิต)'
       : 'ยังไม่ได้เชื่อมข้อมูลการลงเวลา';
+  const clockText = timeFormatter.format(now);
+  const [clockHours, clockMinutes] = clockText.split(':');
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0 });
@@ -108,6 +110,8 @@ function App() {
   useEffect(() => {
     const meta = document.querySelector('meta[name="theme-color"]');
     meta?.setAttribute('content', periodThemeColors[period]);
+    // Keep the outer PWA page in the same theme as all internal screens.
+    document.documentElement.dataset.period = period;
   }, [period]);
 
   useEffect(() => {
@@ -178,8 +182,10 @@ function App() {
 
           <div className="clock-panel">
             <p className="clock-panel__date">{dateFormatter.format(now)}</p>
-            <time className="clock-panel__time" dateTime={now.toISOString()}>
-              {timeFormatter.format(now)}
+            <time className="clock-panel__time" dateTime={now.toISOString()} aria-label={'เวลา ' + clockText + ' นาฬิกา'}>
+              <span>{clockHours}</span>
+              <span className="clock-panel__separator" aria-hidden="true">:</span>
+              <span>{clockMinutes}</span>
             </time>
           </div>
         </section>

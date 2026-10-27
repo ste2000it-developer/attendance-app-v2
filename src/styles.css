@@ -14,6 +14,9 @@ button { font: inherit; -webkit-tap-highlight-color: transparent; }
 button:not(:disabled) { cursor: pointer; }
 button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 #root { min-height: 100vh; }
+/* Match the page around the centered app to the night theme too. */
+:root[data-period="night"] { background: #081b2d; color-scheme: dark; }
+:root[data-period="night"] body { background: #081b2d; }
 
 .app-shell {
   --page-bg: #fffdf7;
@@ -165,7 +168,10 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   text-shadow: var(--clock-date-shadow);
 }
 .clock-panel__time {
-  display: block;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  column-gap: .07em;
   /* Oxanium ExtraBold: wide, slightly squared, clear numerals.
      Stretch numerals only; keep the Thai date in Noto Sans Thai. */
   font-family: 'Oxanium', 'Noto Sans Thai', sans-serif;
@@ -181,6 +187,7 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   -webkit-text-stroke: .5px var(--clock-time-stroke);
   text-shadow: var(--clock-time-shadow);
 }
+.clock-panel__time > span { display: inline-block; }
 /* Keep the approved clock colors and tune the edges to each Pixel Art sky.
    Light colors stay luminous; the subtle contrast edge makes them readable. */
 .clock-panel {
@@ -309,6 +316,37 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 .theme-options button.is-selected, .state-options button.is-selected { background: #e1f6ed; color: #006e5e; border: 2px solid #0d9b82; }
 .preview-explanation { margin: 16px 0; font-size: 13px; line-height: 1.6; color: #657982; }
 .dialog-primary { width: 100%; min-height: 53px; border: 0; border-radius: 14px; background: #008e7b; color: #fff; font-size: 16px; font-weight: 800; }
+
+/* Night palette must carry through dialogs, not only the Home scenery. */
+.app-shell[data-period="night"] .app-dialog {
+  background: #182e47;
+  color: #f0f6ff;
+  border: 1px solid #35516e;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .44);
+}
+.app-shell[data-period="night"] .dialog-close { color: #d2e2f1; }
+.app-shell[data-period="night"] .dialog-icon {
+  background: #173f49;
+  color: #50e3c0;
+}
+.app-shell[data-period="night"] .dialog-description,
+.app-shell[data-period="night"] .preview-explanation { color: #c1d2e0; }
+.app-shell[data-period="night"] .theme-options button,
+.app-shell[data-period="night"] .state-options button {
+  background: #213c57;
+  border-color: #3b5672;
+  color: #e2eef9;
+}
+.app-shell[data-period="night"] .theme-options button.is-selected,
+.app-shell[data-period="night"] .state-options button.is-selected {
+  background: #154d50;
+  border-color: #45d6b0;
+  color: #e5fff7;
+}
+.app-shell[data-period="night"] .dialog-primary {
+  background: #21ab91;
+  color: #071f2d;
+}
 @media (min-width: 540px) {
   body { padding: 20px 0; }
   .app-shell { height: calc(100dvh - 40px); border-radius: 26px; border: 1px solid #cfd9de; box-shadow: 0 16px 54px rgba(32,54,68,.13); }
