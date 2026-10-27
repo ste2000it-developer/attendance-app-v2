@@ -113,38 +113,21 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 .hero {
   min-height: clamp(290px, 37dvh, 348px);
   position: relative;
-  overflow: visible;
+  overflow: hidden;
   isolation: isolate;
   background: var(--sky);
 }
-/* Extend only the painted sky layer into the top safe area.
-   The hero, header, clock, image bottom edge and bridge position stay fixed. */
-.sky-scene {
-  position: absolute;
-  z-index: -1;
-  inset: calc(-1 * env(safe-area-inset-top, 0px)) 0 0;
-  pointer-events: none;
-  background: var(--status-sky);
-  overflow: hidden;
-}
+.sky-scene { position: absolute; z-index: -1; inset: 0; pointer-events: none; background: var(--sky); }
 .sky-scene__art {
-  /* Bottom-anchored, unscaled artwork: never shift the bridge or crop the city. */
+  /* Keep the full illustrated scene visible; sky space is built into the image. */
   position: absolute;
   display: block;
-  inset: auto 0 0;
+  inset: 0;
   width: 100%;
-  height: calc(100% - env(safe-area-inset-top, 0px));
+  height: 100%;
   object-fit: cover;
   object-position: center bottom;
   user-select: none;
-}
-/* Continue the topmost sky color above the unchanged image, without a seam. */
-.sky-scene::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  height: calc(env(safe-area-inset-top, 0px) + 2px);
-  background: var(--status-sky);
 }
 .app-header {
   padding: calc(25px + env(safe-area-inset-top, 0px)) 23px 0;
