@@ -7,7 +7,7 @@ export default function SkyScene({ period }: { period: DayPeriod }) {
     <div className="sky-scene" aria-hidden="true">
       <img
         className="sky-scene__art"
-        src={`${import.meta.env.BASE_URL}backgrounds/pixel-${period}.webp`}
+        src={`${import.meta.env.BASE_URL}backgrounds/pixel-${period}.webp?v=bridge-aligned-1`}
         alt=""
         loading="eager"
         decoding="async"
