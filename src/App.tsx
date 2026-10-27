@@ -24,6 +24,7 @@ import HistoryPage from './HistoryPage';
 import {
   getBangkokPeriod,
   periodNames,
+  periodThemeColors,
   type AttendanceDisplayState,
   type DayPeriod,
 } from './theme';
@@ -107,10 +108,10 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // Keep the iPhone status area white across all day periods and screens.
-    // The Pixel Art and attendance cards keep their existing theme colors.
+    const meta = document.querySelector('meta[name="theme-color"]');
+    meta?.setAttribute('content', periodThemeColors[period]);
+    // Keep the outer PWA page in the same theme as all internal screens.
     document.documentElement.dataset.period = period;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#ffffff');
   }, [period]);
 
   useEffect(() => {
@@ -235,25 +236,32 @@ function App() {
             </div>
           </section>
 
-          <section className="work-section" aria-label="งานวันนี้">
-            <button
-              className="today-task"
-              type="button"
-              onClick={() => openInfo('งานวันนี้', 'ตารางงานจะเชื่อมกับข้อมูลจริงในขั้นตอนต่อไป')}
-            >
-              <span className="today-task__icon" aria-hidden="true">
-                {isPreviewingAttendance ? <BriefcaseBusiness size={23} /> : <CalendarDays size={23} />}
-              </span>
-              <span className="today-task__text">
-                <strong>งานวันนี้</strong>
-                {isPreviewingAttendance ? (
-                  <span>งานปกติ (ตัวอย่าง) · 08:30–17:30 น.</span>
-                ) : (
-                  <span>ยังไม่มีข้อมูลตารางงาน</span>
-                )}
-              </span>
-              <ChevronRight className="today-task__arrow" size={21} strokeWidth={1.9} aria-hidden="true" />
-            </button>
+          <section className="work-section" aria-labelledby="work-title">
+            <div className="section-heading">
+              <h2 id="work-title">งานวันนี้</h2>
+              <button
+                type="button"
+                onClick={() => openInfo('งานวันนี้', 'ตารางงานจะเชื่อมกับข้อมูลจริงในขั้นตอนต่อไป')}
+              >
+                ดูทั้งหมด <ChevronRight size={19} aria-hidden="true" />
+              </button>
+            </div>
+
+            {isPreviewingAttendance ? (
+              <div className="shift-card">
+                <span className="shift-card__icon" aria-hidden="true"><BriefcaseBusiness size={23} /></span>
+                <div className="shift-card__details">
+                  <strong>งานปกติ <small>(ตัวอย่าง)</small></strong>
+                  <span>08:30 – 17:30</span>
+                </div>
+                <span className={'shift-card__tag shift-card__tag--' + state}>{finished ? 'เสร็จสิ้น' : active ? 'กำลังทำงาน' : 'รอเข้างาน'}</span>
+              </div>
+            ) : (
+              <div className="shift-card shift-card--empty">
+                <span className="shift-card__icon" aria-hidden="true"><CalendarDays size={23} /></span>
+                <span>ยังไม่มีข้อมูลตารางงาน</span>
+              </div>
+            )}
           </section>
 
           <p className="preview-notice" role="status">
