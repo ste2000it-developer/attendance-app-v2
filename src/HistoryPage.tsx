@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   CalendarCheck2,
   CalendarDays,
+  ArrowLeft,
   ChevronLeft,
   ChevronRight,
   Clock3,
@@ -104,7 +105,7 @@ function displayStatus(entry: DayEntry): DayStatus {
     : entry.status;
 }
 
-function HistoryPage() {
+function HistoryPage({ onBack }: { onBack: () => void }) {
   const [monthDate, setMonthDate] = useState(() => {
     const today = todayInBangkok();
     return new Date(Date.UTC(today.year, today.month, 1));
@@ -157,6 +158,9 @@ function HistoryPage() {
   return (
     <main className="history-page">
       <header className="history-heading">
+        <button type="button" className="history-heading__back" onClick={onBack} aria-label="กลับหน้าหลัก">
+          <ArrowLeft size={23} strokeWidth={1.9} aria-hidden="true" />
+        </button>
         <span className="history-heading__icon" aria-hidden="true">
           <CalendarDays size={24} strokeWidth={1.9} />
         </span>

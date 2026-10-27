@@ -14,6 +14,12 @@
   color: #1b3740;
 }
 .history-heading { display: flex; align-items: center; gap: 11px; margin-bottom: 17px; }
+.history-heading__back {
+  display: grid; place-items: center; flex: none;
+  height: 42px; width: 42px; border-radius: 12px;
+  border: 1px solid #deebe5; background: #fff; color: #345a57;
+}
+.history-heading__back:active { background: #e9f4ee; }
 .history-heading__icon {
   height: 46px; width: 46px; flex: none; border-radius: 14px;
   background: #e0f3eb; color: #078b76; display: grid; place-items: center;

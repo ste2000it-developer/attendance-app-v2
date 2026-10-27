@@ -8,6 +8,7 @@ import {
   Fingerprint,
   History,
   House,
+  FilePenLine,
   LogIn,
   LogOut,
   Moon,
@@ -34,8 +35,8 @@ type ThemeSelection = DayPeriod | null;
 
 const navigation = [
   { key: 'home', label: 'หน้าหลัก', Icon: House },
-  { key: 'history', label: 'ประวัติ', Icon: History },
-  { key: 'leave', label: 'การลา', Icon: CalendarDays },
+  { key: 'calendar', label: 'ปฏิทิน', Icon: CalendarDays },
+  { key: 'leave', label: 'การลา', Icon: FilePenLine },
   { key: 'profile', label: 'โปรไฟล์', Icon: UserRound },
 ] as const;
 
@@ -147,13 +148,13 @@ function App() {
             </div>
             <div className="header-actions">
               <button
-                className="header-icon header-icon--preview"
+                className="header-icon"
                 type="button"
-                onClick={() => setDialog('preview')}
-                aria-label="ทดลองดูธีมเวลาและสถานะต่าง ๆ"
-                title="ทดลองดูธีม"
+                onClick={() => setActiveTab('history')}
+                aria-label="เปิดประวัติการทำงาน"
+                title="ประวัติการทำงาน"
               >
-                <Palette size={22} strokeWidth={1.9} />
+                <History size={22} strokeWidth={1.9} />
               </button>
               <button
                 className="header-icon"
@@ -254,7 +255,7 @@ function App() {
         </main>
           </>
         ) : (
-          <HistoryPage />
+          <HistoryPage onBack={() => setActiveTab('home')} />
         )}
       </div>
 
@@ -266,7 +267,8 @@ function App() {
             className={'bottom-nav__item' + (key === activeTab ? ' bottom-nav__item--active' : '')}
             aria-current={key === activeTab ? 'page' : undefined}
             onClick={() => {
-              if (key === 'home' || key === 'history') setActiveTab(key);
+              if (key === 'home') setActiveTab('home');
+              else if (key === 'calendar') openInfo('ปฏิทิน', 'เราจะออกแบบหน้าปฏิทินสำหรับตารางงานและนัดหมายในขั้นตอนถัดไป');
               else openInfo(label, 'หน้านี้ยังไม่ได้พัฒนา เราจะออกแบบทีละหน้าตามที่ตกลงกัน');
             }}
           >
