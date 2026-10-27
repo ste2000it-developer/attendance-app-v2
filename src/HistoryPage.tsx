@@ -214,7 +214,6 @@ function HistoryPage({ onBack }: { onBack: () => void }) {
             {days.map((day) => {
               const record = (entries as Record<number, DayEntry>)[day];
               const date = new Date(Date.UTC(year, month, day));
-              const isToday = year === today.year && month === today.month && day === today.day;
               const isFuture = date.getTime() > Date.UTC(today.year, today.month, today.day);
               const status = record ? displayStatus(record) : 'empty';
               const overtime = record ? calculateOvertimeMinutes(record) : 0;
@@ -227,7 +226,6 @@ function HistoryPage({ onBack }: { onBack: () => void }) {
                   key={day}
                   type="button"
                   className={'history-timecard__row history-timecard__row--entry history-timecard__row--' + status
-                    + (isToday ? ' history-timecard__row--today' : '')
                     + (isFuture ? ' history-timecard__row--future' : '')}
                   onClick={(event) => openDay(day, event.currentTarget)}
                   aria-label={day + ' ' + thaiMonth.format(monthDate) + ' — ' + explanation + ' (ข้อมูลตัวอย่าง) กดเพื่อดูรายละเอียด'}

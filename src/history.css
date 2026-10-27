@@ -53,7 +53,7 @@
   --history-leave: #5078b5;
   --history-leave-wash: #eaf1ff;
   --history-holiday-wash: #f2e9da;
-  --history-ot-wash: #faedef;
+  --history-ot-fill: #94485f;
   min-height: 100%;
   padding: calc(21px + env(safe-area-inset-top, 0px)) 17px 34px;
   background: var(--history-page);
@@ -82,7 +82,7 @@
   --history-leave: #496cc1;
   --history-leave-wash: #eaf0ff;
   --history-holiday-wash: #eef4f7;
-  --history-ot-wash: #edf1f9;
+  --history-ot-fill: #216985;
 }
 /* Evening – coral, peach and a touch of sunset pink. */
 .app-shell[data-period="evening"] .history-page {
@@ -106,7 +106,7 @@
   --history-leave: #6175bc;
   --history-leave-wash: #f0eefe;
   --history-holiday-wash: #f6e9e7;
-  --history-ot-wash: #f9e8ed;
+  --history-ot-fill: #984463;
 }
 .app-shell[data-period="night"] .history-page {
   --history-page: #0e233b;
@@ -129,7 +129,7 @@
   --history-leave: #bdc5ff;
   --history-leave-wash: #2b3659;
   --history-holiday-wash: #293e51;
-  --history-ot-wash: #303d52;
+  --history-ot-fill: #744c82;
 }
 .history-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
 .history-heading__back {
@@ -258,8 +258,20 @@
 }
 .history-timecard__row--entry:hover,
 .history-timecard__row--entry:active { background: var(--history-highlight); }
-.history-timecard__row--today { background: var(--history-highlight); }
-.history-timecard__row--ot { background: var(--history-ot-wash); }
+.history-timecard__row--ot,
+.history-timecard__row--ot:hover,
+.history-timecard__row--ot:active {
+  background: var(--history-ot-fill);
+  color: #fff;
+}
+.history-timecard__row--ot .history-timecard__stamp,
+.history-timecard__row--ot .history-timecard__ot,
+.history-timecard__row--ot .history-timecard__date small {
+  color: #fff;
+}
+.history-timecard__row--ot::before {
+  background: rgba(255, 255, 255, .86);
+}
 .history-timecard__row--leave { background: var(--history-leave-wash); }
 .history-timecard__row--holiday { background: var(--history-holiday-wash); }
 .history-timecard__row--ot::before,
