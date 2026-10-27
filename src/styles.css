@@ -160,7 +160,6 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   font-weight: 600;
   line-height: 1.5;
   margin: 0 0 5px;
-  text-shadow: var(--clock-text-shadow);
 }
 .clock-panel__time {
   display: block;
@@ -170,29 +169,23 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   line-height: 1.13;
   color: var(--clock-time-color);
   font-variant-numeric: tabular-nums;
-  text-shadow: var(--clock-text-shadow);
 }
-/* Bright clock/date text across all four scenes. Shadows keep light lettering
-   legible against both bright sky and detailed Pixel Art without hiding the art. */
+/* Approved bright clock/date colors for all four Pixel Art themes, without text shadows. */
 .clock-panel {
   --clock-time-color: #fffaf0;
   --clock-date-color: #fff5e6;
-  --clock-text-shadow: 0 1px 2px rgba(22, 53, 80, .9), 0 2px 8px rgba(19, 54, 86, .6);
 }
 .app-shell[data-period="day"] .clock-panel {
   --clock-time-color: #ffffff;
   --clock-date-color: #f6fbff;
-  --clock-text-shadow: 0 1px 2px rgba(12, 62, 105, .95), 0 2px 9px rgba(9, 69, 117, .7);
 }
 .app-shell[data-period="evening"] .clock-panel {
   --clock-time-color: #fff0c2;
   --clock-date-color: #ffe7c2;
-  --clock-text-shadow: 0 1px 2px rgba(53, 28, 85, .85), 0 2px 8px rgba(66, 30, 80, .55);
 }
 .app-shell[data-period="night"] .clock-panel {
   --clock-time-color: #ffffff;
   --clock-date-color: #ffffff;
-  --clock-text-shadow: 0 1px 3px rgba(5, 21, 50, .32);
 }
 .home-content { position: relative; z-index: 2; margin-top: -29px; padding: 0 22px 17px; }
 .attendance-card {
