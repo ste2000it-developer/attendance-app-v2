@@ -98,7 +98,9 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 }
 .app-scroll::-webkit-scrollbar { display: none; }
 .hero {
-  min-height: clamp(290px, 37dvh, 348px);
+  /* Extend the sky when iOS makes the status-bar pixels available.
+     Keep the bridge below the clock by growing the scene with the safe area. */
+  min-height: calc(clamp(290px, 37dvh, 348px) + env(safe-area-inset-top, 0px));
   position: relative;
   overflow: hidden;
   isolation: isolate;
@@ -115,6 +117,21 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   object-fit: cover;
   object-position: center bottom;
   user-select: none;
+}
+/* iOS Home Screen puts status icons over the artwork.
+   Tint just the top inset for legibility, fading out before the app header. */
+@media (display-mode: standalone) {
+  .sky-scene::after {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: calc(env(safe-area-inset-top, 0px) + 24px);
+    background: linear-gradient(to bottom, rgba(8, 31, 59, .28), rgba(8, 31, 59, 0));
+    pointer-events: none;
+  }
+  .app-shell[data-period="day"] .sky-scene::after {
+    background: linear-gradient(to bottom, rgba(8, 40, 81, .42), rgba(8, 40, 81, 0));
+  }
 }
 .app-header {
   padding: calc(25px + env(safe-area-inset-top, 0px)) 23px 0;
@@ -352,7 +369,7 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   .app-shell { height: calc(100dvh - 40px); border-radius: 26px; border: 1px solid #cfd9de; box-shadow: 0 16px 54px rgba(32,54,68,.13); }
 }
 @media (max-height: 770px) {
-  .hero { min-height: 255px; }
+  .hero { min-height: calc(255px + env(safe-area-inset-top, 0px)); }
   .clock-panel { margin-top: 25px; }
   .home-content { margin-top: -17px; }
   .attendance-card { min-height: 199px; padding: 18px 12px; }
