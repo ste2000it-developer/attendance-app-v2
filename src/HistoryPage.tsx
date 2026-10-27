@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  CalendarCheck2,
-  CalendarDays,
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
   Clock3,
   Info,
-  Timer,
+  History,
   X,
 } from 'lucide-react';
 import './history.css';
@@ -53,7 +51,7 @@ sampleEntries[25] = {
   note: 'ทำงานในวันหยุด (ตัวอย่าง) · ไม่มี OT เพราะออกงานก่อน 19:00 น.',
 };
 
-const weekdays = ['จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส', 'อา'];
+const weekdays = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
 
 const thaiMonth = new Intl.DateTimeFormat('th-TH', {
   month: 'long',
@@ -105,6 +103,10 @@ function displayStatus(entry: DayEntry): DayStatus {
     : entry.status;
 }
 
+function formatPunchDuration(minutes: number) {
+  return Math.floor(minutes / 60) + ':' + String(minutes % 60).padStart(2, '0');
+}
+
 function HistoryPage({ onBack }: { onBack: () => void }) {
   const [monthDate, setMonthDate] = useState(() => {
     const today = todayInBangkok();
@@ -120,11 +122,7 @@ function HistoryPage({ onBack }: { onBack: () => void }) {
   const entries = isSampleMonth ? sampleEntries : {};
   const today = todayInBangkok();
   const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
-  const firstWeekday = (new Date(Date.UTC(year, month, 1)).getUTCDay() + 6) % 7;
-  const calendarCells = Array.from(
-    { length: Math.ceil((firstWeekday + daysInMonth) / 7) * 7 },
-    (_, index) => index - firstWeekday + 1,
-  );
+  const days = Array.from({ length: daysInMonth }, (_, index) => index + 1);
   const allEntries = Object.values(entries) as DayEntry[];
   const workedDays = allEntries.filter((entry) => entry.status === 'work' || entry.status === 'ot').length;
   const totalMinutes = allEntries.reduce((sum, entry) => sum + (entry.minutes ?? 0), 0);
@@ -162,17 +160,17 @@ function HistoryPage({ onBack }: { onBack: () => void }) {
           <ArrowLeft size={23} strokeWidth={1.9} aria-hidden="true" />
         </button>
         <span className="history-heading__icon" aria-hidden="true">
-          <CalendarDays size={24} strokeWidth={1.9} />
+          <History size={23} strokeWidth={1.9} />
         </span>
         <div>
           <h1>ประวัติการทำงาน</h1>
-          <p>ตรวจสอบเวลาทำงานย้อนหลัง</p>
+          <p>บัตรตอกเวลาประจำเดือน</p>
         </div>
       </header>
 
       <div className="history-demo-notice" role="status">
         <Info size={17} aria-hidden="true" />
-        <span>ข้อมูลตัวอย่างเพื่อทดลองดีไซน์ ยังไม่เชื่อม Firebase</span>
+        <span>ตัวอย่างเพื่อทดลองดีไซน์ · ยังไม่เชื่อมข้อมูลจริง</span>
       </div>
 
       <div className="history-month-select" aria-label="เลือกเดือนที่ต้องการดู">
@@ -185,72 +183,100 @@ function HistoryPage({ onBack }: { onBack: () => void }) {
         </button>
       </div>
 
-      <section className="history-summary" aria-label="สรุปการทำงานของเดือน (ข้อมูลตัวอย่าง)">
-        <div className="history-summary__item">
-          <CalendarCheck2 size={20} aria-hidden="true" />
-          <strong>{isSampleMonth ? workedDays : '–'}</strong>
-          <span>วันทำงาน</span>
+      <section className="history-timecard" aria-label="บัตรตอกเวลาประจำเดือน (ข้อมูลตัวอย่าง)">
+        <div className="history-timecard__holes" aria-hidden="true">
+          {Array.from({ length: 11 }, (_, index) => <span key={index} />)}
         </div>
-        <div className="history-summary__item">
-          <Clock3 size={20} aria-hidden="true" />
-          <strong>{isSampleMonth ? formatDuration(totalMinutes) : '–'}</strong>
-          <span>ชั่วโมงรวม</span>
+        <div className="history-timecard__heading">
+          <span className="history-timecard__eyebrow">EMPLOYEE TIME CARD</span>
+          <h2>บัตรบันทึกเวลา</h2>
+          <span className="history-timecard__record">MONTHLY RECORD · {String(month + 1).padStart(2, '0')} / {year}</span>
         </div>
-        <div className="history-summary__item">
-          <Timer size={20} aria-hidden="true" />
-          <strong>{isSampleMonth ? formatDuration(overtimeMinutes) : '–'}</strong>
-          <span>ชั่วโมง OT</span>
+        <div className="history-timecard__fields">
+          <div>
+            <span>ชื่อพนักงาน / EMPLOYEE</span>
+            <strong>พนักงานตัวอย่าง</strong>
+          </div>
+          <div>
+            <span>ประจำเดือน / PERIOD</span>
+            <strong>{thaiMonth.format(monthDate)}</strong>
+          </div>
+        </div>
+
+        {isSampleMonth ? (
+          <div className="history-timecard__table" aria-label="รายการลงเวลาแต่ละวัน">
+            <div className="history-timecard__row history-timecard__row--header" aria-hidden="true">
+              <span>วันที่</span>
+              <span>เข้างาน</span>
+              <span>ออกงาน</span>
+              <span>OT</span>
+            </div>
+            {days.map((day) => {
+              const record = (entries as Record<number, DayEntry>)[day];
+              const date = new Date(Date.UTC(year, month, day));
+              const isToday = year === today.year && month === today.month && day === today.day;
+              const isFuture = date.getTime() > Date.UTC(today.year, today.month, today.day);
+              const status = record ? displayStatus(record) : 'empty';
+              const overtime = record ? calculateOvertimeMinutes(record) : 0;
+              const hasTimes = Boolean(record?.checkIn && record.checkOut);
+              const explanation = record
+                ? statusLabels[status as DayStatus]
+                : isFuture ? 'ยังไม่ถึงวัน' : 'ไม่มีข้อมูล';
+              return (
+                <button
+                  key={day}
+                  type="button"
+                  className={'history-timecard__row history-timecard__row--entry history-timecard__row--' + status
+                    + (isToday ? ' history-timecard__row--today' : '')
+                    + (isFuture ? ' history-timecard__row--future' : '')}
+                  onClick={(event) => openDay(day, event.currentTarget)}
+                  aria-label={day + ' ' + thaiMonth.format(monthDate) + ' — ' + explanation + ' (ข้อมูลตัวอย่าง) กดเพื่อดูรายละเอียด'}
+                >
+                  <span className="history-timecard__date">
+                    <strong>{String(day).padStart(2, '0')}</strong>
+                    <small>{weekdays[date.getUTCDay()]}</small>
+                  </span>
+                  {hasTimes ? (
+                    <>
+                      <span className="history-timecard__stamp">{record?.checkIn}</span>
+                      <span className="history-timecard__stamp">{record?.checkOut}</span>
+                      <span className={'history-timecard__ot' + (overtime > 0 ? ' history-timecard__ot--earned' : '')}>
+                        {overtime > 0 ? formatPunchDuration(overtime) : '—'}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="history-timecard__special">{explanation}</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="history-timecard__no-data">
+            <Clock3 size={25} strokeWidth={1.65} aria-hidden="true" />
+            <strong>ยังไม่มีข้อมูลตัวอย่างของเดือนนี้</strong>
+            <span>ลองเลือกเดือนตุลาคม 2569 เพื่อดูรูปแบบบัตรตอกเวลา</span>
+          </div>
+        )}
+
+        <div className="history-timecard__summary" aria-label="สรุปเวลาประจำเดือน">
+          <div>
+            <strong>{isSampleMonth ? workedDays : '—'}</strong>
+            <span>วันทำงาน</span>
+          </div>
+          <div>
+            <strong>{isSampleMonth ? formatPunchDuration(totalMinutes) : '—'}</strong>
+            <span>ชั่วโมงรวม</span>
+          </div>
+          <div>
+            <strong>{isSampleMonth ? formatPunchDuration(overtimeMinutes) : '—'}</strong>
+            <span>OT รวม (ชม.)</span>
+          </div>
         </div>
       </section>
 
-      <section className="history-calendar" aria-label="ปฏิทินการทำงาน">
-        <div className="history-calendar__grid">
-          {weekdays.map((weekday) => (
-            <div className="history-calendar__weekday" key={weekday}>{weekday}</div>
-          ))}
-          {calendarCells.map((day, index) => {
-            if (day < 1 || day > daysInMonth) {
-              return <div key={'blank-' + index} className="history-calendar__blank" aria-hidden="true" />;
-            }
-            const record = (entries as Record<number, DayEntry>)[day];
-            const isToday = year === today.year && month === today.month && day === today.day;
-            const isFuture = new Date(Date.UTC(year, month, day)).getTime()
-              > new Date(Date.UTC(today.year, today.month, today.day)).getTime();
-            return (
-              <button
-                key={day}
-                type="button"
-                className={'history-calendar__day'
-                  + (record ? ' history-calendar__day--' + displayStatus(record) : '')
-                  + (isToday ? ' history-calendar__day--today' : '')
-                  + (isFuture ? ' history-calendar__day--future' : '')}
-                aria-label={String(day) + ' ' + thaiMonth.format(monthDate)
-                  + (record ? ' — ' + statusLabels[displayStatus(record)] + ' (ตัวอย่าง)' : ' — ไม่มีข้อมูลตัวอย่าง')}
-                onClick={(event) => openDay(day, event.currentTarget)}
-              >
-                <span>{day}</span>
-                <span className="history-calendar__dot" aria-hidden="true" />
-              </button>
-            );
-          })}
-        </div>
-        <div className="history-legend" aria-label="ความหมายจุดสี">
-          <span><i className="history-legend__dot history-legend__dot--work" />ทำงาน</span>
-          <span><i className="history-legend__dot history-legend__dot--ot" />มี OT</span>
-          <span><i className="history-legend__dot history-legend__dot--leave" />ลา</span>
-          <span><i className="history-legend__dot history-legend__dot--holiday" />วันหยุด</span>
-        </div>
-      </section>
-
-      <p className="history-tap-hint">แตะวันที่เพื่อดูรายละเอียด · OT เริ่มหลัง 19:00 น.</p>
-      {!isSampleMonth && (
-        <div className="history-empty-month">
-          <CalendarDays size={22} aria-hidden="true" />
-          <p>ยังไม่มีข้อมูลตัวอย่างสำหรับเดือนนี้</p>
-          <span>ลองกลับไปดูเดือนตุลาคม 2569 เพื่อทดสอบหน้าประวัติ</span>
-        </div>
-      )}
-      <p className="history-footer-note">หมายเหตุ: จุดสีและตัวเลขทั้งหมดเป็นข้อมูลจำลอง ไม่ใช่ประวัติลงเวลาจริง</p>
+      <p className="history-tap-hint">แตะวันที่บนบัตรเพื่อดูรายละเอียด · OT หลัง 19:00 น.</p>
+      <p className="history-footer-note">ตัวเลขและสถานะทั้งหมดเป็นข้อมูลจำลอง ไม่ใช่ประวัติการทำงานจริง</p>
 
       {selectedDay !== null && (
         <div
