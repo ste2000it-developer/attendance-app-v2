@@ -46,14 +46,14 @@
   --history-rule: #eadfca;
   --history-accent: #955e17;
   --history-title: #98621e;
-  --history-ot: #b15b29;
+  --history-ot: #b56578;
   --history-highlight: #ffedcb;
   --history-wash: #fff0d8;
   --history-punch: #d9a04d;
   --history-leave: #5078b5;
   --history-leave-wash: #eaf1ff;
   --history-holiday-wash: #f2e9da;
-  --history-ot-wash: #fff0d9;
+  --history-ot-wash: #faedef;
   min-height: 100%;
   padding: calc(21px + env(safe-area-inset-top, 0px)) 17px 34px;
   background: var(--history-page);
@@ -75,14 +75,14 @@
   --history-rule: #dcecf3;
   --history-accent: #116d96;
   --history-title: #147ba8;
-  --history-ot: #ac6024;
+  --history-ot: #ae6580;
   --history-highlight: #dff4fc;
   --history-wash: #e8f6fc;
   --history-punch: #60b8dd;
   --history-leave: #496cc1;
   --history-leave-wash: #eaf0ff;
   --history-holiday-wash: #eef4f7;
-  --history-ot-wash: #fff0df;
+  --history-ot-wash: #edf1f9;
 }
 /* Evening – coral, peach and a touch of sunset pink. */
 .app-shell[data-period="evening"] .history-page {
@@ -99,14 +99,14 @@
   --history-rule: #f0ded9;
   --history-accent: #a84668;
   --history-title: #b45475;
-  --history-ot: #ac572b;
+  --history-ot: #b35276;
   --history-highlight: #ffe6df;
   --history-wash: #ffe8e5;
   --history-punch: #d789a1;
   --history-leave: #6175bc;
   --history-leave-wash: #f0eefe;
   --history-holiday-wash: #f6e9e7;
-  --history-ot-wash: #ffecdc;
+  --history-ot-wash: #f9e8ed;
 }
 .app-shell[data-period="night"] .history-page {
   --history-page: #0e233b;
@@ -122,14 +122,14 @@
   --history-rule: #455b70;
   --history-accent: #99dbfa;
   --history-title: #89e8d0;
-  --history-ot: #ffc48a;
+  --history-ot: #f0b1ca;
   --history-highlight: #2d495c;
   --history-wash: #24485c;
   --history-punch: #56c8c4;
   --history-leave: #bdc5ff;
   --history-leave-wash: #2b3659;
   --history-holiday-wash: #293e51;
-  --history-ot-wash: #423f48;
+  --history-ot-wash: #303d52;
 }
 .history-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
 .history-heading__back {
@@ -265,7 +265,8 @@
 .history-timecard__row--ot::before,
 .history-timecard__row--leave::before {
   content: "";
-  position: absolute; inset: 6px auto 6px 0;
+  position: absolute;
+  left: 3px; top: 10px; bottom: 10px;
   width: 3px; border-radius: 3px;
   background: var(--history-ot);
 }
@@ -273,6 +274,7 @@
 .history-timecard__row--future { opacity: .65; }
 .history-timecard__date {
   display: flex; align-items: baseline; gap: 6px; text-align: left;
+  padding-left: 13px; /* keep date digits clearly separated from status bars */
 }
 .history-timecard__date strong {
   font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums;
