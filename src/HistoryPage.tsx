@@ -17,7 +17,6 @@ type DayEntry = {
   checkIn?: string;
   checkOut?: string;
   minutes?: number;
-  overtime?: number;
   note?: string;
 };
 
@@ -37,22 +36,20 @@ for (const day of regularDays) {
     checkIn: '08:30',
     checkOut: day === 26 ? '17:40' : '17:30',
     minutes: day === 26 ? 550 : 540,
-    overtime: 0,
   };
 }
 for (const day of [4, 11, 18]) {
   sampleEntries[day] = { status: 'holiday', note: 'วันหยุด (ตัวอย่าง)' };
 }
 sampleEntries[16] = { status: 'leave', note: 'วันลาที่ได้รับอนุมัติ (ตัวอย่าง)' };
-sampleEntries[21] = { status: 'ot', checkIn: '08:30', checkOut: '20:00', minutes: 690, overtime: 120 };
-sampleEntries[23] = { status: 'ot', checkIn: '08:30', checkOut: '20:00', minutes: 690, overtime: 120 };
+sampleEntries[21] = { status: 'work', checkIn: '08:30', checkOut: '20:00', minutes: 690 };
+sampleEntries[23] = { status: 'work', checkIn: '08:30', checkOut: '20:00', minutes: 690 };
 sampleEntries[25] = {
-  status: 'ot',
+  status: 'work',
   checkIn: '08:00',
   checkOut: '16:00',
   minutes: 480,
-  overtime: 480,
-  note: 'ทำงานในวันหยุด (ตัวอย่าง)',
+  note: 'ทำงานในวันหยุด (ตัวอย่าง) · ไม่มี OT เพราะออกงานก่อน 19:00 น.',
 };
 
 const weekdays = ['จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส', 'อา'];
@@ -87,6 +84,26 @@ function formatDuration(minutes: number) {
   return remain ? hours + ' ชม. ' + remain + ' นาที' : hours + ' ชม.';
 }
 
+// Trial overtime rule: count work done strictly after 19:00.
+// A check-out earlier than check-in is on the following day.
+function calculateOvertimeMinutes(entry: DayEntry): number {
+  if (!entry.checkIn || !entry.checkOut) return 0;
+  const toMinutes = (value: string) => {
+    const [hours, minutes] = value.split(':').map(Number);
+    return hours * 60 + minutes;
+  };
+  const start = toMinutes(entry.checkIn);
+  let end = toMinutes(entry.checkOut);
+  if (end < start) end += 24 * 60;
+  return Math.max(0, end - Math.max(start, 19 * 60));
+}
+
+function displayStatus(entry: DayEntry): DayStatus {
+  return entry.status === 'work' && calculateOvertimeMinutes(entry) > 0
+    ? 'ot'
+    : entry.status;
+}
+
 function HistoryPage() {
   const [monthDate, setMonthDate] = useState(() => {
     const today = todayInBangkok();
@@ -110,8 +127,9 @@ function HistoryPage() {
   const allEntries = Object.values(entries) as DayEntry[];
   const workedDays = allEntries.filter((entry) => entry.status === 'work' || entry.status === 'ot').length;
   const totalMinutes = allEntries.reduce((sum, entry) => sum + (entry.minutes ?? 0), 0);
-  const overtimeMinutes = allEntries.reduce((sum, entry) => sum + (entry.overtime ?? 0), 0);
+  const overtimeMinutes = allEntries.reduce((sum, entry) => sum + calculateOvertimeMinutes(entry), 0);
   const selectedEntry = selectedDay === null ? undefined : (entries as Record<number, DayEntry>)[selectedDay];
+  const selectedStatus = selectedEntry ? displayStatus(selectedEntry) : 'empty';
 
   useEffect(() => {
     if (selectedDay === null) return;
@@ -199,11 +217,11 @@ function HistoryPage() {
                 key={day}
                 type="button"
                 className={'history-calendar__day'
-                  + (record ? ' history-calendar__day--' + record.status : '')
+                  + (record ? ' history-calendar__day--' + displayStatus(record) : '')
                   + (isToday ? ' history-calendar__day--today' : '')
                   + (isFuture ? ' history-calendar__day--future' : '')}
                 aria-label={String(day) + ' ' + thaiMonth.format(monthDate)
-                  + (record ? ' — ' + statusLabels[record.status] + ' (ตัวอย่าง)' : ' — ไม่มีข้อมูลตัวอย่าง')}
+                  + (record ? ' — ' + statusLabels[displayStatus(record)] + ' (ตัวอย่าง)' : ' — ไม่มีข้อมูลตัวอย่าง')}
                 onClick={(event) => openDay(day, event.currentTarget)}
               >
                 <span>{day}</span>
@@ -220,7 +238,7 @@ function HistoryPage() {
         </div>
       </section>
 
-      <p className="history-tap-hint">แตะวันที่ในปฏิทินเพื่อเปิดรายละเอียด</p>
+      <p className="history-tap-hint">แตะวันที่เพื่อดูรายละเอียด · OT เริ่มหลัง 19:00 น.</p>
       {!isSampleMonth && (
         <div className="history-empty-month">
           <CalendarDays size={22} aria-hidden="true" />
@@ -263,9 +281,9 @@ function HistoryPage() {
               </button>
             </div>
 
-            <div className={'history-popup__status history-popup__status--' + (selectedEntry?.status ?? 'empty')}>
+            <div className={'history-popup__status history-popup__status--' + selectedStatus}>
               <span className="history-popup__status-dot" aria-hidden="true" />
-              {selectedEntry ? statusLabels[selectedEntry.status] : 'ไม่มีข้อมูลตัวอย่าง'}
+              {selectedEntry ? statusLabels[displayStatus(selectedEntry)] : 'ไม่มีข้อมูลตัวอย่าง'}
             </div>
 
             {selectedEntry?.checkIn && selectedEntry.checkOut ? (
@@ -286,7 +304,7 @@ function HistoryPage() {
                 </div>
                 <div className="history-popup__line">
                   <span>ชั่วโมง OT</span>
-                  <strong>{formatDuration(selectedEntry.overtime ?? 0)}</strong>
+                  <strong>{formatDuration(calculateOvertimeMinutes(selectedEntry))}</strong>
                 </div>
                 {selectedEntry.note && <p className="history-popup__note">{selectedEntry.note}</p>}
               </>
