@@ -1,0 +1,165 @@
+/* History screen: light, readable mobile-first calendar, independent of sky theme. */
+.app-shell[data-view="history"][data-period] {
+  --page-bg: #f8fbf9;
+  --body-text: #1b3740;
+  --subtext: #617c80;
+  --accent: #078e79;
+  --nav-bg: #ffffff;
+  --line: #e1eae6;
+}
+.history-page {
+  min-height: 100%;
+  padding: calc(23px + env(safe-area-inset-top, 0px)) 19px 28px;
+  background: #f8fbf9;
+  color: #1b3740;
+}
+.history-heading { display: flex; align-items: center; gap: 11px; margin-bottom: 17px; }
+.history-heading__icon {
+  height: 46px; width: 46px; flex: none; border-radius: 14px;
+  background: #e0f3eb; color: #078b76; display: grid; place-items: center;
+}
+.history-heading h1 { font-size: 20px; font-weight: 800; margin: 0; line-height: 1.4; }
+.history-heading p { font-size: 13px; color: #6a8185; line-height: 1.5; margin: 2px 0 0; }
+.history-demo-notice {
+  display: flex; align-items: center; gap: 8px; border-radius: 11px;
+  background: #edf4f1; color: #4c716c; padding: 10px 11px;
+  font-size: 12px; line-height: 1.5; margin-bottom: 18px;
+}
+.history-demo-notice svg { flex: none; }
+.history-month-select {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  background: #fff; border: 1px solid #e0eae5; border-radius: 14px;
+  padding: 7px; margin-bottom: 14px;
+}
+.history-month-select strong { font-size: 16px; font-weight: 800; text-align: center; }
+.history-month-select button {
+  height: 39px; width: 39px; flex: none; border: 0; border-radius: 11px;
+  background: #f0f6f3; color: #3f615e; display: grid; place-items: center;
+}
+.history-month-select button:active { background: #e1eee8; }
+.history-summary {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px; margin-bottom: 19px;
+}
+.history-summary__item {
+  min-width: 0; min-height: 112px; padding: 10px 4px;
+  background: #e7f5ed; border: 1px solid #d5e9dd; border-radius: 14px;
+  display: flex; flex-direction: column; justify-content: center;
+  align-items: center; text-align: center; gap: 4px;
+}
+.history-summary__item svg { color: #168b72; }
+.history-summary__item strong {
+  color: #087d6e; font-size: clamp(14px, 4vw, 19px);
+  font-weight: 800; line-height: 1.4; font-variant-numeric: tabular-nums;
+  white-space: nowrap; letter-spacing: -.45px;
+}
+.history-summary__item span { font-size: 12px; font-weight: 600; color: #57746e; white-space: nowrap; }
+.history-calendar {
+  background: #fff; border: 1px solid #e0e9e6;
+  border-radius: 18px; padding: 13px 9px 15px;
+}
+.history-calendar__grid { display: grid; grid-template-columns: repeat(7, minmax(0,1fr)); gap: 3px; }
+.history-calendar__weekday {
+  text-align: center; font-size: 12px; font-weight: 800; color: #7c9191;
+  padding: 6px 0 12px;
+}
+.history-calendar__day, .history-calendar__blank { min-width: 0; height: 44px; }
+.history-calendar__day {
+  border: 1px solid transparent; border-radius: 10px; background: transparent;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; color: #38525b; font-size: 14px; font-weight: 700;
+  padding: 4px; font-variant-numeric: tabular-nums;
+}
+.history-calendar__day:active { background: #e6f2ee; }
+.history-calendar__day--today { border-color: #078e79; }
+.history-calendar__day--future { color: #adbdc0; }
+.history-calendar__dot { width: 6px; height: 6px; border-radius: 50%; background: transparent; }
+.history-calendar__day--work .history-calendar__dot { background: #10a487; }
+.history-calendar__day--ot .history-calendar__dot { background: #eba52b; }
+.history-calendar__day--leave .history-calendar__dot { background: #718fe2; }
+.history-calendar__day--holiday .history-calendar__dot { background: #a4b2b6; }
+.history-legend {
+  display: flex; justify-content: center; align-items: center; flex-wrap: wrap;
+  column-gap: 15px; row-gap: 8px; padding-top: 17px;
+}
+.history-legend span { display: flex; align-items: center; gap: 6px; color: #637c81; font-size: 11px; font-weight: 600; }
+.history-legend__dot { display: inline-block; height: 8px; width: 8px; flex: none; border-radius: 50%; }
+.history-legend__dot--work { background: #10a487; }
+.history-legend__dot--ot { background: #eba52b; }
+.history-legend__dot--leave { background: #718fe2; }
+.history-legend__dot--holiday { background: #a4b2b6; }
+.history-tap-hint { text-align: center; color: #72868a; margin: 20px 0 12px; font-size: 13px; }
+.history-footer-note { text-align: center; color: #83979a; font-size: 11px; line-height: 1.6; margin: 22px 6px 0; }
+.history-empty-month {
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  padding: 20px 12px; border: 1px dashed #d4e5df; border-radius: 14px;
+  color: #71898c; text-align: center;
+}
+.history-empty-month p { margin: 0; font-weight: 700; font-size: 14px; }
+.history-empty-month span { font-size: 12px; }
+.history-popup-overlay {
+  position: fixed; inset: 0; z-index: 40;
+  display: flex; align-items: flex-end; justify-content: center;
+  background: rgba(10, 30, 40, .54);
+}
+.history-popup {
+  background: #fff; color: #203b43;
+  width: min(100%, 480px); padding: 11px 20px calc(23px + env(safe-area-inset-bottom, 0px));
+  border-radius: 24px 24px 0 0; max-height: 85dvh; overflow-y: auto;
+  box-shadow: 0 -10px 40px rgba(11, 37, 44, .13);
+  animation: history-popup-rise .2s ease-out;
+}
+.history-popup__handle {
+  width: 37px; height: 4px; border-radius: 10px; background: #dfe8e5;
+  margin: 0 auto 18px;
+}
+.history-popup__heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+.history-popup__heading h2 { font-size: 18px; line-height: 1.45; font-weight: 800; margin: 0; }
+.history-popup__heading p { font-size: 12px; color: #788e92; margin: 3px 0 0; }
+.history-popup__close {
+  height: 35px; width: 35px; flex: none; display: grid; place-items: center;
+  border: 0; border-radius: 50%; background: #eff5f2; color: #526e76;
+}
+.history-popup__status {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+  font-size: 14px; font-weight: 750;
+}
+.history-popup__status-dot { background: #a4b2b6; width: 10px; height: 10px; border-radius: 50%; }
+.history-popup__status--work .history-popup__status-dot { background: #10a487; }
+.history-popup__status--ot .history-popup__status-dot { background: #eba52b; }
+.history-popup__status--leave .history-popup__status-dot { background: #718fe2; }
+.history-popup__times { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
+.history-popup__times > div { background: #f2f7f5; border-radius: 13px; padding: 14px 12px; }
+.history-popup__times span { display: block; color: #71888a; font-size: 12px; }
+.history-popup__times strong { display: block; color: #234249; font-size: 26px; font-weight: 800; line-height: 1.5; font-variant-numeric: tabular-nums; }
+.history-popup__line {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 8px; padding: 14px 1px; border-bottom: 1px solid #e9efec; font-size: 13px;
+}
+.history-popup__line span { color: #697f85; }
+.history-popup__line strong { font-weight: 800; }
+.history-popup__note { color: #698189; background: #f4f8f6; border-radius: 10px; font-size: 12px; padding: 10px; }
+.history-popup__empty {
+  background: #f2f7f5; color: #678084; border-radius: 13px;
+  text-align: center; padding: 22px 10px; font-size: 13px; line-height: 1.8;
+}
+.history-popup__done {
+  display: block; width: 100%; min-height: 48px; margin-top: 19px;
+  color: #fff; background: #078e79; border: 0; border-radius: 13px;
+  font-size: 15px; font-weight: 800;
+}
+@keyframes history-popup-rise {
+  from { transform: translateY(28px); opacity: .72; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@media (max-width: 355px) {
+  .history-page { padding-left: 13px; padding-right: 13px; }
+  .history-calendar { padding-left: 6px; padding-right: 6px; }
+  .history-calendar__grid { gap: 2px; }
+  .history-summary { gap: 6px; }
+  .history-summary__item span { font-size: 11px; }
+  .history-legend { column-gap: 9px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .history-popup { animation: none; }
+}

@@ -19,6 +19,7 @@ import {
   X,
 } from 'lucide-react';
 import SkyScene from './SkyScene';
+import HistoryPage from './HistoryPage';
 import {
   getBangkokPeriod,
   periodNames,
@@ -66,6 +67,8 @@ function App() {
   const [previewAttendance, setPreviewAttendance] = useState<AttendanceDisplayState | null>(null);
   const [dialog, setDialog] = useState<Dialog>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeTab, setActiveTab] = useState<'home' | 'history'>('home');
 
   const period = previewTheme ?? getBangkokPeriod(now);
   // Firebase attendance is not connected. Do not invent check-in/out records.
@@ -84,6 +87,10 @@ function App() {
     : active
       ? 'กำลังทำงาน (สาธิต)'
       : 'ยังไม่ได้เชื่อมข้อมูลการลงเวลา';
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 });
+  }, [activeTab]);
 
   useEffect(() => {
     const tick = () => setNow(new Date());
@@ -123,8 +130,10 @@ function App() {
   );
 
   return (
-    <div className="app-shell" data-period={period}>
-      <div className="app-scroll">
+    <div className="app-shell" data-period={period} data-view={activeTab}>
+      <div className="app-scroll" ref={scrollRef}>
+        {activeTab === 'home' ? (
+          <>
         <section className="hero" aria-label={'บรรยากาศช่วง' + periodNames[period]}>
           <SkyScene period={period} />
 
@@ -243,6 +252,10 @@ function App() {
             {isDemo ? 'กำลังแสดงธีม/สถานะตัวอย่าง · ไม่มีการบันทึกข้อมูลจริง' : 'เวอร์ชันทดลองดีไซน์ · ยังไม่เชื่อมระบบบันทึกเวลา'}
           </p>
         </main>
+          </>
+        ) : (
+          <HistoryPage />
+        )}
       </div>
 
       <nav className="bottom-nav" aria-label="เมนูหลัก">
@@ -250,13 +263,14 @@ function App() {
           <button
             key={key}
             type="button"
-            className={'bottom-nav__item' + (key === 'home' ? ' bottom-nav__item--active' : '')}
-            aria-current={key === 'home' ? 'page' : undefined}
+            className={'bottom-nav__item' + (key === activeTab ? ' bottom-nav__item--active' : '')}
+            aria-current={key === activeTab ? 'page' : undefined}
             onClick={() => {
-              if (key !== 'home') openInfo(label, 'หน้านี้ยังไม่ได้พัฒนา เราจะออกแบบทีละหน้าตามที่ตกลงกัน');
+              if (key === 'home' || key === 'history') setActiveTab(key);
+              else openInfo(label, 'หน้านี้ยังไม่ได้พัฒนา เราจะออกแบบทีละหน้าตามที่ตกลงกัน');
             }}
           >
-            <Icon size={24} strokeWidth={key === 'home' ? 2.3 : 1.85} aria-hidden="true" />
+            <Icon size={24} strokeWidth={key === activeTab ? 2.3 : 1.85} aria-hidden="true" />
             <span>{label}</span>
           </button>
         ))}
