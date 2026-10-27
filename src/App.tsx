@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   BriefcaseBusiness,
   CalendarDays,
@@ -107,12 +107,16 @@ function App() {
     };
   }, []);
 
-  useEffect(() => {
-    const meta = document.querySelector('meta[name="theme-color"]');
-    // Use the matching color at the sky's top edge; leave the scene and clock still.
+  useLayoutEffect(() => {
+    // Update before paint when navigating so iOS never holds Home's sky color
+    // above the History screen. The approved skyline geometry stays untouched.
     document.documentElement.dataset.period = period;
-    meta?.setAttribute('content', periodThemeColors[period]);
-  }, [period]);
+    document.documentElement.dataset.view = activeTab;
+    const chromeColor = activeTab === 'history'
+      ? (period === 'night' ? '#0e233b' : '#f0f5f5')
+      : periodThemeColors[period];
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', chromeColor);
+  }, [activeTab, period]);
 
   useEffect(() => {
     if (!dialog) return;

@@ -3,11 +3,32 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <!-- Let iOS 27 match the opaque status bar to the page's Pixel Art sky.
-         No image is drawn behind the system bar. -->
+    <!-- iOS standalone: keep the status bar opaque, not black/translucent.
+         WebKit selects its appearance from the page background. -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Attendance" />
     <meta name="theme-color" content="#43a8fd" />
+    <meta name="format-detection" content="telephone=no" />
+    <!-- Apply the initial Bangkok sky before first paint to prevent a mismatched
+         status-bar flash on launch. Route-specific colors update in React. -->
+    <script>
+      (() => {
+        const hour = Number(new Intl.DateTimeFormat('en-GB', {
+          hour: '2-digit', hourCycle: 'h23', timeZone: 'Asia/Bangkok',
+        }).format(new Date()));
+        const period = hour >= 5 && hour < 8 ? 'morning'
+          : hour >= 8 && hour < 15 ? 'day'
+          : hour >= 15 && hour < 19 ? 'evening' : 'night';
+        const colors = {
+          morning: '#43a8fd', day: '#34a3fd',
+          evening: '#4543ad', night: '#022a72',
+        };
+        document.documentElement.dataset.period = period;
+        document.documentElement.dataset.view = 'home';
+        document.querySelector('meta[name="theme-color"]')
+          ?.setAttribute('content', colors[period]);
+      })();
+    </script>
     <link rel="manifest" href="%BASE_URL%manifest.webmanifest" />
     <meta name="description" content="Attendance App V2 — ระบบบันทึกเวลาทำงานที่ใช้งานง่ายสำหรับทุกวัย" />
     <link rel="icon" type="image/svg+xml" href="%BASE_URL%icon.svg" />
