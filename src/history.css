@@ -1,11 +1,27 @@
-/* Timecard-style History: paper card in daylight, navy timecard at night. */
+/* Timecard History: four colorful stationery palettes follow the Home sky period. */
 .app-shell[data-view="history"] {
-  --page-bg: #f3f6f3;
-  --body-text: #223b42;
-  --subtext: #687e82;
-  --accent: #078e79;
-  --nav-bg: #fffefa;
-  --line: #dde6e1;
+  --page-bg: #fff8eb;
+  --body-text: #483b30;
+  --subtext: #7b6f59;
+  --accent: #a46b1f;
+  --nav-bg: #fffbf2;
+  --line: #e8d9b9;
+}
+.app-shell[data-view="history"][data-period="day"] {
+  --page-bg: #eff8ff;
+  --body-text: #23475b;
+  --subtext: #617f8f;
+  --accent: #167ba6;
+  --nav-bg: #faffff;
+  --line: #cee5ee;
+}
+.app-shell[data-view="history"][data-period="evening"] {
+  --page-bg: #fff1ee;
+  --body-text: #573c49;
+  --subtext: #8c6878;
+  --accent: #ab4e70;
+  --nav-bg: #fffaf8;
+  --line: #efd2d1;
 }
 .app-shell[data-view="history"][data-period="night"] {
   --page-bg: #0e233b;
@@ -16,24 +32,81 @@
   --line: #2d4259;
 }
 .history-page {
-  --history-page: #f3f6f3;
-  --history-text: #253e43;
-  --history-muted: #6b8184;
-  --history-panel: #fff;
-  --history-panel-line: #dce8e2;
-  --history-action: #f0f6f3;
-  --history-card: #faf5e8;
-  --history-card-line: #d5c9b4;
-  --history-card-ink: #2c414b;
-  --history-card-muted: #6c7d80;
-  --history-rule: #d8d1c5;
-  --history-accent: #315d7e;
-  --history-ot: #aa642d;
-  --history-highlight: #f2ead8;
+  /* Morning – warm sunrise gold, with a stamped-paper feel. */
+  --history-page: #fff8eb;
+  --history-text: #493c30;
+  --history-muted: #7c705b;
+  --history-panel: #fffcf5;
+  --history-panel-line: #e9d8b8;
+  --history-action: #fff0d3;
+  --history-card: #fff9ec;
+  --history-card-line: #e3cfac;
+  --history-card-ink: #473b31;
+  --history-card-muted: #7f725e;
+  --history-rule: #eadfca;
+  --history-accent: #955e17;
+  --history-title: #98621e;
+  --history-ot: #b15b29;
+  --history-highlight: #ffedcb;
+  --history-wash: #fff0d8;
+  --history-punch: #d9a04d;
+  --history-leave: #5078b5;
+  --history-leave-wash: #eaf1ff;
+  --history-holiday-wash: #f2e9da;
+  --history-ot-wash: #fff0d9;
   min-height: 100%;
   padding: calc(21px + env(safe-area-inset-top, 0px)) 17px 34px;
   background: var(--history-page);
   color: var(--history-text);
+}
+
+/* Midday – blue sky and turquoise ink. */
+.app-shell[data-period="day"] .history-page {
+  --history-page: #eff8ff;
+  --history-text: #23475b;
+  --history-muted: #607d8f;
+  --history-panel: #ffffff;
+  --history-panel-line: #cde5f1;
+  --history-action: #e0f2fb;
+  --history-card: #f8fcff;
+  --history-card-line: #c9e0ee;
+  --history-card-ink: #2a4557;
+  --history-card-muted: #67818d;
+  --history-rule: #dcecf3;
+  --history-accent: #116d96;
+  --history-title: #147ba8;
+  --history-ot: #ac6024;
+  --history-highlight: #dff4fc;
+  --history-wash: #e8f6fc;
+  --history-punch: #60b8dd;
+  --history-leave: #496cc1;
+  --history-leave-wash: #eaf0ff;
+  --history-holiday-wash: #eef4f7;
+  --history-ot-wash: #fff0df;
+}
+/* Evening – coral, peach and a touch of sunset pink. */
+.app-shell[data-period="evening"] .history-page {
+  --history-page: #fff1ee;
+  --history-text: #573c49;
+  --history-muted: #896d79;
+  --history-panel: #fffaf8;
+  --history-panel-line: #efd3d3;
+  --history-action: #fbe6e7;
+  --history-card: #fff7f2;
+  --history-card-line: #eccbc8;
+  --history-card-ink: #503e48;
+  --history-card-muted: #90737b;
+  --history-rule: #f0ded9;
+  --history-accent: #a84668;
+  --history-title: #b45475;
+  --history-ot: #ac572b;
+  --history-highlight: #ffe6df;
+  --history-wash: #ffe8e5;
+  --history-punch: #d789a1;
+  --history-leave: #6175bc;
+  --history-leave-wash: #f0eefe;
+  --history-holiday-wash: #f6e9e7;
+  --history-ot-wash: #ffecdc;
 }
 .app-shell[data-period="night"] .history-page {
   --history-page: #0e233b;
@@ -47,9 +120,16 @@
   --history-card-ink: #ebf3fa;
   --history-card-muted: #a9bfce;
   --history-rule: #455b70;
-  --history-accent: #93d6ff;
+  --history-accent: #99dbfa;
+  --history-title: #89e8d0;
   --history-ot: #ffc48a;
   --history-highlight: #2d495c;
+  --history-wash: #24485c;
+  --history-punch: #56c8c4;
+  --history-leave: #bdc5ff;
+  --history-leave-wash: #2b3659;
+  --history-holiday-wash: #293e51;
+  --history-ot-wash: #423f48;
 }
 .history-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
 .history-heading__back {
@@ -63,6 +143,7 @@
   height: 42px; width: 42px; flex: none; border-radius: 13px;
   background: var(--history-action); color: var(--accent);
   display: grid; place-items: center;
+  border: 1px solid var(--history-panel-line);
 }
 .history-heading h1 { font-size: 19px; font-weight: 800; margin: 0; line-height: 1.4; }
 .history-heading p { font-size: 12px; color: var(--history-muted); line-height: 1.5; margin: 2px 0 0; }
@@ -77,10 +158,13 @@
   background: var(--history-panel); border: 1px solid var(--history-panel-line);
   border-radius: 14px; padding: 6px; margin-bottom: 17px;
 }
-.history-month-select strong { font-size: 16px; font-weight: 800; text-align: center; }
+.history-month-select strong {
+  font-size: 16px; font-weight: 800; text-align: center;
+  color: var(--history-title);
+}
 .history-month-select button {
   height: 39px; width: 39px; flex: none; border: 0; border-radius: 11px;
-  background: var(--history-action); color: var(--history-text);
+  background: var(--history-action); color: var(--history-title);
   display: grid; place-items: center;
 }
 .history-month-select button:active { filter: brightness(.95); }
@@ -89,6 +173,7 @@
   position: relative;
   overflow: hidden;
   border: 1px solid var(--history-card-line);
+  border-top: 4px solid var(--history-punch);
   border-radius: 9px;
   background: var(--history-card);
   color: var(--history-card-ink);
@@ -98,7 +183,7 @@
 .history-timecard::before {
   content: "";
   position: absolute; left: 12px; top: 0; bottom: 0;
-  width: 1px; background: #ce9791; opacity: .58; pointer-events: none;
+  width: 1px; background: var(--history-punch); opacity: .62; pointer-events: none;
 }
 .app-shell[data-period="night"] .history-timecard {
   box-shadow: 0 10px 26px rgba(0, 0, 0, .3), 2px 2px 0 #39516a;
@@ -117,16 +202,17 @@
 }
 .history-timecard__heading {
   text-align: center;
-  border-bottom: 2px solid var(--history-card-muted);
+  border-bottom: 2px solid var(--history-punch);
   padding-bottom: 13px;
 }
 .history-timecard__eyebrow {
-  display: block; color: var(--history-card-muted);
+  display: block; color: var(--history-title);
   font-family: 'Oxanium', sans-serif;
   font-size: 11px; letter-spacing: 2.4px; font-weight: 800;
 }
 .history-timecard__heading h2 {
   margin: 3px 0; font-size: 21px; font-weight: 850; line-height: 1.4;
+  color: var(--history-title);
 }
 .history-timecard__record {
   display: block; color: var(--history-card-muted);
@@ -153,12 +239,15 @@
 }
 .history-timecard__row > * { min-width: 0; }
 .history-timecard__row--header {
-  border-bottom: 2px solid var(--history-card-muted);
-  color: var(--history-card-muted); font-size: 11px; font-weight: 800;
-  padding: 6px 3px 9px;
+  border-bottom: 2px solid var(--history-punch);
+  background: var(--history-wash);
+  color: var(--history-card-ink); font-size: 11px; font-weight: 800;
+  border-radius: 6px 6px 0 0;
+  padding: 9px 3px 10px;
 }
 .history-timecard__row--header span:first-child { text-align: left; }
 .history-timecard__row--entry {
+  position: relative;
   appearance: none; font: inherit; color: inherit;
   border: 0; border-bottom: 1px solid var(--history-rule);
   border-radius: 0; background: transparent;
@@ -170,6 +259,17 @@
 .history-timecard__row--entry:hover,
 .history-timecard__row--entry:active { background: var(--history-highlight); }
 .history-timecard__row--today { background: var(--history-highlight); }
+.history-timecard__row--ot { background: var(--history-ot-wash); }
+.history-timecard__row--leave { background: var(--history-leave-wash); }
+.history-timecard__row--holiday { background: var(--history-holiday-wash); }
+.history-timecard__row--ot::before,
+.history-timecard__row--leave::before {
+  content: "";
+  position: absolute; inset: 6px auto 6px 0;
+  width: 3px; border-radius: 3px;
+  background: var(--history-ot);
+}
+.history-timecard__row--leave::before { background: var(--history-leave); }
 .history-timecard__row--future { opacity: .65; }
 .history-timecard__date {
   display: flex; align-items: baseline; gap: 6px; text-align: left;
@@ -192,9 +292,8 @@
 .history-timecard__special {
   grid-column: 2 / 5; font-size: 12px; color: var(--history-card-muted);
 }
-.history-timecard__row--leave .history-timecard__special { color: #4779af; font-weight: 800; }
+.history-timecard__row--leave .history-timecard__special { color: var(--history-leave); font-weight: 800; }
 .history-timecard__row--holiday .history-timecard__special { font-weight: 700; }
-.app-shell[data-period="night"] .history-timecard__row--leave .history-timecard__special { color: #a7c4ff; }
 .history-timecard__no-data {
   padding: 48px 15px; display: flex; flex-direction: column;
   align-items: center; gap: 9px; text-align: center;
@@ -204,11 +303,15 @@
 .history-timecard__no-data span { font-size: 12px; line-height: 1.7; }
 .history-timecard__summary {
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 5px; text-align: center;
-  border-top: 2px solid var(--history-card-muted);
-  padding: 16px 0 3px; margin-top: 16px;
+  gap: 6px; text-align: center;
+  border-top: 2px solid var(--history-punch);
+  padding: 13px 0 3px; margin-top: 15px;
 }
-.history-timecard__summary > div { min-width: 0; }
+.history-timecard__summary > div {
+  min-width: 0; border-radius: 9px;
+  background: var(--history-wash);
+  padding: 10px 3px;
+}
 .history-timecard__summary strong {
   display: block; font-family: 'Oxanium', 'Noto Sans Thai', sans-serif;
   color: var(--history-accent); font-size: clamp(17px, 5vw, 21px);
@@ -262,6 +365,22 @@
 .history-popup__status--work .history-popup__status-dot { background: #10a487; }
 .history-popup__status--ot .history-popup__status-dot { background: #eba52b; }
 .history-popup__status--leave .history-popup__status-dot { background: #718fe2; }
+/* Share the time-of-day accent with the daily detail sheet. */
+.history-popup__heading h2 { color: var(--history-title); }
+.history-popup__times strong { color: var(--history-accent); }
+.history-popup__done { background: var(--accent); }
+.app-shell[data-period="day"] .history-popup {
+  background: #f8fcff; color: #274353; border: 1px solid #cce5ee; border-bottom: 0;
+}
+.app-shell[data-period="evening"] .history-popup {
+  background: #fff9f8; color: #563e49; border: 1px solid #efd5d4; border-bottom: 0;
+}
+.app-shell[data-period="day"] .history-popup__times > div { background: #e5f4fb; }
+.app-shell[data-period="evening"] .history-popup__times > div { background: #fceced; }
+.app-shell[data-period="day"] .history-popup__note,
+.app-shell[data-period="day"] .history-popup__empty { background: #eaf6fa; }
+.app-shell[data-period="evening"] .history-popup__note,
+.app-shell[data-period="evening"] .history-popup__empty { background: #fff0ef; }
 .history-popup__times {
   display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 9px;
 }
@@ -313,11 +432,12 @@
 .app-shell[data-period="night"] .history-popup__empty {
   background: #243e57; color: #c6d9e8;
 }
-.app-shell[data-period="night"] .history-popup__times strong { color: #f0f6ff; }
+.app-shell[data-period="night"] .history-popup__times strong { color: #99dbfa; }
 .app-shell[data-period="night"] .history-popup__line { border-color: #35516e; }
 .app-shell[data-period="night"] .history-popup__done {
   background: #21ab91; color: #071f2d;
 }
+.app-shell[data-period="night"] .history-popup__heading h2 { color: #89e8d0; }
 @media (max-width: 355px) {
   .history-page { padding-left: 11px; padding-right: 11px; }
   .history-heading__icon { display: none; }
