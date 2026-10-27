@@ -53,7 +53,7 @@
   --history-leave: #5078b5;
   --history-leave-wash: #eaf1ff;
   --history-holiday-wash: #f2e9da;
-  --history-ot-fill: #94485f;
+  --history-ot-fill: #865a17;
   min-height: 100%;
   padding: calc(21px + env(safe-area-inset-top, 0px)) 17px 34px;
   background: var(--history-page);
@@ -82,7 +82,7 @@
   --history-leave: #496cc1;
   --history-leave-wash: #eaf0ff;
   --history-holiday-wash: #eef4f7;
-  --history-ot-fill: #216985;
+  --history-ot-fill: #196b93;
 }
 /* Evening – coral, peach and a touch of sunset pink. */
 .app-shell[data-period="evening"] .history-page {
@@ -106,7 +106,7 @@
   --history-leave: #6175bc;
   --history-leave-wash: #f0eefe;
   --history-holiday-wash: #f6e9e7;
-  --history-ot-fill: #984463;
+  --history-ot-fill: #934c70;
 }
 .app-shell[data-period="night"] .history-page {
   --history-page: #0e233b;
@@ -129,7 +129,7 @@
   --history-leave: #bdc5ff;
   --history-leave-wash: #2b3659;
   --history-holiday-wash: #293e51;
-  --history-ot-fill: #744c82;
+  --history-ot-fill: #205676;
 }
 .history-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
 .history-heading__back {
@@ -202,20 +202,23 @@
 }
 .history-timecard__heading {
   text-align: center;
+  margin: 0 -13px 0 -23px;
+  padding: 13px 13px 14px 23px;
+  background: var(--history-ot-fill);
+  color: #fff;
   border-bottom: 2px solid var(--history-punch);
-  padding-bottom: 13px;
 }
 .history-timecard__eyebrow {
-  display: block; color: var(--history-title);
+  display: block; color: rgba(255,255,255,.88);
   font-family: 'Oxanium', sans-serif;
   font-size: 11px; letter-spacing: 2.4px; font-weight: 800;
 }
 .history-timecard__heading h2 {
   margin: 3px 0; font-size: 21px; font-weight: 850; line-height: 1.4;
-  color: var(--history-title);
+  color: #fff;
 }
 .history-timecard__record {
-  display: block; color: var(--history-card-muted);
+  display: block; color: rgba(255,255,255,.84);
   font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
 }
 .history-timecard__fields {
