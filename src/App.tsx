@@ -6,7 +6,6 @@ import {
   ChevronRight,
   Clock3,
   Fingerprint,
-  History,
   House,
   FilePenLine,
   LogIn,
@@ -148,13 +147,13 @@ function App() {
             </div>
             <div className="header-actions">
               <button
-                className="header-icon"
+                className="header-icon header-icon--preview"
                 type="button"
-                onClick={() => setActiveTab('history')}
-                aria-label="เปิดประวัติการทำงาน"
-                title="ประวัติการทำงาน"
+                onClick={() => setDialog('preview')}
+                aria-label="ทดลองดูธีมเวลาและสถานะต่าง ๆ"
+                title="ทดลองดูธีม"
               >
-                <History size={22} strokeWidth={1.9} />
+                <Palette size={22} strokeWidth={1.9} />
               </button>
               <button
                 className="header-icon"
