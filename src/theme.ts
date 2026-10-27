@@ -28,8 +28,9 @@ export const periodNames: Record<DayPeriod, string> = {
 };
 
 export const periodThemeColors: Record<DayPeriod, string> = {
-  morning: '#fff7df',
-  day: '#dcf2ff',
-  evening: '#edafad',
-  night: '#10233c',
+  // Sampled from the top edge of the approved Pixel Art images.
+  morning: '#43a8fd',
+  day: '#34a3fd',
+  evening: '#4543ad',
+  night: '#022a72',
 };

@@ -2,22 +2,28 @@
 :root {
   font-family: 'Noto Sans Thai', system-ui, -apple-system, sans-serif;
   color: #172d3a;
-  /* iOS opaque status-bar fallback: keep the page canvas dark. */
-  background: #171717;
+  /* iOS 27 samples the page's actual background for the Home Screen status bar.
+     Match the very top of the approved Pixel Art image, never resize the artwork. */
+  --status-sky: #43a8fd;
+  background: var(--status-sky);
+  color-scheme: light;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
 * { box-sizing: border-box; }
 html { min-width: 320px; height: 100%; overscroll-behavior: none; }
-body { margin: 0; min-width: 320px; min-height: 100%; background: #171717; overscroll-behavior: none; }
+body { margin: 0; min-width: 320px; min-height: 100%; background: var(--status-sky); overscroll-behavior: none; }
 button { font: inherit; -webkit-tap-highlight-color: transparent; }
 button:not(:disabled) { cursor: pointer; }
 button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
-#root { min-height: 100vh; background: #171717; }
-/* Match the page around the centered app to the night theme too. */
-:root[data-period="night"] { background: #081b2d; color-scheme: dark; }
-:root[data-period="night"] body { background: #081b2d; }
+#root { min-height: 100vh; background: var(--status-sky); }
+/* These sampled colors match the top edge of each unmodified Pixel Art asset.
+   Let iOS choose light/dark status icons from the page instead of forcing black. */
+:root[data-period="morning"] { --status-sky: #43a8fd; color-scheme: light; }
+:root[data-period="day"] { --status-sky: #34a3fd; color-scheme: light; }
+:root[data-period="evening"] { --status-sky: #4543ad; color-scheme: dark; }
+:root[data-period="night"] { --status-sky: #022a72; color-scheme: dark; }
 
 .app-shell {
   --page-bg: #fffdf7;

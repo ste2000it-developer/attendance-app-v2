@@ -24,6 +24,7 @@ import HistoryPage from './HistoryPage';
 import {
   getBangkokPeriod,
   periodNames,
+  periodThemeColors,
   type AttendanceDisplayState,
   type DayPeriod,
 } from './theme';
@@ -108,11 +109,9 @@ function App() {
 
   useEffect(() => {
     const meta = document.querySelector('meta[name="theme-color"]');
-    // Keep system chrome dark from startup through every time-of-day theme.
-    // The scene itself retains its existing Pixel Art positioning.
-    meta?.setAttribute('content', '#171717');
-    // Keep the outer PWA page in the same theme as all internal screens.
+    // Use the matching color at the sky's top edge; leave the scene and clock still.
     document.documentElement.dataset.period = period;
+    meta?.setAttribute('content', periodThemeColors[period]);
   }, [period]);
 
   useEffect(() => {
