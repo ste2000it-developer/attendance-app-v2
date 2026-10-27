@@ -61,9 +61,12 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: var(--page-bg);
+  /* iOS Home Screen status chrome samples this fixed, full-width shell.
+     Keep the outer shell WHITE even in night mode, independently of the
+     scrolling content surface. Do not alter viewport, art or safe-area. */
+  background-color: #ffffff;
   color: var(--body-text);
-  transition: background-color 240ms ease, color 240ms ease;
+  transition: color 240ms ease;
 }
 .app-shell[data-period="day"] {
   --page-bg: #f7fcff;
@@ -109,6 +112,9 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 .app-scroll {
   flex: 1 1 auto;
   min-height: 0;
+  /* Paint the original period-specific page color ABOVE the white shell.
+     This preserves every visible Home/History color except the iOS chrome. */
+  background-color: var(--page-bg);
   overflow-y: auto;
   overscroll-behavior-y: contain;
   scrollbar-width: none;
