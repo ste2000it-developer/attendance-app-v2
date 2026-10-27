@@ -166,8 +166,8 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 }
 .clock-panel__time {
   display: block;
-  /* Trial: a clear, blocky pixel clock while keeping the Thai date modern. */
-  font-family: 'Silkscreen', ui-monospace, monospace;
+  /* Trial: angular geometric sans clock, easier to distinguish digits than 8-bit pixels. */
+  font-family: 'Chakra Petch', 'Noto Sans Thai', sans-serif;
   font-size: clamp(64px, 16vw, 74px);
   font-weight: 700;
   letter-spacing: -1.5px;
@@ -175,7 +175,7 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   color: var(--clock-time-color);
   font-variant-numeric: tabular-nums;
   /* Crisp subpixel outline + directional shadow, not a chunky border or glow. */
-  -webkit-text-stroke: .45px var(--clock-time-stroke);
+  -webkit-text-stroke: .5px var(--clock-time-stroke);
   text-shadow: var(--clock-time-shadow);
 }
 /* Keep the approved clock colors and tune the edges to each Pixel Art sky.
