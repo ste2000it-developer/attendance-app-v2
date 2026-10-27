@@ -156,47 +156,59 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 .clock-panel { position: relative; text-align: center; margin-top: clamp(40px, 6.1dvh, 64px); padding: 0 12px; }
 .clock-panel__date {
   color: var(--clock-date-color);
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 700;
   line-height: 1.5;
   margin: 0 0 5px;
+  /* A fine colored edge holds the light date text against clouds and buildings. */
+  -webkit-text-stroke: .35px var(--clock-date-stroke);
   text-shadow: var(--clock-date-shadow);
 }
 .clock-panel__time {
   display: block;
-  font-size: clamp(57px, 14vw, 67px);
+  font-size: clamp(64px, 16vw, 74px);
   font-weight: 800;
-  letter-spacing: -2.5px;
+  letter-spacing: -2px;
   line-height: 1.13;
   color: var(--clock-time-color);
   font-variant-numeric: tabular-nums;
+  /* Crisp subpixel outline + directional shadow, not a chunky border or glow. */
+  -webkit-text-stroke: .8px var(--clock-time-stroke);
   text-shadow: var(--clock-time-shadow);
 }
-/* Subtle two-layer depth rather than a hard outline/glow: a short, crisp
-   contrast shadow plus a low-opacity soft shadow for Pixel Art scenery. */
+/* Keep the approved clock colors and tune the edges to each Pixel Art sky.
+   Light colors stay luminous; the subtle contrast edge makes them readable. */
 .clock-panel {
   --clock-time-color: #fffaf0;
   --clock-date-color: #fff5e6;
-  --clock-time-shadow: 0 1px 2px rgba(26, 67, 96, .48), 0 3px 8px rgba(20, 60, 87, .16);
-  --clock-date-shadow: 0 1px 2px rgba(26, 67, 96, .56), 0 2px 6px rgba(20, 60, 87, .17);
+  --clock-time-stroke: rgba(19, 63, 86, .67);
+  --clock-date-stroke: rgba(19, 63, 86, .76);
+  --clock-time-shadow: 0 1px 2px rgba(17, 57, 82, .76), 0 3px 8px rgba(17, 57, 82, .31);
+  --clock-date-shadow: 0 1px 2px rgba(17, 57, 82, .81), 0 2px 6px rgba(17, 57, 82, .33);
 }
 .app-shell[data-period="day"] .clock-panel {
   --clock-time-color: #ffffff;
   --clock-date-color: #f6fbff;
-  --clock-time-shadow: 0 1px 2px rgba(17, 72, 114, .53), 0 3px 8px rgba(12, 58, 103, .19);
-  --clock-date-shadow: 0 1px 2px rgba(17, 72, 114, .59), 0 2px 6px rgba(12, 58, 103, .20);
+  --clock-time-stroke: rgba(12, 61, 98, .74);
+  --clock-date-stroke: rgba(12, 61, 98, .81);
+  --clock-time-shadow: 0 1px 2px rgba(9, 54, 92, .83), 0 3px 9px rgba(9, 54, 92, .36);
+  --clock-date-shadow: 0 1px 2px rgba(9, 54, 92, .87), 0 2px 7px rgba(9, 54, 92, .38);
 }
 .app-shell[data-period="evening"] .clock-panel {
   --clock-time-color: #fff0c2;
   --clock-date-color: #ffe7c2;
-  --clock-time-shadow: 0 1px 2px rgba(77, 36, 88, .40), 0 3px 8px rgba(59, 32, 77, .13);
-  --clock-date-shadow: 0 1px 2px rgba(77, 36, 88, .47), 0 2px 6px rgba(59, 32, 77, .15);
+  --clock-time-stroke: rgba(70, 30, 85, .56);
+  --clock-date-stroke: rgba(70, 30, 85, .64);
+  --clock-time-shadow: 0 1px 2px rgba(65, 29, 83, .66), 0 3px 8px rgba(65, 29, 83, .24);
+  --clock-date-shadow: 0 1px 2px rgba(65, 29, 83, .73), 0 2px 6px rgba(65, 29, 83, .27);
 }
 .app-shell[data-period="night"] .clock-panel {
   --clock-time-color: #ffffff;
   --clock-date-color: #ffffff;
-  --clock-time-shadow: 0 1px 2px rgba(5, 23, 53, .20), 0 2px 7px rgba(5, 23, 53, .08);
-  --clock-date-shadow: 0 1px 2px rgba(5, 23, 53, .25), 0 2px 6px rgba(5, 23, 53, .09);
+  --clock-time-stroke: rgba(6, 27, 56, .27);
+  --clock-date-stroke: rgba(6, 27, 56, .38);
+  --clock-time-shadow: 0 1px 2px rgba(5, 23, 53, .30), 0 2px 7px rgba(5, 23, 53, .11);
+  --clock-date-shadow: 0 1px 2px rgba(5, 23, 53, .37), 0 2px 6px rgba(5, 23, 53, .12);
 }
 .home-content { position: relative; z-index: 2; margin-top: -29px; padding: 0 22px 17px; }
 .attendance-card {
