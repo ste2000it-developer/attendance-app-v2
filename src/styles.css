@@ -166,11 +166,14 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 }
 .clock-panel__time {
   display: block;
-  /* Trial: thick soft-squared numerals with rounded corners, keeping Thai date untouched. */
-  font-family: 'Rubik', 'Noto Sans Thai', sans-serif;
+  /* Oxanium ExtraBold: wide, slightly squared, clear numerals.
+     Stretch numerals only; keep the Thai date in Noto Sans Thai. */
+  font-family: 'Oxanium', 'Noto Sans Thai', sans-serif;
   font-size: clamp(64px, 16vw, 74px);
-  font-weight: 900;
+  font-weight: 800;
   letter-spacing: -2px;
+  transform: scaleX(1.08);
+  transform-origin: center;
   line-height: 1.13;
   color: var(--clock-time-color);
   font-variant-numeric: tabular-nums;
