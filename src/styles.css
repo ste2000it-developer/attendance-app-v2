@@ -2,13 +2,12 @@
 :root {
   font-family: 'Noto Sans Thai', system-ui, -apple-system, sans-serif;
   color: #172d3a;
-  /* iOS 27 samples the page's actual background for the Home Screen status bar.
-     Match the very top of the approved Pixel Art image, never resize the artwork. */
-  --status-sky: #43a8fd;
+  /* Opaque, white iOS status bar. Only the root chrome changes;
+     the approved Pixel Art, hero layout and clock never move. */
+  --status-sky: #ffffff;
   --bottom-chrome: #fffefa;
-  /* The installed iPhone paints the whole root canvas behind its bottom
-     home-indicator area. Keep the SKY only at the top, and extend the exact
-     bottom-navigation color behind the bottom safe-area.  No layout changes. */
+  /* White above the app; bottom canvas matches the existing bottom navigation.
+     Neither the viewport size nor the content geometry changes. */
   background: linear-gradient(
     to bottom,
     var(--status-sky) 0,
@@ -28,12 +27,12 @@ button { font: inherit; -webkit-tap-highlight-color: transparent; }
 button:not(:disabled) { cursor: pointer; }
 button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 #root { min-height: 100vh; background: transparent; }
-/* These sampled colors match the top edge of each unmodified Pixel Art asset.
-   Let iOS choose light/dark status icons from the page instead of forcing black. */
-:root[data-period="morning"] { --status-sky: #43a8fd; --bottom-chrome: #fffefa; color-scheme: light; }
-:root[data-period="day"] { --status-sky: #34a3fd; --bottom-chrome: #ffffff; color-scheme: light; }
-:root[data-period="evening"] { --status-sky: #4543ad; --bottom-chrome: #fffdfa; color-scheme: dark; }
-:root[data-period="night"] { --status-sky: #022a72; --bottom-chrome: #10263e; color-scheme: dark; }
+/* The iOS status area stays white on every theme. Preserve the
+   bottom-navigation palette per period independently. */
+:root[data-period="morning"] { --bottom-chrome: #fffefa; color-scheme: light; }
+:root[data-period="day"] { --bottom-chrome: #ffffff; color-scheme: light; }
+:root[data-period="evening"] { --bottom-chrome: #fffdfa; color-scheme: light; }
+:root[data-period="night"] { --bottom-chrome: #10263e; color-scheme: light; }
 :root[data-view="history"]:not([data-period="night"]) { --bottom-chrome: #ffffff; }
 
 .app-shell {

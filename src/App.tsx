@@ -24,7 +24,6 @@ import HistoryPage from './HistoryPage';
 import {
   getBangkokPeriod,
   periodNames,
-  periodThemeColors,
   type AttendanceDisplayState,
   type DayPeriod,
 } from './theme';
@@ -108,10 +107,10 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const meta = document.querySelector('meta[name="theme-color"]');
-    // Use the matching color at the sky's top edge; leave the scene and clock still.
+    // Keep the iPhone status area white across all day periods and screens.
+    // The Pixel Art and attendance cards keep their existing theme colors.
     document.documentElement.dataset.period = period;
-    meta?.setAttribute('content', periodThemeColors[period]);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#ffffff');
   }, [period]);
 
   useEffect(() => {
