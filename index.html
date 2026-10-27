@@ -3,77 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <!-- iOS standalone: sky extends under the transparent status bar.
-         The actual Pixel Art hero is kept at its previously approved screen coordinates. -->
+    <!-- Let iOS 27 match the opaque status bar to the page's Pixel Art sky.
+         No image is drawn behind the system bar. -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Attendance" />
     <meta name="theme-color" content="#43a8fd" />
-    <meta name="format-detection" content="telephone=no" />
-    <!-- Apply the initial Bangkok sky before first paint to prevent a mismatched
-         status-bar flash on launch. Route-specific colors update in React. -->
-    <script>
-      (() => {
-        const hour = Number(new Intl.DateTimeFormat('en-GB', {
-          hour: '2-digit', hourCycle: 'h23', timeZone: 'Asia/Bangkok',
-        }).format(new Date()));
-        const period = hour >= 5 && hour < 8 ? 'morning'
-          : hour >= 8 && hour < 15 ? 'day'
-          : hour >= 15 && hour < 19 ? 'evening' : 'night';
-        const colors = {
-          morning: '#43a8fd', day: '#34a3fd',
-          evening: '#4543ad', night: '#022a72',
-        };
-        document.documentElement.dataset.period = period;
-        document.documentElement.dataset.view = 'home';
-        // Detect an installed iOS Home Screen app, not a regular Safari browser tab.
-        const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent)
-          || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-        const isStandalone = navigator.standalone === true
-          || window.matchMedia('(display-mode: standalone)').matches;
-        // The installed iOS app needs a full-device-height flex shell:
-        // 100dvh undercounts the physical screen by the top safe-area.
-        // This flag never alters the artwork or the clock position.
-        document.documentElement.dataset.iosStandalone = isIOS && isStandalone ? 'true' : 'false';
-        // iOS 27 may STILL reserve the status-bar pixels even with
-        // black-translucent. Never shift the hero unless those pixels are
-        // genuinely part of the available viewport (not just an env() inset).
-        document.documentElement.dataset.iosEdge = 'false';
-        if (isIOS && isStandalone) {
-          const preserveFraming = () => {
-            const probe = document.createElement('div');
-            probe.style.cssText = 'position:absolute;pointer-events:none;padding-top:env(safe-area-inset-top,0px)';
-            document.documentElement.appendChild(probe);
-            const top = parseFloat(getComputedStyle(probe).paddingTop) || 0;
-            probe.remove();
-            const screenHeight = window.screen.height;
-            const viewportHeight = window.innerHeight;
-            const edgeAvailable = top > 0
-              && screenHeight > 0
-              && Math.abs(screenHeight - viewportHeight) <= 8;
-            document.documentElement.dataset.iosEdge = edgeAvailable ? 'true' : 'false';
-            if (!edgeAvailable) {
-              document.documentElement.style.removeProperty('--ios-original-hero-height');
-              document.documentElement.style.removeProperty('--ios-original-clock-margin');
-              return;
-            }
-            // Only full-bleed viewports get the separate sky extension.
-            // Base the scene dimensions on the same usable height as before.
-            const oldViewportHeight = viewportHeight - top;
-            if (oldViewportHeight < 320) return;
-            const compact = oldViewportHeight <= 770;
-            const hero = compact ? 255 : Math.max(290, Math.min(348, oldViewportHeight * .37));
-            const clock = compact ? 25 : Math.max(40, Math.min(64, oldViewportHeight * .061));
-            document.documentElement.style.setProperty('--ios-original-hero-height', hero + 'px');
-            document.documentElement.style.setProperty('--ios-original-clock-margin', clock + 'px');
-          };
-          preserveFraming();
-          window.addEventListener('resize', preserveFraming, { passive: true });
-        }
-        document.querySelector('meta[name="theme-color"]')
-          ?.setAttribute('content', colors[period]);
-      })();
-    </script>
     <link rel="manifest" href="%BASE_URL%manifest.webmanifest" />
     <meta name="description" content="Attendance App V2 — ระบบบันทึกเวลาทำงานที่ใช้งานง่ายสำหรับทุกวัย" />
     <link rel="icon" type="image/svg+xml" href="%BASE_URL%icon.svg" />

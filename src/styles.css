@@ -14,20 +14,16 @@
 * { box-sizing: border-box; }
 html { min-width: 320px; height: 100%; overscroll-behavior: none; }
 body { margin: 0; min-width: 320px; min-height: 100%; background: var(--status-sky); overscroll-behavior: none; }
-button { font: inherit; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-button, a { -webkit-touch-callout: none; }
+button { font: inherit; -webkit-tap-highlight-color: transparent; }
 button:not(:disabled) { cursor: pointer; }
 button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 #root { min-height: 100vh; background: var(--status-sky); }
-/* iOS Home Screen status bar: the page backing color follows the current screen.
-   On Home, it matches each original Pixel Art sky without moving the artwork.
-   On History, it matches that screen's light/dark page background. */
+/* These sampled colors match the top edge of each unmodified Pixel Art asset.
+   Let iOS choose light/dark status icons from the page instead of forcing black. */
 :root[data-period="morning"] { --status-sky: #43a8fd; color-scheme: light; }
 :root[data-period="day"] { --status-sky: #34a3fd; color-scheme: light; }
 :root[data-period="evening"] { --status-sky: #4543ad; color-scheme: dark; }
 :root[data-period="night"] { --status-sky: #022a72; color-scheme: dark; }
-:root[data-view="history"] { --status-sky: #f0f5f5; color-scheme: light; }
-:root[data-view="history"][data-period="night"] { --status-sky: #0e233b; color-scheme: dark; }
 
 .app-shell {
   --page-bg: #fffdf7;
@@ -58,8 +54,6 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   background: var(--page-bg);
   color: var(--body-text);
   transition: background-color 240ms ease, color 240ms ease;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
 }
 .app-shell[data-period="day"] {
   --page-bg: #f7fcff;
@@ -540,14 +534,6 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
     height: 100dvh;
     min-height: 0;
   }
-  /* iOS installed PWA: the translucent status bar still reserves its top
-     safe-area (62px on the reported iPhone). 100dvh alone therefore ends
-     that far ABOVE the physical bottom, exposing the blue root background.
-     Restore only this omitted height to the app container. The hero, image,
-     clock and bridge keep their original coordinates and dimensions. */
-  :root[data-ios-standalone="true"] .app-shell {
-    height: calc(100dvh + env(safe-area-inset-top, 0px));
-  }
 }
 /* The small demo footnote duplicates the disconnected-status row.
    Removing it saves space while keeping every real Home action visible. */
@@ -565,55 +551,6 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 @media (max-width: 355px) {
   .today-task { gap: 8px; padding: 9px 10px; }
   .today-task__text > span { font-size: 11px; }
-}
-
-
-/* iOS Home Screen edge-to-edge: fill only the NEW top safe-area with the top
-   pixel row of the original sky. The bridge, visible image, clock and hero
-   are all drawn at the exact same viewport coordinates as the opaque layout. */
-.status-sky-extension { display: none; }
-@media (max-width: 539px) {
-  :root[data-ios-edge="true"] .app-shell .status-sky-extension {
-    display: block;
-    position: absolute;
-    inset: 0 0 auto;
-    height: env(safe-area-inset-top, 0px);
-    background-color: var(--status-sky);
-    background-size: 100% 100%;
-    background-position: top center;
-    background-repeat: no-repeat;
-    pointer-events: none;
-    z-index: 5;
-  }
-  /* Slight top tint helps white iOS status icons, fading before sky joins. */
-  :root[data-ios-edge="true"] .app-shell[data-view="home"] .status-sky-extension::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, rgba(4, 20, 44, .22), rgba(4, 20, 44, 0));
-    pointer-events: none;
-  }
-  :root[data-ios-edge="true"] .app-shell[data-view="history"] .status-sky-extension {
-    background-image: none !important;
-    background-color: var(--page-bg);
-  }
-  /* iOS transparent status bar enlarges the viewport. The upper margin
-     consumes only that extra height; the hero itself never moves/resizes. */
-  :root[data-ios-edge="true"] .app-shell .app-scroll {
-    margin-top: env(safe-area-inset-top, 0px);
-  }
-  :root[data-ios-edge="true"] .app-shell .app-header {
-    padding-top: 25px;
-  }
-  :root[data-ios-edge="true"] .app-shell .history-page {
-    padding-top: 21px;
-  }
-  :root[data-ios-edge="true"] .app-shell .hero {
-    min-height: var(--ios-original-hero-height, clamp(290px, 37dvh, 348px));
-  }
-  :root[data-ios-edge="true"] .app-shell .clock-panel {
-    margin-top: var(--ios-original-clock-margin, clamp(40px, 6.1dvh, 64px));
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

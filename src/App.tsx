@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   BriefcaseBusiness,
   CalendarDays,
@@ -70,11 +70,6 @@ function App() {
   const closeRef = useRef<HTMLButtonElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<'home' | 'history'>('home');
-  const [skyEdge, setSkyEdge] = useState<{ period: DayPeriod; dataUrl: string } | null>(null);
-  const handleSkyEdgeReady = useCallback((imagePeriod: DayPeriod, dataUrl: string) => {
-    setSkyEdge(previous => previous?.period === imagePeriod && previous.dataUrl === dataUrl
-      ? previous : { period: imagePeriod, dataUrl });
-  }, []);
 
   const period = previewTheme ?? getBangkokPeriod(now);
   // Firebase attendance is not connected. Do not invent check-in/out records.
@@ -112,16 +107,12 @@ function App() {
     };
   }, []);
 
-  useLayoutEffect(() => {
-    // Update before paint when navigating so iOS never holds Home's sky color
-    // above the History screen. The approved skyline geometry stays untouched.
+  useEffect(() => {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    // Use the matching color at the sky's top edge; leave the scene and clock still.
     document.documentElement.dataset.period = period;
-    document.documentElement.dataset.view = activeTab;
-    const chromeColor = activeTab === 'history'
-      ? (period === 'night' ? '#0e233b' : '#f0f5f5')
-      : periodThemeColors[period];
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', chromeColor);
-  }, [activeTab, period]);
+    meta?.setAttribute('content', periodThemeColors[period]);
+  }, [period]);
 
   useEffect(() => {
     if (!dialog) return;
@@ -145,18 +136,11 @@ function App() {
 
   return (
     <div className="app-shell" data-period={period} data-view={activeTab}>
-      <div
-        className="status-sky-extension"
-        aria-hidden="true"
-        style={skyEdge?.period === period
-          ? { backgroundImage: `url("${skyEdge.dataUrl}")` }
-          : undefined}
-      />
       <div className="app-scroll" ref={scrollRef}>
         {activeTab === 'home' ? (
           <>
         <section className="hero" aria-label={'บรรยากาศช่วง' + periodNames[period]}>
-          <SkyScene period={period} onSkyEdgeReady={handleSkyEdgeReady} />
+          <SkyScene period={period} />
 
           <header className="app-header">
             <div className="brand">
