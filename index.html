@@ -31,6 +31,10 @@
           || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
         const isStandalone = navigator.standalone === true
           || window.matchMedia('(display-mode: standalone)').matches;
+        // The installed iOS app needs a full-device-height flex shell:
+        // 100dvh undercounts the physical screen by the top safe-area.
+        // This flag never alters the artwork or the clock position.
+        document.documentElement.dataset.iosStandalone = isIOS && isStandalone ? 'true' : 'false';
         // iOS 27 may STILL reserve the status-bar pixels even with
         // black-translucent. Never shift the hero unless those pixels are
         // genuinely part of the available viewport (not just an env() inset).

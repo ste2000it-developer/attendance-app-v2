@@ -540,6 +540,14 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
     height: 100dvh;
     min-height: 0;
   }
+  /* iOS installed PWA: the translucent status bar still reserves its top
+     safe-area (62px on the reported iPhone). 100dvh alone therefore ends
+     that far ABOVE the physical bottom, exposing the blue root background.
+     Restore only this omitted height to the app container. The hero, image,
+     clock and bridge keep their original coordinates and dimensions. */
+  :root[data-ios-standalone="true"] .app-shell {
+    height: calc(100dvh + env(safe-area-inset-top, 0px));
+  }
 }
 /* The small demo footnote duplicates the disconnected-status row.
    Removing it saves space while keeping every real Home action visible. */
