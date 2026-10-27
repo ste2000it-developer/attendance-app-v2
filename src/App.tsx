@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   BriefcaseBusiness,
   CalendarDays,
@@ -70,6 +70,11 @@ function App() {
   const closeRef = useRef<HTMLButtonElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<'home' | 'history'>('home');
+  const [skyEdge, setSkyEdge] = useState<{ period: DayPeriod; dataUrl: string } | null>(null);
+  const handleSkyEdgeReady = useCallback((imagePeriod: DayPeriod, dataUrl: string) => {
+    setSkyEdge(previous => previous?.period === imagePeriod && previous.dataUrl === dataUrl
+      ? previous : { period: imagePeriod, dataUrl });
+  }, []);
 
   const period = previewTheme ?? getBangkokPeriod(now);
   // Firebase attendance is not connected. Do not invent check-in/out records.
@@ -140,11 +145,18 @@ function App() {
 
   return (
     <div className="app-shell" data-period={period} data-view={activeTab}>
+      <div
+        className="status-sky-extension"
+        aria-hidden="true"
+        style={skyEdge?.period === period
+          ? { backgroundImage: `url("${skyEdge.dataUrl}")` }
+          : undefined}
+      />
       <div className="app-scroll" ref={scrollRef}>
         {activeTab === 'home' ? (
           <>
         <section className="hero" aria-label={'บรรยากาศช่วง' + periodNames[period]}>
-          <SkyScene period={period} />
+          <SkyScene period={period} onSkyEdgeReady={handleSkyEdgeReady} />
 
           <header className="app-header">
             <div className="brand">

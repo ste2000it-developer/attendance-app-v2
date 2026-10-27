@@ -3,9 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <!-- iOS standalone: keep the status bar opaque, not black/translucent.
-         WebKit selects its appearance from the page background. -->
+    <!-- iOS standalone: sky extends under the transparent status bar.
+         The actual Pixel Art hero is kept at its previously approved screen coordinates. -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Attendance" />
     <meta name="theme-color" content="#43a8fd" />
     <meta name="format-detection" content="telephone=no" />
@@ -25,6 +26,32 @@
         };
         document.documentElement.dataset.period = period;
         document.documentElement.dataset.view = 'home';
+        // Detect an installed iOS Home Screen app, not a regular Safari browser tab.
+        const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent)
+          || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const isStandalone = navigator.standalone === true
+          || window.matchMedia('(display-mode: standalone)').matches;
+        document.documentElement.dataset.iosEdge = isIOS && isStandalone ? 'true' : 'false';
+        if (isIOS && isStandalone) {
+          // black-translucent increases viewport height by the top safe-area.
+          // Recreate the old (opaque) hero/clock dimensions, so no art moves.
+          const preserveFraming = () => {
+            const probe = document.createElement('div');
+            probe.style.cssText = 'position:absolute;pointer-events:none;padding-top:env(safe-area-inset-top,0px)';
+            document.documentElement.appendChild(probe);
+            const top = parseFloat(getComputedStyle(probe).paddingTop) || 0;
+            probe.remove();
+            const oldViewportHeight = window.innerHeight - top;
+            if (oldViewportHeight < 320) return;
+            const compact = oldViewportHeight <= 770;
+            const hero = compact ? 255 : Math.max(290, Math.min(348, oldViewportHeight * .37));
+            const clock = compact ? 25 : Math.max(40, Math.min(64, oldViewportHeight * .061));
+            document.documentElement.style.setProperty('--ios-original-hero-height', hero + 'px');
+            document.documentElement.style.setProperty('--ios-original-clock-margin', clock + 'px');
+          };
+          preserveFraming();
+          window.addEventListener('resize', preserveFraming, { passive: true });
+        }
         document.querySelector('meta[name="theme-color"]')
           ?.setAttribute('content', colors[period]);
       })();
