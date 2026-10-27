@@ -166,11 +166,11 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 }
 .clock-panel__time {
   display: block;
-  /* Trial: angular geometric sans clock, easier to distinguish digits than 8-bit pixels. */
-  font-family: 'Chakra Petch', 'Noto Sans Thai', sans-serif;
+  /* Trial: thick soft-squared numerals with rounded corners, keeping Thai date untouched. */
+  font-family: 'Rubik', 'Noto Sans Thai', sans-serif;
   font-size: clamp(64px, 16vw, 74px);
-  font-weight: 700;
-  letter-spacing: -1.5px;
+  font-weight: 900;
+  letter-spacing: -2px;
   line-height: 1.13;
   color: var(--clock-time-color);
   font-variant-numeric: tabular-nums;
