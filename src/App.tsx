@@ -40,7 +40,7 @@ const navigation = [
 
 const themeOptions = [
   { id: 'morning', label: 'เช้า', Icon: Sunrise },
-  { id: 'day', label: 'กลางวัน', Icon: Sun },
+  { id: 'day', label: 'เที่ยง', Icon: Sun },
   { id: 'evening', label: 'เย็น', Icon: Sunset },
   { id: 'night', label: 'กลางคืน', Icon: Moon },
 ] as const;

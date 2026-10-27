@@ -113,6 +113,82 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   object-position: center bottom;
   user-select: none;
 }
+/* Animation trial: static skyline and bridge, tiny moving pixel clouds/stars. */
+.sky-scene__sky-effects {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.sky-scene__sky-effects {
+  --cloud-base: #f8dfbd;
+  --cloud-highlight: #ffebcf;
+}
+.sky-scene[data-period="day"] .sky-scene__sky-effects {
+  --cloud-base: #d4eeff;
+  --cloud-highlight: #f4faff;
+}
+.sky-scene[data-period="evening"] .sky-scene__sky-effects {
+  --cloud-base: #f6afac;
+  --cloud-highlight: #ffd7b6;
+}
+.sky-scene__cloud {
+  position: absolute;
+  display: block;
+  height: auto;
+  color: var(--cloud-base);
+  opacity: .60;
+  image-rendering: pixelated;
+  will-change: transform;
+  animation: sky-cloud-drift 38s ease-in-out infinite alternate;
+}
+.sky-scene__cloud--left {
+  top: 37%;
+  left: -38px;
+  width: 148px;
+  animation-duration: 35s;
+  animation-delay: -9s;
+}
+.sky-scene__cloud--right {
+  top: 23%;
+  right: -34px;
+  width: 122px;
+  opacity: .46;
+  animation-duration: 49s;
+  animation-direction: alternate-reverse;
+  animation-delay: -19s;
+}
+.sky-scene[data-period="evening"] .sky-scene__cloud { opacity: .42; }
+.sky-scene[data-period="evening"] .sky-scene__cloud--right { opacity: .32; }
+@keyframes sky-cloud-drift {
+  from { transform: translate3d(-14px, 0, 0); }
+  to { transform: translate3d(25px, 0, 0); }
+}
+/* The star dots only fade; the original night illustration remains unchanged. */
+.sky-scene__star {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: #fff4d5;
+  opacity: .22;
+  image-rendering: pixelated;
+  animation: sky-star-twinkle 5.5s ease-in-out infinite alternate;
+}
+.sky-scene__star--one { top: 12%; left: 22%; animation-delay: -1.5s; }
+.sky-scene__star--two { top: 28%; left: 57%; width: 2px; height: 2px; animation-delay: -3.8s; animation-duration: 6.3s; }
+.sky-scene__star--three { top: 39%; right: 13%; animation-delay: -2.2s; animation-duration: 7.1s; }
+.sky-scene__star--four { top: 19%; right: 29%; width: 2px; height: 2px; animation-delay: -5s; }
+@keyframes sky-star-twinkle {
+  from { opacity: .18; }
+  to { opacity: .85; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sky-scene__cloud,
+  .sky-scene__star {
+    animation: none !important;
+    will-change: auto;
+  }
+}
 .app-header {
   padding: calc(25px + env(safe-area-inset-top, 0px)) 23px 0;
   display: flex;
