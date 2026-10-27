@@ -367,8 +367,8 @@
 .history-popup__status--leave .history-popup__status-dot { background: #718fe2; }
 /* Share the time-of-day accent with the daily detail sheet. */
 .history-popup__heading h2 { color: var(--history-title); }
-.history-popup__times strong { color: var(--history-accent); }
-.history-popup__done { background: var(--accent); }
+.history-page .history-popup__times strong { color: var(--history-accent); }
+.history-page .history-popup__done { background: var(--accent); }
 .app-shell[data-period="day"] .history-popup {
   background: #f8fcff; color: #274353; border: 1px solid #cce5ee; border-bottom: 0;
 }
