@@ -48,7 +48,7 @@ sampleEntries[25] = {
   checkIn: '08:00',
   checkOut: '16:00',
   minutes: 480,
-  note: 'ทำงานในวันหยุด (ตัวอย่าง) · ไม่มี OT เพราะออกงานก่อน 19:00 น.',
+  note: 'ทำงานวันอาทิตย์ (ตัวอย่าง) · นับ OT ตั้งแต่ 08:00 น.',
 };
 
 const weekdays = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
@@ -83,9 +83,9 @@ function formatDuration(minutes: number) {
   return remain ? hours + ' ชม. ' + remain + ' นาที' : hours + ' ชม.';
 }
 
-// Trial overtime rule: count work done strictly after 19:00.
+// Demo overtime: Sunday starts at 08:00; other days start after 19:00.
 // A check-out earlier than check-in is on the following day.
-function calculateOvertimeMinutes(entry: DayEntry): number {
+function calculateOvertimeMinutes(entry: DayEntry, isSunday: boolean): number {
   if (!entry.checkIn || !entry.checkOut) return 0;
   const toMinutes = (value: string) => {
     const [hours, minutes] = value.split(':').map(Number);
@@ -94,11 +94,11 @@ function calculateOvertimeMinutes(entry: DayEntry): number {
   const start = toMinutes(entry.checkIn);
   let end = toMinutes(entry.checkOut);
   if (end < start) end += 24 * 60;
-  return Math.max(0, end - Math.max(start, 19 * 60));
+  return Math.max(0, end - Math.max(start, isSunday ? 8 * 60 : 19 * 60));
 }
 
-function displayStatus(entry: DayEntry): DayStatus {
-  return entry.status === 'work' && calculateOvertimeMinutes(entry) > 0
+function displayStatus(entry: DayEntry, isSunday: boolean): DayStatus {
+  return entry.status === 'work' && calculateOvertimeMinutes(entry, isSunday) > 0
     ? 'ot'
     : entry.status;
 }
@@ -126,9 +126,10 @@ function HistoryPage({ onBack }: { onBack: () => void }) {
   const allEntries = Object.values(entries) as DayEntry[];
   const workedDays = allEntries.filter((entry) => entry.status === 'work' || entry.status === 'ot').length;
   const totalMinutes = allEntries.reduce((sum, entry) => sum + (entry.minutes ?? 0), 0);
-  const overtimeMinutes = allEntries.reduce((sum, entry) => sum + calculateOvertimeMinutes(entry), 0);
+  const overtimeMinutes = Object.entries(entries as Record<number, DayEntry>).reduce((sum, [day, entry]) => sum + calculateOvertimeMinutes(entry, new Date(Date.UTC(year, month, Number(day))).getUTCDay() === 0), 0);
   const selectedEntry = selectedDay === null ? undefined : (entries as Record<number, DayEntry>)[selectedDay];
-  const selectedStatus = selectedEntry ? displayStatus(selectedEntry) : 'empty';
+  const selectedIsSunday = selectedDay !== null && new Date(Date.UTC(year, month, selectedDay)).getUTCDay() === 0;
+  const selectedStatus = selectedEntry ? displayStatus(selectedEntry, selectedIsSunday) : 'empty';
 
   useEffect(() => {
     if (selectedDay === null) return;
@@ -215,8 +216,9 @@ function HistoryPage({ onBack }: { onBack: () => void }) {
               const record = (entries as Record<number, DayEntry>)[day];
               const date = new Date(Date.UTC(year, month, day));
               const isFuture = date.getTime() > Date.UTC(today.year, today.month, today.day);
-              const status = record ? displayStatus(record) : 'empty';
-              const overtime = record ? calculateOvertimeMinutes(record) : 0;
+              const sunday = date.getUTCDay() === 0;
+              const status = record ? displayStatus(record, sunday) : 'empty';
+              const overtime = record ? calculateOvertimeMinutes(record, sunday) : 0;
               const hasTimes = Boolean(record?.checkIn && record.checkOut);
               const explanation = record
                 ? statusLabels[status as DayStatus]
@@ -273,7 +275,7 @@ function HistoryPage({ onBack }: { onBack: () => void }) {
         </div>
       </section>
 
-      <p className="history-tap-hint">แตะวันที่บนบัตรเพื่อดูรายละเอียด · OT หลัง 19:00 น.</p>
+      <p className="history-tap-hint">แตะวันที่บนบัตรเพื่อดูรายละเอียด · วันอาทิตย์ OT ตั้งแต่ 08:00 น. · วันอื่นหลัง 19:00 น. (ข้อมูลตัวอย่าง)</p>
       <p className="history-footer-note">ตัวเลขและสถานะทั้งหมดเป็นข้อมูลจำลอง ไม่ใช่ประวัติการทำงานจริง</p>
 
       {selectedDay !== null && (
@@ -311,7 +313,7 @@ function HistoryPage({ onBack }: { onBack: () => void }) {
 
             <div className={'history-popup__status history-popup__status--' + selectedStatus}>
               <span className="history-popup__status-dot" aria-hidden="true" />
-              {selectedEntry ? statusLabels[displayStatus(selectedEntry)] : 'ไม่มีข้อมูลตัวอย่าง'}
+              {selectedEntry ? statusLabels[selectedStatus as DayStatus] : 'ไม่มีข้อมูลตัวอย่าง'}
             </div>
 
             {selectedEntry?.checkIn && selectedEntry.checkOut ? (
@@ -332,7 +334,7 @@ function HistoryPage({ onBack }: { onBack: () => void }) {
                 </div>
                 <div className="history-popup__line">
                   <span>ชั่วโมง OT</span>
-                  <strong>{formatDuration(calculateOvertimeMinutes(selectedEntry))}</strong>
+                  <strong>{formatDuration(calculateOvertimeMinutes(selectedEntry, selectedIsSunday))}</strong>
                 </div>
                 {selectedEntry.note && <p className="history-popup__note">{selectedEntry.note}</p>}
               </>
