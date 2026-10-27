@@ -24,7 +24,6 @@ import HistoryPage from './HistoryPage';
 import {
   getBangkokPeriod,
   periodNames,
-  periodThemeColors,
   type AttendanceDisplayState,
   type DayPeriod,
 } from './theme';
@@ -109,10 +108,9 @@ function App() {
 
   useEffect(() => {
     const meta = document.querySelector('meta[name="theme-color"]');
-    // Use a solid dark iPhone chrome only in standalone mode; no image repositioning.
-    const standalone = window.matchMedia('(display-mode: standalone)').matches ||
-      (navigator as Navigator & { standalone?: boolean }).standalone === true;
-    meta?.setAttribute('content', standalone ? '#171717' : periodThemeColors[period]);
+    // Keep system chrome dark from startup through every time-of-day theme.
+    // The scene itself retains its existing Pixel Art positioning.
+    meta?.setAttribute('content', '#171717');
     // Keep the outer PWA page in the same theme as all internal screens.
     document.documentElement.dataset.period = period;
   }, [period]);
