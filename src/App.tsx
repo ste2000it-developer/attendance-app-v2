@@ -6,6 +6,7 @@ import {
   ChevronRight,
   Clock3,
   Fingerprint,
+  History,
   House,
   FilePenLine,
   LogIn,
@@ -154,6 +155,15 @@ function App() {
                 title="ทดลองดูธีม"
               >
                 <Palette size={22} strokeWidth={1.9} />
+              </button>
+              <button
+                className="header-icon header-icon--history"
+                type="button"
+                onClick={() => setActiveTab('history')}
+                aria-label="เปิดประวัติการทำงาน"
+                title="ประวัติการทำงาน"
+              >
+                <History size={22} strokeWidth={1.9} />
               </button>
               <button
                 className="header-icon"
