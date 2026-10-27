@@ -31,17 +31,31 @@
           || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
         const isStandalone = navigator.standalone === true
           || window.matchMedia('(display-mode: standalone)').matches;
-        document.documentElement.dataset.iosEdge = isIOS && isStandalone ? 'true' : 'false';
+        // iOS 27 may STILL reserve the status-bar pixels even with
+        // black-translucent. Never shift the hero unless those pixels are
+        // genuinely part of the available viewport (not just an env() inset).
+        document.documentElement.dataset.iosEdge = 'false';
         if (isIOS && isStandalone) {
-          // black-translucent increases viewport height by the top safe-area.
-          // Recreate the old (opaque) hero/clock dimensions, so no art moves.
           const preserveFraming = () => {
             const probe = document.createElement('div');
             probe.style.cssText = 'position:absolute;pointer-events:none;padding-top:env(safe-area-inset-top,0px)';
             document.documentElement.appendChild(probe);
             const top = parseFloat(getComputedStyle(probe).paddingTop) || 0;
             probe.remove();
-            const oldViewportHeight = window.innerHeight - top;
+            const screenHeight = window.screen.height;
+            const viewportHeight = window.innerHeight;
+            const edgeAvailable = top > 0
+              && screenHeight > 0
+              && Math.abs(screenHeight - viewportHeight) <= 8;
+            document.documentElement.dataset.iosEdge = edgeAvailable ? 'true' : 'false';
+            if (!edgeAvailable) {
+              document.documentElement.style.removeProperty('--ios-original-hero-height');
+              document.documentElement.style.removeProperty('--ios-original-clock-margin');
+              return;
+            }
+            // Only full-bleed viewports get the separate sky extension.
+            // Base the scene dimensions on the same usable height as before.
+            const oldViewportHeight = viewportHeight - top;
             if (oldViewportHeight < 320) return;
             const compact = oldViewportHeight <= 770;
             const hero = compact ? 255 : Math.max(290, Math.min(348, oldViewportHeight * .37));
