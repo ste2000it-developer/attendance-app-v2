@@ -96,6 +96,41 @@ function App() {
   }, [activeTab]);
 
   useEffect(() => {
+    // iOS standalone PWA can rubber-band the page even when an inner scroller
+    // has overscroll-behavior:none. Stop only attempts to drag past the FIRST
+    // or LAST item; all ordinary content scrolling remains native and smooth.
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+    let lastTouchY: number | null = null;
+
+    const onTouchStart = (event: TouchEvent) => {
+      lastTouchY = event.touches.length === 1 ? event.touches[0].clientY : null;
+    };
+    const onTouchMove = (event: TouchEvent) => {
+      if (event.touches.length !== 1 || lastTouchY === null) return;
+      const touchY = event.touches[0].clientY;
+      const deltaY = touchY - lastTouchY;
+      lastTouchY = touchY;
+      const atTop = scroller.scrollTop <= 0;
+      const atBottom = scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 1;
+      if ((deltaY > 0 && atTop) || (deltaY < 0 && atBottom)) {
+        event.preventDefault();
+      }
+    };
+    const onTouchEnd = () => { lastTouchY = null; };
+    scroller.addEventListener('touchstart', onTouchStart, { passive: true });
+    scroller.addEventListener('touchmove', onTouchMove, { passive: false });
+    scroller.addEventListener('touchend', onTouchEnd);
+    scroller.addEventListener('touchcancel', onTouchEnd);
+    return () => {
+      scroller.removeEventListener('touchstart', onTouchStart);
+      scroller.removeEventListener('touchmove', onTouchMove);
+      scroller.removeEventListener('touchend', onTouchEnd);
+      scroller.removeEventListener('touchcancel', onTouchEnd);
+    };
+  }, []);
+
+  useEffect(() => {
     const tick = () => setNow(new Date());
     const timer = window.setInterval(tick, 15_000);
     document.addEventListener('visibilitychange', tick);

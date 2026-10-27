@@ -8,8 +8,8 @@
   -webkit-font-smoothing: antialiased;
 }
 * { box-sizing: border-box; }
-html { min-width: 320px; height: 100%; }
-body { margin: 0; min-width: 320px; min-height: 100%; }
+html { min-width: 320px; height: 100%; overscroll-behavior: none; }
+body { margin: 0; min-width: 320px; min-height: 100%; overscroll-behavior: none; }
 button { font: inherit; -webkit-tap-highlight-color: transparent; }
 button:not(:disabled) { cursor: pointer; }
 button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
@@ -93,7 +93,10 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  overscroll-behavior-y: contain;
+  /* Native-like scrolling without pull-to-refresh / rubber-band chaining. */
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
   scrollbar-width: none;
 }
 .app-scroll::-webkit-scrollbar { display: none; }
@@ -346,6 +349,25 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 .app-shell[data-period="night"] .dialog-primary {
   background: #21ab91;
   color: #071f2d;
+}
+/* On phones, lock the page canvas; only .app-scroll is scrollable.
+   This prevents pulling the entire PWA down to expose blank space above
+   the approved Pixel Art while keeping the bottom tab bar stationary.
+   Deliberately do not adjust the hero, clock, status bar, or safe areas. */
+@media (max-width: 539px) {
+  html, body, #root {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  .app-shell {
+    position: fixed;
+    inset: 0;
+    height: 100dvh;
+    min-height: 0;
+    overscroll-behavior: none;
+  }
 }
 @media (min-width: 540px) {
   body { padding: 20px 0; }
