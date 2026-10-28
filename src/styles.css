@@ -464,3 +464,56 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* Compact Today's Work only. Keep the approved sky, clock, date, check-in,
+   summary, and navigation positions and sizes completely unchanged. */
+.app-shell[data-view="home"] .work-section {
+  margin-top: 12px;
+}
+.app-shell[data-view="home"] .work-today-card {
+  width: 100%;
+  min-height: 68px;
+  padding: 9px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  background: var(--panel);
+  color: var(--body-text);
+  text-align: left;
+}
+.app-shell[data-view="home"] .work-today-card:active {
+  background: var(--card-bg);
+}
+.app-shell[data-view="home"] .work-today-card__icon {
+  flex: 0 0 43px;
+  display: grid;
+  place-items: center;
+  width: 43px;
+  height: 43px;
+  border-radius: 12px;
+  color: var(--accent);
+  background: var(--card-bg);
+}
+.app-shell[data-view="home"] .work-today-card__content {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.app-shell[data-view="home"] .work-today-card__content strong {
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+.app-shell[data-view="home"] .work-today-card__content > span {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--subtext);
+}
+.app-shell[data-view="home"] .work-today-card__arrow {
+  flex: 0 0 auto;
+  color: var(--subtext);
+}

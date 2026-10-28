@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  BriefcaseBusiness,
   CalendarDays,
   Check,
   ChevronRight,
@@ -340,31 +339,23 @@ function App() {
           </section>
 
           <section className="work-section" aria-labelledby="work-title">
-            <div className="section-heading">
-              <h2 id="work-title">งานวันนี้</h2>
-              <button
-                type="button"
-                onClick={() => openInfo('งานวันนี้', 'ตารางงานจะเชื่อมกับข้อมูลจริงในขั้นตอนต่อไป')}
-              >
-                ดูทั้งหมด <ChevronRight size={19} aria-hidden="true" />
-              </button>
-            </div>
-
-            {isPreviewingAttendance ? (
-              <div className="shift-card">
-                <span className="shift-card__icon" aria-hidden="true"><BriefcaseBusiness size={23} /></span>
-                <div className="shift-card__details">
-                  <strong>งานปกติ <small>(ตัวอย่าง)</small></strong>
-                  <span>08:30 – 17:30</span>
-                </div>
-                <span className={'shift-card__tag shift-card__tag--' + state}>{finished ? 'เสร็จสิ้น' : active ? 'กำลังทำงาน' : 'รอเข้างาน'}</span>
-              </div>
-            ) : (
-              <div className="shift-card shift-card--empty">
-                <span className="shift-card__icon" aria-hidden="true"><CalendarDays size={23} /></span>
-                <span>ยังไม่มีข้อมูลตารางงาน</span>
-              </div>
-            )}
+            <button
+              className="work-today-card"
+              type="button"
+              onClick={() => openInfo('งานวันนี้', 'ตารางงานจะเชื่อมกับข้อมูลจริงในขั้นตอนต่อไป')}
+              aria-label="งานวันนี้ ดูรายละเอียดและกำหนดการทั้งหมด"
+            >
+              <span className="work-today-card__icon" aria-hidden="true">
+                <CalendarDays size={24} strokeWidth={1.85} />
+              </span>
+              <span className="work-today-card__content">
+                <strong id="work-title">งานวันนี้</strong>
+                <span>{isPreviewingAttendance
+                  ? 'งานปกติ · 08:30 – 17:30 (ตัวอย่าง)'
+                  : 'ยังไม่มีข้อมูลตารางงาน'}</span>
+              </span>
+              <ChevronRight className="work-today-card__arrow" size={22} strokeWidth={1.9} aria-hidden="true" />
+            </button>
           </section>
 
           <p className="preview-notice" role="status">
