@@ -32,6 +32,8 @@ export const periodNames: Record<DayPeriod, string> = {
 export const periodThemeColors: Record<DayPeriod, string> = {
   morning: '#43a8fd',
   day: '#34a3fd',
-  evening: '#4543ad',
-  night: '#022a72',
+  // Evening is sampled from the first row of the approved sunset artwork.
+  evening: '#563ea3',
+  // A calmer navy that sits closer to the night sky than the old vivid blue.
+  night: '#0b2856',
 };
