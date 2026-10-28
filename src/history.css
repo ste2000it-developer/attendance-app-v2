@@ -33,7 +33,6 @@
   --history-highlight: #e5f1f4;
   --history-wash: #e9f2f5;
   --history-punch: #205d73;
-  --history-ot-fill: #177963;
   --history-leave-fill: #526bc2;
   --history-holiday-fill: #7d8e9b;
   min-height: 100%;
@@ -58,7 +57,6 @@
   --history-highlight: #29465b;
   --history-wash: #25455e;
   --history-punch: #55a6b3;
-  --history-ot-fill: #177963;
   --history-leave-fill: #465eaa;
   --history-holiday-fill: #526878;
 }
@@ -139,7 +137,7 @@
   color: #fff;
   border-bottom: 2px solid var(--history-card-line);
 }
-/* The night header remains legible without sharing the OT status color. */
+/* Keep the night header legible. */
 .app-shell[data-period="night"] .history-timecard__heading {
   background: #25455e;
 }
@@ -172,7 +170,7 @@
 .history-timecard__table { margin-top: 10px; }
 .history-timecard__row {
   width: 100%; min-width: 0;
-  display: grid; grid-template-columns: 26% 25% 25% 24%;
+  display: grid; grid-template-columns: 34% 33% 33%;
   align-items: center; text-align: center;
 }
 .history-timecard__row > * { min-width: 0; }
@@ -197,12 +195,6 @@
 .history-timecard__row--entry:hover,
 .history-timecard__row--entry:active { background: var(--history-highlight); }
 /* A full-width, solid color strip identifies each status; no left marker. */
-.history-timecard__row--ot,
-.history-timecard__row--ot:hover,
-.history-timecard__row--ot:active {
-  background: var(--history-ot-fill);
-  color: #fff;
-}
 .history-timecard__row--leave,
 .history-timecard__row--leave:hover,
 .history-timecard__row--leave:active {
@@ -215,9 +207,6 @@
   background: var(--history-holiday-fill);
   color: #fff;
 }
-.history-timecard__row--ot .history-timecard__stamp,
-.history-timecard__row--ot .history-timecard__ot,
-.history-timecard__row--ot .history-timecard__date small,
 .history-timecard__row--leave .history-timecard__date small,
 .history-timecard__row--holiday .history-timecard__date small,
 .history-timecard__row--leave .history-timecard__special,
@@ -238,14 +227,8 @@
   font-weight: 750; letter-spacing: -.2px; font-size: 15px;
   font-variant-numeric: tabular-nums; color: var(--history-accent);
 }
-.history-timecard__ot {
-  font-family: 'Oxanium', 'Noto Sans Thai', monospace;
-  font-size: 14px; font-weight: 800;
-  color: var(--history-card-muted); font-variant-numeric: tabular-nums;
-}
-.history-timecard__ot--earned { color: var(--history-ot-fill); }
 .history-timecard__special {
-  grid-column: 2 / 5; font-size: 12px; color: var(--history-card-muted);
+  grid-column: 2 / 4; font-size: 12px; color: var(--history-card-muted);
 }
 .history-timecard__row--leave .history-timecard__special,
 .history-timecard__row--holiday .history-timecard__special {
@@ -260,7 +243,7 @@
 .history-timecard__no-data strong { font-size: 14px; color: var(--history-card-ink); }
 .history-timecard__no-data span { font-size: 12px; line-height: 1.7; }
 .history-timecard__summary {
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px; text-align: center;
   border-top: 2px solid var(--history-punch);
   padding: 13px 0 3px; margin-top: 15px;
@@ -321,7 +304,6 @@
   background: #a4b2b6; width: 10px; height: 10px; border-radius: 50%;
 }
 .history-popup__status--work .history-popup__status-dot { background: #168973; }
-.history-popup__status--ot .history-popup__status-dot { background: var(--history-ot-fill); }
 .history-popup__status--leave .history-popup__status-dot { background: var(--history-leave-fill); }
 .history-popup__status--holiday .history-popup__status-dot { background: var(--history-holiday-fill); }
 /* Share the time-of-day accent with the daily detail sheet. */
