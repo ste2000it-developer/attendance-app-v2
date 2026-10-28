@@ -22,6 +22,7 @@ import SkyScene from './SkyScene';
 import HistoryPage from './HistoryPage';
 import CalendarPage from './CalendarPage';
 import LeavePage from './LeavePage';
+import ProfilePage from './ProfilePage';
 import {
   getBangkokPeriod,
   periodNames,
@@ -82,7 +83,7 @@ function App() {
   const [dialog, setDialog] = useState<Dialog>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [activeTab, setActiveTab] = useState<'home' | 'history' | 'leave'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'history' | 'leave' | 'profile'>('home');
   const [calendarOpen, setCalendarOpen] = useState(false);
   const calendarDialogRef = useRef<HTMLElement>(null);
 
@@ -274,7 +275,7 @@ function App() {
               <button
                 className="header-icon"
                 type="button"
-                onClick={() => openInfo('โปรไฟล์', 'หน้าโปรไฟล์จะพัฒนาในขั้นตอนถัดไป')}
+                onClick={() => setActiveTab('profile')}
                 aria-label="โปรไฟล์"
               >
                 <UserRound size={23} strokeWidth={1.9} />
@@ -365,8 +366,14 @@ function App() {
           </>
         ) : activeTab === 'history' ? (
           <HistoryPage onBack={() => setActiveTab('home')} />
-        ) : (
+        ) : activeTab === 'leave' ? (
           <LeavePage now={now} onBack={() => setActiveTab('home')} />
+        ) : (
+          <ProfilePage
+            onBack={() => setActiveTab('home')}
+            onHistory={() => setActiveTab('history')}
+            onLeave={() => setActiveTab('leave')}
+          />
         )}
       </div>
 
@@ -383,7 +390,7 @@ function App() {
               if (key === 'home') setActiveTab('home');
               else if (key === 'calendar') setCalendarOpen(true);
               else if (key === 'leave') setActiveTab('leave');
-              else openInfo(label, 'หน้านี้ยังไม่ได้พัฒนา เราจะออกแบบทีละหน้าตามที่ตกลงกัน');
+              else if (key === 'profile') setActiveTab('profile');
             }}
           >
             <Icon size={24} strokeWidth={((key === 'calendar' ? calendarOpen : key === activeTab) ? 2.3 : 1.85)} aria-hidden="true" />
