@@ -364,20 +364,30 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
    the approved Pixel Art while keeping the bottom tab bar stationary.
    Deliberately do not adjust the hero, clock, status bar, or safe areas. */
 @media (max-width: 539px) {
-  /* iOS 27 samples the color of a REAL fixed element at the top edge.
-     The strip sits inside the existing sky pixels and never shifts the art
-     or changes the status-bar/safe-area viewport mode. */
+  /* Safari's chrome-color sampling skips pinned strips <= 10px and
+     elements with pointer-events:none. Use a real, solid 16px strip.
+     This overlays the sky's top pixels WITHOUT moving any layout. */
   .status-bar-tint {
     display: block;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    height: 8px;
-    background: var(--status-bar-edge);
-    pointer-events: none;
+    height: 16px;
+    background-color: var(--status-bar-edge);
+    pointer-events: auto;
     z-index: 50;
   }
+  /* Fallback for Home Screen apps that derive the status-bar color from
+     the document canvas rather than the pinned edge element. */
+  :root[data-period="morning"],
+  :root[data-period="morning"] body { background-color: #43a8fd; }
+  :root[data-period="day"],
+  :root[data-period="day"] body { background-color: #34a3fd; }
+  :root[data-period="evening"],
+  :root[data-period="evening"] body { background-color: #4543ad; }
+  :root[data-period="night"],
+  :root[data-period="night"] body { background-color: #022a72; }
   html, body, #root {
     width: 100%;
     height: 100%;
