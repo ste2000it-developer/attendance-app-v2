@@ -30,7 +30,7 @@ export const periodNames: Record<DayPeriod, string> = {
 // Match the top edge of each approved Pixel Art sky image.
 // Used for the PWA system bar and the iOS fixed color sampling strip.
 export const periodThemeColors: Record<DayPeriod, string> = {
-  morning: '#43a8fd',
+  morning: '#53aefd',
   day: '#34a3fd',
   // Evening is sampled from the first row of the approved sunset artwork.
   evening: '#563ea3',
