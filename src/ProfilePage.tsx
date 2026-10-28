@@ -43,6 +43,15 @@ export default function ProfilePage({ onBack, onHistory, onLeave }: ProfilePageP
       </header>
 
       <section className="profile-identity" aria-labelledby="profile-identity-title">
+        {/* Subtle pixel landscape that follows the Home sky's time of day. */}
+        <div className="profile-pixel-scene" aria-hidden="true">
+          <span className="profile-pixel-scene__sun" />
+          <span className="profile-pixel-scene__cloud" />
+          <span className="profile-pixel-scene__star profile-pixel-scene__star--one" />
+          <span className="profile-pixel-scene__star profile-pixel-scene__star--two" />
+          <span className="profile-pixel-scene__ridge profile-pixel-scene__ridge--back" />
+          <span className="profile-pixel-scene__ridge profile-pixel-scene__ridge--front" />
+        </div>
         <div className="profile-identity__top">
           <span className="profile-identity__eyebrow">EMPLOYEE CARD</span>
           <span className="profile-identity__emblem" aria-hidden="true"><Fingerprint size={24} strokeWidth={1.7} /></span>
