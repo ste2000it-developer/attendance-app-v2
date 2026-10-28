@@ -21,7 +21,7 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 /* Canvas colors follow the visible screen, not the phone's default palette.
    White is the default for every non-Home light screen; dark screens use
    the app's navy. Only Home gets sky colors. */
-:root[data-view="home"][data-period="morning"] { --device-canvas: #43a8fd; }
+:root[data-view="home"][data-period="morning"] { --device-canvas: #53aefd; }
 :root[data-view="home"][data-period="day"] { --device-canvas: #34a3fd; }
 :root[data-view="home"][data-period="evening"] { --device-canvas: #563ea3; }
 :root[data-view="home"][data-period="night"] { --device-canvas: #032b71; }
@@ -31,7 +31,7 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 .app-shell {
   /* The small edge tint is sampled by the iOS 27 Home Screen status bar.
      It never changes viewport or hero geometry. */
-  --status-bar-edge: #43a8fd;
+  --status-bar-edge: #53aefd;
   --page-bg: #fffdf7;
   --body-text: #162c38;
   --subtext: #516574;
