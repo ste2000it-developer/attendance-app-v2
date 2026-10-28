@@ -1,22 +1,32 @@
 /* Attendance V2: professional, accessible, time-aware employee homepage */
 :root {
+  /* Explicit canvas on every device; never leave the iPhone chrome to
+     a browser-selected or OS-default background. */
+  --device-canvas: #ffffff;
   font-family: 'Noto Sans Thai', system-ui, -apple-system, sans-serif;
   color: #172d3a;
-  background: #e8ecf0;
+  background-color: var(--device-canvas);
+  color-scheme: light;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
 * { box-sizing: border-box; }
-html { min-width: 320px; height: 100%; overscroll-behavior: none; }
-body { margin: 0; min-width: 320px; min-height: 100%; overscroll-behavior: none; }
+html { min-width: 320px; height: 100%; background-color: var(--device-canvas); overscroll-behavior: none; }
+body { margin: 0; min-width: 320px; min-height: 100%; background-color: var(--device-canvas); overscroll-behavior: none; }
 button { font: inherit; -webkit-tap-highlight-color: transparent; }
 button:not(:disabled) { cursor: pointer; }
 button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
-#root { min-height: 100vh; }
-/* Match the page around the centered app to the night theme too. */
-:root[data-period="night"] { background: #081b2d; color-scheme: dark; }
-:root[data-period="night"] body { background: #081b2d; }
+#root { min-height: 100vh; background-color: var(--device-canvas); }
+/* Canvas colors follow the visible screen, not the phone's default palette.
+   White is the default for every non-Home light screen; dark screens use
+   the app's navy. Only Home gets sky colors. */
+:root[data-view="home"][data-period="morning"] { --device-canvas: #43a8fd; }
+:root[data-view="home"][data-period="day"] { --device-canvas: #34a3fd; }
+:root[data-view="home"][data-period="evening"] { --device-canvas: #563ea3; }
+:root[data-view="home"][data-period="night"] { --device-canvas: #032b71; }
+:root[data-view]:not([data-view="home"])[data-period="night"] { --device-canvas: #0e233b; }
+:root[data-period="night"] { color-scheme: dark; }
 
 .app-shell {
   /* The small edge tint is sampled by the iOS 27 Home Screen status bar.
@@ -76,7 +86,7 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   --nav-bg: #fffdfa;
 }
 .app-shell[data-period="night"] {
-  --status-bar-edge: #0b2856;
+  --status-bar-edge: #032b71;
   --page-bg: #0e233b;
   --body-text: #f0f6ff;
   --subtext: #b1c4d5;
@@ -386,28 +396,8 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
     pointer-events: auto;
     z-index: 50;
   }
-  /* Fallback for Home Screen apps that derive the status-bar color from
-     the document canvas rather than the pinned edge element. */
-  :root[data-period="morning"],
-  :root[data-period="morning"] body { background-color: #43a8fd; }
-  :root[data-period="day"],
-  :root[data-period="day"] body { background-color: #34a3fd; }
-  :root[data-period="evening"],
-  :root[data-period="evening"] body { background-color: #563ea3; }
-  :root[data-period="night"],
-  :root[data-period="night"] body { background-color: #0b2856; }
-  /* Non-Home screens: pure white system bar in light themes, navy at night.
-     Only the iOS canvas/chrome changes; each page keeps its own background. */
-  :root:not([data-view="home"]):not([data-period="night"]),
-  :root:not([data-view="home"]):not([data-period="night"]) body {
-    background-color: #ffffff;
-    color-scheme: light;
-  }
-  :root:not([data-view="home"])[data-period="night"],
-  :root:not([data-view="home"])[data-period="night"] body {
-    background-color: #0e233b;
-    color-scheme: dark;
-  }
+  /* Document, body, and app root already share --device-canvas above.
+     No duplicate mobile-specific fallback colors: one source of truth. */
   html, body, #root {
     width: 100%;
     height: 100%;
