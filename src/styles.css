@@ -474,7 +474,3 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   overscroll-behavior: none;
   touch-action: none;
 }
-.app-shell[data-view="home"] .work-section,
-.app-shell[data-view="home"] .preview-notice {
-  display: none;
-}
