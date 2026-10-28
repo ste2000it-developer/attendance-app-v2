@@ -27,6 +27,11 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 :root[data-view="home"][data-period="night"] { --device-canvas: #032b71; }
 :root[data-view]:not([data-view="home"])[data-period="night"] { --device-canvas: #0e233b; }
 :root[data-period="night"] { color-scheme: dark; }
+/* iOS standalone status bar can sample the document canvas outside the
+   DOM overlay. Pre-composite the same backdrop only while calendar is open. */
+:root[data-view][data-period][data-calendar-open="true"] {
+  --device-canvas: var(--calendar-chrome-color);
+}
 
 .app-shell {
   /* The small edge tint is sampled by the iOS 27 Home Screen status bar.
@@ -372,6 +377,11 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 }
 .app-shell:not([data-view="home"])[data-period="night"] {
   --status-bar-edge: #0e233b;
+}
+/* Keep the original sky/status bar untouched when no calendar is open.
+   This selector overrides only the thin iOS color-sampling strip. */
+.app-shell[data-view][data-period][data-calendar-open="true"] {
+  --status-bar-edge: var(--calendar-chrome-color);
 }
 
 /* Keep the iOS color-sampling strip out of the layout on larger screens. */

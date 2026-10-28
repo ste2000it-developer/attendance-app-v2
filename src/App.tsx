@@ -63,6 +63,18 @@ const timeFormatter = new Intl.DateTimeFormat('en-GB', {
   hourCycle: 'h23',
 });
 
+// Match the calendar backdrop's rgba(6, 21, 32, .60) on iOS's native
+// status-bar canvas, where a web overlay cannot dim the system-owned area.
+function dimForCalendar(hex: string): string {
+  const backdrop = [6, 21, 32];
+  const channels = [1, 3, 5].map((at, index) => {
+    const original = Number.parseInt(hex.slice(at, at + 2), 16);
+    return Math.round(original * 0.4 + backdrop[index] * 0.6)
+      .toString(16).padStart(2, '0');
+  });
+  return '#' + channels.join('');
+}
+
 function App() {
   const [now, setNow] = useState(() => new Date());
   const [previewTheme, setPreviewTheme] = useState<ThemeSelection>(null);
@@ -152,10 +164,17 @@ function App() {
     const chromeColor = activeTab === 'home'
       ? periodThemeColors[period]
       : (period === 'night' ? '#0e233b' : '#ffffff');
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', chromeColor);
+    const visibleChromeColor = calendarOpen ? dimForCalendar(chromeColor) : chromeColor;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', visibleChromeColor);
     document.documentElement.dataset.period = period;
     document.documentElement.dataset.view = activeTab;
-  }, [period, activeTab]);
+    document.documentElement.dataset.calendarOpen = calendarOpen ? 'true' : 'false';
+    if (calendarOpen) {
+      document.documentElement.style.setProperty('--calendar-chrome-color', visibleChromeColor);
+    } else {
+      document.documentElement.style.removeProperty('--calendar-chrome-color');
+    }
+  }, [period, activeTab, calendarOpen]);
 
   useEffect(() => {
     if (!dialog) return;
@@ -215,10 +234,10 @@ function App() {
   );
 
   return (
-    <div className="app-shell" data-period={period} data-view={activeTab}>
+    <div className="app-shell" data-period={period} data-view={activeTab} data-calendar-open={calendarOpen ? 'true' : undefined}>
       {/* Remount the fixed color source when theme OR screen changes so iOS
           resamples it without changing the hero or safe-area layout. */}
-      <div key={period + '-' + activeTab} className="status-bar-tint" aria-hidden="true" />
+      <div key={period + '-' + activeTab + (calendarOpen ? '-dimmed' : '')} className="status-bar-tint" aria-hidden="true" />
       <div className="app-scroll" ref={scrollRef}>
         {activeTab === 'home' ? (
           <>
