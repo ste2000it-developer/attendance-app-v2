@@ -465,52 +465,16 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; }
 }
 
-/*
- * Home stays non-scrolling without compressing the approved check-in,
- * summary, and schedule cards. Reclaim height from the illustrated sky
- * and unused vertical gaps instead. History/Leave retain native scrolling.
- */
+/* Keep Home exactly as the approved full-artwork layout.
+   No movement, crop or resizing of the Pixel Art or approved cards.
+   The unconnected 'Today's work' preview is intentionally hidden,
+   leaving the static dashboard fully visible above the tab bar. */
 .app-shell[data-view="home"] .app-scroll {
-  display: flex;
-  flex-direction: column;
   overflow-y: hidden;
   overscroll-behavior: none;
   touch-action: none;
 }
-.app-shell[data-view="home"] .hero {
-  flex: 1 1 auto;
-  min-height: clamp(214px, 27dvh, 280px);
-}
-/* Crop upward from the artwork; do not scale down the cards or the art. */
-.app-shell[data-view="home"] .sky-scene__art {
-  inset: -44px 0 auto;
-  height: calc(100% + 44px);
-  object-position: center bottom;
-}
-.app-shell[data-view="home"] .home-content {
-  flex: 0 0 auto;
-  padding-bottom: 6px;
-}
-.app-shell[data-view="home"] .status-strip { margin-top: 6px; }
-.app-shell[data-view="home"] .summary-card { margin-top: 6px; }
-.app-shell[data-view="home"] .work-section { margin-top: 10px; }
-.app-shell[data-view="home"] .section-heading { margin-bottom: 6px; }
-.app-shell[data-view="home"] .section-heading button { min-height: 32px; }
-.app-shell[data-view="home"] .preview-notice { display: none; }
-
-@media (max-height: 950px) {
-  .app-shell[data-view="home"] .app-header {
-    padding-top: calc(20px + env(safe-area-inset-top, 0px));
-  }
-  .app-shell[data-view="home"] .clock-panel { margin-top: 12px; }
-}
-@media (max-height: 770px) {
-  .app-shell[data-view="home"] .hero { min-height: 205px; }
-  .app-shell[data-view="home"] .app-header {
-    padding-top: calc(13px + env(safe-area-inset-top, 0px));
-  }
-  .app-shell[data-view="home"] .clock-panel { margin-top: 6px; }
-  .app-shell[data-view="home"] .clock-panel__time {
-    font-size: clamp(58px, 14vw, 68px);
-  }
+.app-shell[data-view="home"] .work-section,
+.app-shell[data-view="home"] .preview-notice {
+  display: none;
 }
