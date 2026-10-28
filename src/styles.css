@@ -19,6 +19,9 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 :root[data-period="night"] body { background: #081b2d; }
 
 .app-shell {
+  /* The small edge tint is sampled by the iOS 27 Home Screen status bar.
+     It never changes viewport or hero geometry. */
+  --status-bar-edge: #43a8fd;
   --page-bg: #fffdf7;
   --body-text: #162c38;
   --subtext: #516574;
@@ -49,6 +52,7 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   transition: background-color 240ms ease, color 240ms ease;
 }
 .app-shell[data-period="day"] {
+  --status-bar-edge: #34a3fd;
   --page-bg: #f7fcff;
   --hero-text: #16517c;
   --hero-subtext: #365f79;
@@ -60,6 +64,7 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   --nav-bg: #ffffff;
 }
 .app-shell[data-period="evening"] {
+  --status-bar-edge: #4543ad;
   --page-bg: #fff9f5;
   --sky: linear-gradient(180deg, #af8bab 0%, #f3a4a0 50%, #ffca93 87%, #f9dac0 100%);
   --hero-text: #ffffff;
@@ -71,6 +76,7 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   --nav-bg: #fffdfa;
 }
 .app-shell[data-period="night"] {
+  --status-bar-edge: #022a72;
   --page-bg: #0e233b;
   --body-text: #f0f6ff;
   --subtext: #b1c4d5;
@@ -350,11 +356,28 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   background: #21ab91;
   color: #071f2d;
 }
+/* Keep the iOS color-sampling strip out of the layout on larger screens. */
+.status-bar-tint { display: none; }
+
 /* On phones, lock the page canvas; only .app-scroll is scrollable.
    This prevents pulling the entire PWA down to expose blank space above
    the approved Pixel Art while keeping the bottom tab bar stationary.
    Deliberately do not adjust the hero, clock, status bar, or safe areas. */
 @media (max-width: 539px) {
+  /* iOS 27 samples the color of a REAL fixed element at the top edge.
+     The strip sits inside the existing sky pixels and never shifts the art
+     or changes the status-bar/safe-area viewport mode. */
+  .status-bar-tint {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background: var(--status-bar-edge);
+    pointer-events: none;
+    z-index: 50;
+  }
   html, body, #root {
     width: 100%;
     height: 100%;
