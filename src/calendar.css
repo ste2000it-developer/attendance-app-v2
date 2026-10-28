@@ -24,7 +24,7 @@
   --cal-soft: #e8f2f5;
   --cal-accent: #205d73;
   --cal-selected: #dceff0;
-  --cal-work: #15957c;
+  --cal-work: #eab308;
     min-height: 100%;
   padding: calc(21px + env(safe-area-inset-top, 0px)) 17px 34px;
   background: var(--cal-bg);
@@ -39,7 +39,7 @@
   --cal-soft: #243e57;
   --cal-accent: #9fdae2;
   --cal-selected: #254e5b;
-  --cal-work: #42caaa;
+  --cal-work: #facc15;
   }
 .calendar-heading {
   display: flex;
@@ -311,7 +311,7 @@
 }
 .calendar-event__heading { display: flex; align-items: center; gap: 9px; }
 .calendar-event__heading strong { font-size: 15px; color: var(--cal-accent); font-weight: 800; line-height: 1.45; }
-.calendar-event__indicator { flex: 0 0 9px; width: 9px; height: 9px; border-radius: 50%; background: #15957c; }
+.calendar-event__indicator { flex: 0 0 9px; width: 9px; height: 9px; border-radius: 50%; background: var(--cal-work); }
 .calendar-event__meta { display: flex; flex-direction: column; gap: 8px; margin-top: 11px; }
 .calendar-event__meta span {
   display: flex; align-items: flex-start; gap: 8px;
