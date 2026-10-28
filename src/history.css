@@ -1,7 +1,7 @@
 /* History uses one consistent light palette in morning/day/evening
    and a complementary dark palette only at night. */
 .app-shell[data-view="history"]:not([data-period="night"]) {
-  --page-bg: #f0f5f5;
+  --page-bg: #ffffff;
   --body-text: #2b4651;
   --subtext: #607a87;
   --accent: #205d73;
@@ -17,7 +17,7 @@
   --line: #2d4259;
 }
 .history-page {
-  --history-page: #f0f5f5;
+  --history-page: #ffffff;
   --history-text: #2b4651;
   --history-muted: #607a87;
   --history-panel: #ffffff;
