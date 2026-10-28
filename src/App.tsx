@@ -143,12 +143,12 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // Home uses the sky edge; History uses its own screen background.
-    // The history screen has a pale surface for morning/day/evening,
-    // and a navy surface at night.
-    const chromeColor = activeTab === 'history'
-      ? (period === 'night' ? '#0e233b' : '#f0f5f5')
-      : periodThemeColors[period];
+    // Pixel-art sky colors belong only to Home.
+    // Other screens use a white system bar in light mode and the app's
+    // dark background in night mode, regardless of the time-of-day sky.
+    const chromeColor = activeTab === 'home'
+      ? periodThemeColors[period]
+      : (period === 'night' ? '#0e233b' : '#ffffff');
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', chromeColor);
     document.documentElement.dataset.period = period;
     document.documentElement.dataset.view = activeTab;
