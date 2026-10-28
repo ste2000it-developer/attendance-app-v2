@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CalendarDays, ChevronLeft, ChevronRight, Info, RotateCcw, X } from 'lucide-react';
 import './calendar.css';
 
@@ -53,10 +53,13 @@ function bangkokParts(date: Date) {
   return { year: part('year'), month: part('month') - 1, day: part('day') };
 }
 
-export default function CalendarPage({ now, onClose }: { now: Date; onClose: () => void }) {
+export default function CalendarPage({ now }: { now: Date }) {
   const today = bangkokParts(now);
   const [monthDate, setMonthDate] = useState(() => new Date(Date.UTC(today.year, today.month, 1)));
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const popupCloseRef = useRef<HTMLButtonElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+  const popupRef = useRef<HTMLElement>(null);
 
   const year = monthDate.getUTCFullYear();
   const month = monthDate.getUTCMonth();
@@ -79,12 +82,44 @@ export default function CalendarPage({ now, onClose }: { now: Date; onClose: () 
   const isSelectedFuture = selectedDay !== null
     && Date.UTC(year, month, selectedDay) > Date.UTC(today.year, today.month, today.day);
 
+  useEffect(() => {
+    if (selectedDay === null) return;
+    const popup = popupRef.current;
+    popupCloseRef.current?.focus();
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setSelectedDay(null);
+      }
+      if (event.key !== 'Tab' || !popup) return;
+      const buttons = Array.from(popup.querySelectorAll<HTMLButtonElement>('button:not(:disabled)'));
+      if (!buttons.length) return;
+      const first = buttons[0];
+      const last = buttons[buttons.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      previousFocusRef.current?.focus();
+    };
+  }, [selectedDay]);
+
   const changeMonth = (offset: number) => {
     setMonthDate(new Date(Date.UTC(year, month + offset, 1)));
     setSelectedDay(null);
   };
-  const goToToday = () => {
+  const goToToday = (element: HTMLButtonElement) => {
     setMonthDate(new Date(Date.UTC(today.year, today.month, 1)));
+    previousFocusRef.current = element;
     setSelectedDay(today.day);
   };
 
@@ -95,15 +130,12 @@ export default function CalendarPage({ now, onClose }: { now: Date; onClose: () 
           <CalendarDays size={24} strokeWidth={1.9} />
         </span>
         <div className="calendar-heading__title">
-          <h1 id="calendar-popup-title">ปฏิทินการทำงาน</h1>
+          <h1>ปฏิทินการทำงาน</h1>
           <p>ดูวันทำงาน วันหยุด และวันลา</p>
         </div>
-        <button className="calendar-today" type="button" onClick={goToToday} aria-label="กลับไปวันที่วันนี้">
+        <button className="calendar-today" type="button" onClick={(event) => goToToday(event.currentTarget)} aria-label="กลับไปวันที่วันนี้">
           <RotateCcw size={16} strokeWidth={2} aria-hidden="true" />
           วันนี้
-        </button>
-        <button className="calendar-close" type="button" onClick={onClose} aria-label="ปิดปฏิทิน">
-          <X size={23} aria-hidden="true" />
         </button>
       </header>
 
@@ -148,7 +180,10 @@ export default function CalendarPage({ now, onClose }: { now: Date; onClose: () 
                   + (selected ? ' calendar-day--selected' : '')}
                 aria-pressed={selected}
                 aria-label={dayLabel + statusText}
-                onClick={() => setSelectedDay(day)}
+                onClick={(event) => {
+                  previousFocusRef.current = event.currentTarget;
+                  setSelectedDay(day);
+                }}
               >
                 <span className="calendar-day__number">{day}</span>
                 <span className={'calendar-day__marker' + (status ? ' calendar-day__marker--' + status : '')} aria-hidden="true" />
@@ -176,20 +211,46 @@ export default function CalendarPage({ now, onClose }: { now: Date; onClose: () 
         </div>
       </section>
 
-      <section className="calendar-detail" aria-label="รายละเอียดวันที่เลือก" aria-live="polite">
-        {selectedDate ? (
-          <>
-            <div className="calendar-detail__head">
+      <p className="calendar-footer-note">รายการที่แสดงเป็นข้อมูลจำลอง ไม่ใช่บันทึกการทำงานหรือวันลาจริง</p>
+
+      {selectedDay !== null && selectedDate && (
+        <div
+          className="calendar-day-overlay"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setSelectedDay(null);
+          }}
+        >
+          <section
+            className="calendar-day-popup"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="calendar-day-popup-title"
+            ref={popupRef}
+          >
+            <div className="calendar-day-popup__handle" aria-hidden="true" />
+            <div className="calendar-day-popup__heading">
               <div>
-                <span>รายละเอียดประจำวัน</span>
-                <h2>{dateFormatter.format(selectedDate)}</h2>
+                <span>รายละเอียดประจำวัน · ข้อมูลตัวอย่าง</span>
+                <h2 id="calendar-day-popup-title">{dateFormatter.format(selectedDate)}</h2>
               </div>
-              {selectedRecord && !isSelectedFuture && (
-                <span className={'calendar-detail__status calendar-detail__status--' + selectedRecord.status}>
-                  {statusLabels[selectedRecord.status]}
-                </span>
-              )}
+              <button
+                className="calendar-day-popup__close"
+                ref={popupCloseRef}
+                type="button"
+                onClick={() => setSelectedDay(null)}
+                aria-label="ปิดรายละเอียดวันที่เลือก"
+              >
+                <X size={21} aria-hidden="true" />
+              </button>
             </div>
+
+            {!isSelectedFuture && selectedRecord && (
+              <div className={'calendar-day-popup__status calendar-day-popup__status--' + selectedRecord.status}>
+                <span className="calendar-day-popup__status-dot" aria-hidden="true" />
+                {statusLabels[selectedRecord.status]}
+              </div>
+            )}
+
             {isSelectedFuture ? (
               <p className="calendar-detail__empty">ยังไม่ถึงวันที่เลือก</p>
             ) : selectedRecord ? (
@@ -205,16 +266,12 @@ export default function CalendarPage({ now, onClose }: { now: Date; onClose: () 
             ) : (
               <p className="calendar-detail__empty">ยังไม่มีข้อมูลตัวอย่างสำหรับวันที่เลือก</p>
             )}
-          </>
-        ) : (
-          <div className="calendar-detail__placeholder">
-            <CalendarDays size={25} strokeWidth={1.7} aria-hidden="true" />
-            <strong>เลือกวันที่บนปฏิทิน</strong>
-            <span>แตะวันที่เพื่อดูสถานะและเวลาเข้า–ออกงาน</span>
-          </div>
-        )}
-      </section>
-      <p className="calendar-footer-note">รายการที่แสดงเป็นข้อมูลจำลอง ไม่ใช่บันทึกการทำงานหรือวันลาจริง</p>
+            <button className="calendar-day-popup__done" type="button" onClick={() => setSelectedDay(null)}>
+              ปิดรายละเอียด
+            </button>
+          </section>
+        </div>
+      )}
     </main>
   );
 }
