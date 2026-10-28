@@ -27,9 +27,11 @@ export const periodNames: Record<DayPeriod, string> = {
   night: 'กลางคืน',
 };
 
+// Match the top edge of each approved Pixel Art sky image.
+// Used for the PWA system bar and the iOS fixed color sampling strip.
 export const periodThemeColors: Record<DayPeriod, string> = {
-  morning: '#fff7df',
-  day: '#dcf2ff',
-  evening: '#edafad',
-  night: '#10233c',
+  morning: '#43a8fd',
+  day: '#34a3fd',
+  evening: '#4543ad',
+  night: '#022a72',
 };
