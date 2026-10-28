@@ -465,12 +465,19 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; }
 }
 
-/* Keep Home exactly as the approved full-artwork layout.
-   No movement, crop or resizing of the Pixel Art or approved cards.
-   The unconnected 'Today's work' preview is intentionally hidden,
-   leaving the static dashboard fully visible above the tab bar. */
+/* Home: keep the approved sky artwork, check-in card and all panels
+   at their original sizes. Align to the bottom like the supplied lower-screen
+   reference so Today's Work and the note remain visible without scrolling.
+   Do not crop or reposition the image inside its own artwork frame. */
 .app-shell[data-view="home"] .app-scroll {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
   overflow-y: hidden;
   overscroll-behavior: none;
   touch-action: none;
+}
+.app-shell[data-view="home"] .hero,
+.app-shell[data-view="home"] .home-content {
+  flex: 0 0 auto;
 }
