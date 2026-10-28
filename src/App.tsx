@@ -143,11 +143,16 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const meta = document.querySelector('meta[name="theme-color"]');
-    meta?.setAttribute('content', periodThemeColors[period]);
-    // Keep the outer PWA page in the same theme as all internal screens.
+    // Home uses the sky edge; History uses its own screen background.
+    // The history screen has a pale surface for morning/day/evening,
+    // and a navy surface at night.
+    const chromeColor = activeTab === 'history'
+      ? (period === 'night' ? '#0e233b' : '#f0f5f5')
+      : periodThemeColors[period];
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', chromeColor);
     document.documentElement.dataset.period = period;
-  }, [period]);
+    document.documentElement.dataset.view = activeTab;
+  }, [period, activeTab]);
 
   useEffect(() => {
     if (!dialog) return;
@@ -171,9 +176,9 @@ function App() {
 
   return (
     <div className="app-shell" data-period={period} data-view={activeTab}>
-      {/* Replace the real edge element on theme changes so iOS resamples
-          its solid color, without changing the hero or safe-area layout. */}
-      <div key={period} className="status-bar-tint" aria-hidden="true" />
+      {/* Remount the fixed color source when theme OR screen changes so iOS
+          resamples it without changing the hero or safe-area layout. */}
+      <div key={period + '-' + activeTab} className="status-bar-tint" aria-hidden="true" />
       <div className="app-scroll" ref={scrollRef}>
         {activeTab === 'home' ? (
           <>
