@@ -1,48 +1,56 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { CalendarDays, ChevronLeft, ChevronRight, Info, RotateCcw, X } from 'lucide-react';
+import {
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Clock3,
+  Info,
+  MapPin,
+  RotateCcw,
+  X,
+} from 'lucide-react';
 import './calendar.css';
 
-type DayStatus = 'work' | 'leave' | 'holiday';
-type SampleDay = { status: DayStatus; checkIn?: string; checkOut?: string; note?: string };
+type WorkEvent = {
+  id: string;
+  title: string;
+  time: string;
+  location?: string;
+  note?: string;
+};
 
-// Visual-design fixtures matching the October 2026 History preview.
-// Never treat these examples as real attendance, leave approvals or public holidays.
-const sampleDays: Record<number, SampleDay> = {};
-const regularDays = [1, 2, 3, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 17, 19, 20, 22, 24, 26];
-for (const day of regularDays) {
-  sampleDays[day] = {
-    status: 'work',
-    checkIn: '08:30',
-    checkOut: day === 26 ? '17:40' : '17:30',
-  };
-}
-for (const day of [4, 11, 18]) {
-  sampleDays[day] = { status: 'holiday', note: 'วันหยุด (ข้อมูลตัวอย่าง)' };
-}
-sampleDays[16] = { status: 'leave', note: 'วันลาที่ได้รับอนุมัติ (ข้อมูลตัวอย่าง)' };
-sampleDays[21] = { status: 'work', checkIn: '08:30', checkOut: '20:00' };
-sampleDays[23] = { status: 'work', checkIn: '08:30', checkOut: '20:00' };
-sampleDays[25] = {
-  status: 'work',
-  checkIn: '08:00',
-  checkOut: '16:00',
-  note: 'ทำงานวันอาทิตย์ (ข้อมูลตัวอย่าง)',
+// Design preview only: no Firestore job assignments or real schedules yet.
+// Unlike History, Calendar never displays attendance, leave or work-hour totals.
+const sampleSchedules: Record<number, WorkEvent[]> = {
+  21: [
+    { id: 'demo-21', title: 'ประชุมวางแผนงาน', time: '09:00 – 10:00', location: 'ห้องประชุม (ตัวอย่าง)' },
+  ],
+  23: [
+    { id: 'demo-23', title: 'ตรวจสอบหน้างาน', time: '09:30 – 12:00', location: 'สถานที่ปฏิบัติงาน (ตัวอย่าง)' },
+  ],
+  28: [
+    { id: 'demo-28', title: 'ประชุมติดตามความคืบหน้า', time: '13:00 – 14:00', location: 'ห้องประชุม (ตัวอย่าง)' },
+  ],
+  29: [
+    { id: 'demo-29-1', title: 'ตรวจความพร้อมอุปกรณ์', time: '09:00 – 11:00', location: 'พื้นที่ปฏิบัติงาน (ตัวอย่าง)' },
+    { id: 'demo-29-2', title: 'ประสานงานโครงการ', time: '14:00 – 15:00', note: 'ตรวจสอบรายละเอียดงานที่ได้รับมอบหมาย (ตัวอย่าง)' },
+  ],
+  30: [
+    { id: 'demo-30', title: 'ตรวจสอบงานประจำวัน', time: '08:30 – 12:00', location: 'หน้างาน (ตัวอย่าง)' },
+  ],
+  31: [
+    { id: 'demo-31', title: 'สรุปงานประจำสัปดาห์', time: '10:00 – 11:00', location: 'สำนักงาน (ตัวอย่าง)' },
+  ],
 };
 
 const weekdays = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'] as const;
-const statusLabels: Record<DayStatus, string> = {
-  work: 'วันทำงาน',
-  leave: 'วันลา',
-  holiday: 'วันหยุด',
-};
 const monthFormatter = new Intl.DateTimeFormat('th-TH', {
   month: 'long', year: 'numeric', timeZone: 'UTC',
 });
 const dateFormatter = new Intl.DateTimeFormat('th-TH', {
   weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
 });
-
 function bangkokParts(date: Date) {
   const parts = new Intl.DateTimeFormat('en-GB', {
     timeZone: 'Asia/Bangkok',
@@ -65,6 +73,7 @@ export default function CalendarPage({ now, onClose }: { now: Date; onClose: () 
   const year = monthDate.getUTCFullYear();
   const month = monthDate.getUTCMonth();
   const isSampleMonth = year === 2026 && month === 9;
+  const schedules = isSampleMonth ? sampleSchedules : {};
   const firstWeekday = new Date(Date.UTC(year, month, 1)).getUTCDay();
   const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
   const cells: (number | null)[] = [
@@ -73,15 +82,15 @@ export default function CalendarPage({ now, onClose }: { now: Date; onClose: () 
   ];
   while (cells.length % 7 !== 0) cells.push(null);
 
-  const counts: Record<DayStatus, number> = { work: 0, leave: 0, holiday: 0 };
-  if (isSampleMonth) {
-    for (const entry of Object.values(sampleDays)) counts[entry.status] += 1;
-  }
-
   const selectedDate = selectedDay === null ? null : new Date(Date.UTC(year, month, selectedDay));
-  const selectedRecord = selectedDay !== null && isSampleMonth ? sampleDays[selectedDay] : undefined;
-  const isSelectedFuture = selectedDay !== null
-    && Date.UTC(year, month, selectedDay) > Date.UTC(today.year, today.month, today.day);
+  const selectedEvents = selectedDay === null ? [] : (schedules[selectedDay] ?? []);
+  const agenda = Object.entries(schedules)
+    .flatMap(([day, events]) => events.map((event) => ({ day: Number(day), event })))
+    .sort((a, b) => a.day - b.day || a.event.time.localeCompare(b.event.time));
+  const previewAgenda = agenda
+    .filter(({ day }) => year > today.year
+      || (year === today.year && (month > today.month || (month === today.month && day >= today.day))))
+    .slice(0, 3);
 
   useEffect(() => {
     if (selectedDay === null) return;
@@ -118,10 +127,13 @@ export default function CalendarPage({ now, onClose }: { now: Date; onClose: () 
     setMonthDate(new Date(Date.UTC(year, month + offset, 1)));
     setSelectedDay(null);
   };
-  const goToToday = (element: HTMLButtonElement) => {
+  const openDay = (day: number, button: HTMLButtonElement) => {
+    previousFocusRef.current = button;
+    setSelectedDay(day);
+  };
+  const goToToday = (button: HTMLButtonElement) => {
     setMonthDate(new Date(Date.UTC(today.year, today.month, 1)));
-    previousFocusRef.current = element;
-    setSelectedDay(today.day);
+    openDay(today.day, button);
   };
 
   return (
@@ -131,8 +143,8 @@ export default function CalendarPage({ now, onClose }: { now: Date; onClose: () 
           <CalendarDays size={24} strokeWidth={1.9} />
         </span>
         <div className="calendar-heading__title">
-          <h1 id="calendar-popup-title">ปฏิทินการทำงาน</h1>
-          <p>ดูวันทำงาน วันหยุด และวันลา</p>
+          <h1 id="calendar-popup-title">ปฏิทินกำหนดการงาน</h1>
+          <p>ดูงานและนัดหมายที่ได้รับมอบหมาย</p>
         </div>
         <button className="calendar-today" type="button" onClick={(event) => goToToday(event.currentTarget)} aria-label="กลับไปวันที่วันนี้">
           <RotateCcw size={16} strokeWidth={2} aria-hidden="true" />
@@ -145,10 +157,10 @@ export default function CalendarPage({ now, onClose }: { now: Date; onClose: () 
 
       <div className="calendar-demo-notice" role="status">
         <Info size={17} aria-hidden="true" />
-        <span>ข้อมูลสำหรับทดลองดีไซน์ · ยังไม่เชื่อมระบบจริง</span>
+        <span>กำหนดการตัวอย่าง · ยังไม่เชื่อมข้อมูลงานจริง</span>
       </div>
 
-      <section className="calendar-month-card" aria-label="ปฏิทินรายเดือน">
+      <section className="calendar-month-card" aria-label="ปฏิทินกำหนดการรายเดือน">
         <div className="calendar-month-nav">
           <button type="button" onClick={() => changeMonth(-1)} aria-label="เดือนก่อนหน้า">
             <ChevronLeft size={22} aria-hidden="true" />
@@ -162,60 +174,64 @@ export default function CalendarPage({ now, onClose }: { now: Date; onClose: () 
         <div className="calendar-weekdays" aria-hidden="true">
           {weekdays.map((weekday) => <span key={weekday}>{weekday}</span>)}
         </div>
-        <div className="calendar-grid" role="group" aria-label="เลือกวันที่เพื่อดูรายละเอียด">
+        <div className="calendar-grid" role="group" aria-label="เลือกวันที่เพื่อดูกำหนดการ">
           {cells.map((day, index) => {
             if (day === null) {
               return <span className="calendar-empty-cell" key={'empty-' + index} aria-hidden="true" />;
             }
             const date = new Date(Date.UTC(year, month, day));
             const isToday = today.year === year && today.month === month && today.day === day;
-            const isFuture = date.getTime() > Date.UTC(today.year, today.month, today.day);
-            const status = isSampleMonth && !isFuture ? sampleDays[day]?.status : undefined;
+            const events = schedules[day] ?? [];
+            const hasSchedule = events.length > 0;
             const selected = selectedDay === day;
-            const dayLabel = dateFormatter.format(date);
-            const statusText = status ? ' · ' + statusLabels[status] + ' (ตัวอย่าง)' : '';
             return (
               <button
                 key={day}
                 type="button"
                 className={'calendar-day'
-                  + (status ? ' calendar-day--' + status : '')
+                  + (hasSchedule ? ' calendar-day--scheduled' : '')
                   + (isToday ? ' calendar-day--today' : '')
                   + (selected ? ' calendar-day--selected' : '')}
                 aria-pressed={selected}
-                aria-label={dayLabel + statusText}
-                onClick={(event) => {
-                  previousFocusRef.current = event.currentTarget;
-                  setSelectedDay(day);
-                }}
+                aria-label={dateFormatter.format(date) + (hasSchedule ? ' · มีกำหนดการ ' + events.length + ' รายการ (ตัวอย่าง)' : ' · ไม่มีกำหนดการตัวอย่าง')}
+                onClick={(event) => openDay(day, event.currentTarget)}
               >
                 <span className="calendar-day__number">{day}</span>
-                <span className={'calendar-day__marker' + (status ? ' calendar-day__marker--' + status : '')} aria-hidden="true" />
+                <span className={'calendar-day__marker' + (hasSchedule ? ' calendar-day__marker--scheduled' : '')} aria-hidden="true" />
               </button>
             );
           })}
         </div>
       </section>
 
-      <div className="calendar-legend" aria-label="คำอธิบายสถานะ">
-        <span><i className="calendar-legend__dot calendar-legend__dot--work" />วันทำงาน</span>
-        <span><i className="calendar-legend__dot calendar-legend__dot--leave" />วันลา</span>
-        <span><i className="calendar-legend__dot calendar-legend__dot--holiday" />วันหยุด</span>
+      <div className="calendar-legend" aria-label="คำอธิบายปฏิทิน">
+        <span><i className="calendar-legend__dot calendar-legend__dot--scheduled" />มีกำหนดการงาน</span>
+        <span><i className="calendar-legend__today" />วันนี้</span>
       </div>
 
-      <section className="calendar-summary" aria-label="สรุปประจำเดือน">
-        <h2>สรุปประจำเดือน <small>(ตัวอย่าง)</small></h2>
-        <div className="calendar-summary__items">
-          {(['work', 'leave', 'holiday'] as const).map((status) => (
-            <div key={status}>
-              <strong>{isSampleMonth ? counts[status] : '—'}</strong>
-              <span>{statusLabels[status]}</span>
-            </div>
-          ))}
-        </div>
+      <section className="calendar-agenda" aria-label="กำหนดการที่กำลังจะถึง">
+        <h2>กำหนดการที่กำลังจะถึง <small>(ตัวอย่าง)</small></h2>
+        {previewAgenda.length > 0 ? (
+          <div className="calendar-agenda__list">
+            {previewAgenda.map(({ day, event }) => (
+              <div className="calendar-agenda__item" key={event.id}>
+                <span className="calendar-agenda__date">
+                  <strong>{String(day).padStart(2, '0')}</strong>
+                  <small>{month + 1}/{year + 543}</small>
+                </span>
+                <div className="calendar-agenda__content">
+                  <strong>{event.title}</strong>
+                  <span><Clock3 size={14} aria-hidden="true" />{event.time}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="calendar-agenda__empty">ไม่มีกำหนดการตัวอย่างที่กำลังจะถึงในเดือนนี้</div>
+        )}
       </section>
 
-      <p className="calendar-footer-note">รายการที่แสดงเป็นข้อมูลจำลอง ไม่ใช่บันทึกการทำงานหรือวันลาจริง</p>
+      <p className="calendar-footer-note">งานและเวลาทั้งหมดเป็นข้อมูลตัวอย่าง ไม่ใช่กำหนดการมอบหมายงานจริง</p>
 
       {selectedDay !== null && selectedDate && createPortal(
         <div
@@ -234,7 +250,7 @@ export default function CalendarPage({ now, onClose }: { now: Date; onClose: () 
             <div className="calendar-day-popup__handle" aria-hidden="true" />
             <div className="calendar-day-popup__heading">
               <div>
-                <span>รายละเอียดประจำวัน · ข้อมูลตัวอย่าง</span>
+                <span>กำหนดการประจำวัน · ข้อมูลตัวอย่าง</span>
                 <h2 id="calendar-day-popup-title">{dateFormatter.format(selectedDate)}</h2>
               </div>
               <button
@@ -242,34 +258,32 @@ export default function CalendarPage({ now, onClose }: { now: Date; onClose: () 
                 ref={popupCloseRef}
                 type="button"
                 onClick={() => setSelectedDay(null)}
-                aria-label="ปิดรายละเอียดวันที่เลือก"
+                aria-label="ปิดรายละเอียดกำหนดการ"
               >
                 <X size={21} aria-hidden="true" />
               </button>
             </div>
 
-            {!isSelectedFuture && selectedRecord && (
-              <div className={'calendar-day-popup__status calendar-day-popup__status--' + selectedRecord.status}>
-                <span className="calendar-day-popup__status-dot" aria-hidden="true" />
-                {statusLabels[selectedRecord.status]}
+            {selectedEvents.length > 0 ? (
+              <div className="calendar-event-list">
+                {selectedEvents.map((event) => (
+                  <article className="calendar-event" key={event.id}>
+                    <div className="calendar-event__heading">
+                      <span className="calendar-event__indicator" aria-hidden="true" />
+                      <strong>{event.title}</strong>
+                    </div>
+                    <div className="calendar-event__meta">
+                      <span><Clock3 size={16} aria-hidden="true" />{event.time}</span>
+                      {event.location && <span><MapPin size={16} aria-hidden="true" />{event.location}</span>}
+                    </div>
+                    {event.note && <p className="calendar-event__note">{event.note}</p>}
+                  </article>
+                ))}
               </div>
+            ) : (
+              <p className="calendar-detail__empty">ไม่มีกำหนดการงานตัวอย่างสำหรับวันนี้</p>
             )}
 
-            {isSelectedFuture ? (
-              <p className="calendar-detail__empty">ยังไม่ถึงวันที่เลือก</p>
-            ) : selectedRecord ? (
-              <>
-                {selectedRecord.checkIn && selectedRecord.checkOut && (
-                  <div className="calendar-detail__times">
-                    <div><span>เข้างาน</span><strong>{selectedRecord.checkIn}</strong></div>
-                    <div><span>ออกงาน</span><strong>{selectedRecord.checkOut}</strong></div>
-                  </div>
-                )}
-                {selectedRecord.note && <p className="calendar-detail__note">{selectedRecord.note}</p>}
-              </>
-            ) : (
-              <p className="calendar-detail__empty">ยังไม่มีข้อมูลตัวอย่างสำหรับวันที่เลือก</p>
-            )}
             <button className="calendar-day-popup__done" type="button" onClick={() => setSelectedDay(null)}>
               ปิดรายละเอียด
             </button>
