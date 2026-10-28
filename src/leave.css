@@ -103,13 +103,14 @@
 .leave-footnote { display:flex; align-items:center; justify-content:center; gap:5px; color:var(--lv-muted); margin:18px 0 0; font-size:11px; line-height:1.6; }
 
 /* Custom leave form / details bottom sheet */
-.leave-modal-overlay, .leave-picker-overlay {
+.leave-modal-overlay, .leave-picker-overlay, .leave-type-overlay, .leave-confirm-overlay {
   position:fixed; inset:0; display:flex; align-items:flex-end; justify-content:center;
   background:rgba(7,22,32,.62); overscroll-behavior:contain;
 }
 .leave-modal-overlay { z-index:70; }
-.leave-picker-overlay { z-index:85; }
-.leave-modal, .leave-picker {
+.leave-picker-overlay, .leave-type-overlay { z-index:85; }
+.leave-confirm-overlay { z-index:100; }
+.leave-modal, .leave-picker, .leave-type-sheet, .leave-confirm-sheet {
   --lv-surface:#ffffff; --lv-ink:#203b46; --lv-muted:#6c818c;
   --lv-line:#e0e9ed; --lv-soft:#edf5f6; --lv-accent:#087d78;
   width:min(100%,480px); max-height:91dvh; overflow-y:auto;
@@ -118,11 +119,11 @@
   padding:11px 20px calc(22px + env(safe-area-inset-bottom, 0px));
   box-shadow:0 -12px 35px rgba(5,24,37,.18);
 }
-.app-shell[data-period="night"] .leave-modal, .app-shell[data-period="night"] .leave-picker {
+.app-shell[data-period="night"] .leave-modal, .app-shell[data-period="night"] .leave-picker, .app-shell[data-period="night"] .leave-type-sheet, .app-shell[data-period="night"] .leave-confirm-sheet {
   --lv-surface:#1b3046; --lv-ink:#eff7fe; --lv-muted:#b5c7d5;
   --lv-line:#37536c; --lv-soft:#264258; --lv-accent:#83dbcc;
 }
-.leave-modal::-webkit-scrollbar, .leave-picker::-webkit-scrollbar { display:none; }
+.leave-modal::-webkit-scrollbar, .leave-picker::-webkit-scrollbar, .leave-type-sheet::-webkit-scrollbar, .leave-confirm-sheet::-webkit-scrollbar { display:none; }
 .leave-modal__handle, .leave-picker__handle { width:38px; height:4px; background:var(--lv-line); border-radius:6px; margin:0 auto 17px; }
 .leave-modal__head, .leave-picker__head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; margin-bottom:20px; }
 .leave-modal__head span, .leave-picker__head span { display:block; color:var(--lv-muted); font-weight:750; letter-spacing:.2px; font-size:11px; }
@@ -230,14 +231,14 @@
   .leave-request { gap:7px; padding:10px 8px; }
   .leave-request__icon { width:36px; height:38px; flex-basis:36px; }
   .leave-status { font-size:10px; padding:5px; }
-  .leave-modal, .leave-picker { padding-left:15px; padding-right:15px; }
+  .leave-modal, .leave-picker, .leave-type-sheet, .leave-confirm-sheet { padding-left:15px; padding-right:15px; }
   .leave-date-trigger { padding-left:7px; padding-right:7px; }
   .leave-date-trigger__value { font-size:11px; gap:4px; }
   .leave-date-trigger__value svg { width:14px; }
 }
 @media (min-width:540px) {
-  .leave-modal-overlay, .leave-picker-overlay { align-items:center; padding:20px; }
-  .leave-modal, .leave-picker { border-radius:23px; max-height:87dvh; }
+  .leave-modal-overlay, .leave-picker-overlay, .leave-type-overlay, .leave-confirm-overlay { align-items:center; padding:20px; }
+  .leave-modal, .leave-picker, .leave-type-sheet, .leave-confirm-sheet { border-radius:23px; max-height:87dvh; }
 }
 @media (prefers-reduced-motion:reduce) {
   .leave-control__chevron { transition:none; }
@@ -258,3 +259,70 @@
 .leave-form__duration { display:flex; align-items:center; gap:5px; flex-wrap:wrap; margin:1px 0 0; font-size:12px; line-height:1.5; color:var(--lv-accent); font-weight:800; }
 .leave-form__duration svg { flex:0 0 auto; }
 .leave-form__duration small { font-size:11px; font-weight:500; color:var(--lv-muted); }
+
+
+/* Custom leave-type selection: separate popup with visibly outlined rows. */
+.leave-type-sheet { display:flex; flex-direction:column; max-height:87dvh; }
+.leave-type-sheet .leave-picker__head { flex:0 0 auto; }
+.leave-type-sheet .leave-type-options {
+  min-height:0; position:static; flex:1 1 auto; max-height:none;
+  overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
+  border:none; border-radius:0; box-shadow:none; padding:2px 1px 7px;
+  background:transparent;
+}
+.leave-type-sheet .leave-type-option {
+  min-height:60px; border:1px solid var(--lv-line);
+  border-radius:12px; margin:0;
+}
+.leave-type-sheet .leave-type-option + .leave-type-option { margin-top:7px; }
+.leave-type-sheet .leave-type-option--selected { border:2px solid var(--lv-accent); }
+.leave-type-sheet .leave-type-option:focus-visible,
+.leave-picker__day:focus-visible { outline:3px solid #f1ad30; outline-offset:2px; }
+
+/* Four employee fields collapse into one profile preview row. */
+.leave-employee--compact { display:flex; align-items:center; gap:10px; padding:10px 12px; }
+.leave-employee__badge {
+  display:grid; place-items:center; width:35px; height:35px; flex:0 0 35px;
+  border-radius:10px; color:var(--lv-accent); background:var(--lv-surface);
+}
+.leave-employee__identity { display:flex; flex-direction:column; gap:3px; flex:1; min-width:0; }
+.leave-employee__identity strong { font-size:12px; color:var(--lv-ink); }
+.leave-employee__identity span { font-size:11px; line-height:1.35; color:var(--lv-muted); }
+.leave-employee__pending { font-size:10px; color:var(--lv-muted); white-space:nowrap; }
+
+/* Range picker: tap start and end inside the same Thai calendar. */
+.leave-picker__range-hint {
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  margin:-2px 0 16px; padding:10px; border-radius:12px; background:var(--lv-soft);
+}
+.leave-picker__range-hint > span { display:flex; min-width:0; flex:1; flex-direction:column; gap:4px; }
+.leave-picker__range-hint small { font-size:11px; color:var(--lv-muted); }
+.leave-picker__range-hint strong { font-size:12px; line-height:1.4; color:var(--lv-muted); }
+.leave-picker__range-hint .is-picked strong { color:var(--lv-accent); }
+.leave-picker__range-hint > svg { flex:0 0 auto; color:var(--lv-muted); }
+.leave-picker__day--range { background:var(--lv-soft); color:var(--lv-accent); border-radius:5px; }
+.leave-picker__day--selected { color:#fff; background:var(--lv-accent); border-color:var(--lv-accent); }
+.leave-picker__apply { margin-top:13px; }
+.leave-picker__apply:disabled { opacity:.38; cursor:not-allowed; }
+
+/* Confirm before appending a sample leave request to local preview state. */
+.leave-confirm__summary {
+  display:flex; flex-direction:column; padding:3px 14px;
+  border-radius:14px; background:var(--lv-soft);
+}
+.leave-confirm__summary > div { display:flex; flex-direction:column; gap:4px; padding:12px 0; }
+.leave-confirm__summary > div + div { border-top:1px solid var(--lv-line); }
+.leave-confirm__summary span { font-size:11px; color:var(--lv-muted); }
+.leave-confirm__summary strong { font-size:14px; color:var(--lv-ink); line-height:1.5; overflow-wrap:anywhere; }
+.leave-confirm__notice { margin:13px 0 15px; }
+.leave-confirm__actions { display:flex; flex-direction:column; gap:8px; }
+.leave-confirm__edit {
+  min-height:47px; width:100%; background:var(--lv-surface); color:var(--lv-ink);
+  border:1px solid var(--lv-line); border-radius:12px; font-size:13px; font-weight:800;
+}
+@media (max-width:355px) {
+  .leave-employee--compact { padding:9px 8px; gap:7px; }
+  .leave-employee__badge { flex-basis:30px; width:30px; height:30px; }
+  .leave-employee__identity span { font-size:10px; }
+  .leave-employee__pending { display:none; }
+}
