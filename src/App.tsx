@@ -171,8 +171,9 @@ function App() {
 
   return (
     <div className="app-shell" data-period={period} data-view={activeTab}>
-      {/* Solid edge sampled by iOS Home Screen status bar; no layout height. */}
-      <div className="status-bar-tint" aria-hidden="true" />
+      {/* Replace the real edge element on theme changes so iOS resamples
+          its solid color, without changing the hero or safe-area layout. */}
+      <div key={period} className="status-bar-tint" aria-hidden="true" />
       <div className="app-scroll" ref={scrollRef}>
         {activeTab === 'home' ? (
           <>
