@@ -22,6 +22,7 @@ import {
 import SkyScene from './SkyScene';
 import HistoryPage from './HistoryPage';
 import CalendarPage from './CalendarPage';
+import LeavePage from './LeavePage';
 import {
   getBangkokPeriod,
   periodNames,
@@ -82,7 +83,7 @@ function App() {
   const [dialog, setDialog] = useState<Dialog>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [activeTab, setActiveTab] = useState<'home' | 'history'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'history' | 'leave'>('home');
   const [calendarOpen, setCalendarOpen] = useState(false);
   const calendarDialogRef = useRef<HTMLElement>(null);
 
@@ -371,8 +372,10 @@ function App() {
           </p>
         </main>
           </>
-        ) : (
+        ) : activeTab === 'history' ? (
           <HistoryPage onBack={() => setActiveTab('home')} />
+        ) : (
+          <LeavePage now={now} onBack={() => setActiveTab('home')} />
         )}
       </div>
 
@@ -388,6 +391,7 @@ function App() {
             onClick={() => {
               if (key === 'home') setActiveTab('home');
               else if (key === 'calendar') setCalendarOpen(true);
+              else if (key === 'leave') setActiveTab('leave');
               else openInfo(label, 'หน้านี้ยังไม่ได้พัฒนา เราจะออกแบบทีละหน้าตามที่ตกลงกัน');
             }}
           >
