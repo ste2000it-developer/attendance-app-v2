@@ -4,11 +4,22 @@ import {
   ArrowLeft, CalendarCheck2, CalendarDays, CalendarRange, Check,
   ChevronDown, ChevronLeft, ChevronRight, ClipboardList, Clock3,
   FilePenLine, HeartPulse, Info, MoreHorizontal, Paperclip,
-  Palmtree, Plus, Send, X,
+  Palmtree, Plus, Send, X, GraduationCap, Shield, BookOpen,
+  Baby, Stethoscope, Siren, UserRound,
 } from 'lucide-react';
 import './leave.css';
 
-type LeaveType = 'ลาป่วย' | 'ลากิจ' | 'ลาพักร้อน' | 'อื่น ๆ';
+type LeaveType =
+  | 'ลาพักร้อนประจำปี'
+  | 'ลาป่วย'
+  | 'ลาเพื่อฝึกอบรม/พัฒนาความรู้'
+  | 'ลารับราชการทหาร'
+  | 'ลาอุปสมบท'
+  | 'ลาคลอด'
+  | 'ลาเพื่อทำหมัน'
+  | 'ลากิจโดยไม่รับค่าจ้าง'
+  | 'ลาฉุกเฉิน'
+  | 'อื่นๆ';
 type LeaveStatus = 'pending' | 'approved' | 'rejected';
 type LeaveFilter = 'all' | LeaveStatus;
 type LeaveRequest = {
@@ -23,15 +34,23 @@ type Modal = 'form' | 'detail' | null;
 type DateField = 'start' | 'end' | null;
 
 const demoRequests: LeaveRequest[] = [
-  { id: 'demo-1', type: 'ลากิจ', start: '2026-11-03', end: '2026-11-03', reason: 'ธุระส่วนตัว (ข้อมูลตัวอย่าง)', status: 'pending' },
+  { id: 'demo-1', type: 'ลากิจโดยไม่รับค่าจ้าง', start: '2026-11-03', end: '2026-11-03', reason: 'ธุระส่วนตัว (ข้อมูลตัวอย่าง)', status: 'pending' },
   { id: 'demo-2', type: 'ลาป่วย', start: '2026-10-16', end: '2026-10-16', reason: 'พักรักษาตัว (ข้อมูลตัวอย่าง)', status: 'approved' },
-  { id: 'demo-3', type: 'ลาพักร้อน', start: '2026-09-22', end: '2026-09-23', reason: 'วันพักผ่อน (ข้อมูลตัวอย่าง)', status: 'rejected' },
+  { id: 'demo-3', type: 'ลาพักร้อนประจำปี', start: '2026-09-22', end: '2026-09-23', reason: 'วันพักผ่อน (ข้อมูลตัวอย่าง)', status: 'rejected' },
 ];
+// Original V1 leave categories and rules retained for the V2 design preview.
+// Actual company holiday counting and real approval remain unconnected.
 const leaveOptions = [
-  { type: 'ลาป่วย', detail: 'เจ็บป่วยหรือพบแพทย์', Icon: HeartPulse },
-  { type: 'ลากิจ', detail: 'ธุระส่วนตัวที่จำเป็น', Icon: ClipboardList },
-  { type: 'ลาพักร้อน', detail: 'วันพักผ่อนประจำปี', Icon: Palmtree },
-  { type: 'อื่น ๆ', detail: 'การลาประเภทอื่น', Icon: MoreHorizontal },
+  { type: 'ลาพักร้อนประจำปี', detail: 'ยื่นล่วงหน้าอย่างน้อย 1 วัน', Icon: Palmtree, advance: true, noteRequired: false },
+  { type: 'ลาป่วย', detail: 'ไม่ต้องยื่นล่วงหน้า', Icon: HeartPulse, advance: false, noteRequired: false },
+  { type: 'ลาเพื่อฝึกอบรม/พัฒนาความรู้', detail: 'ยื่นล่วงหน้าอย่างน้อย 1 วัน', Icon: GraduationCap, advance: true, noteRequired: false },
+  { type: 'ลารับราชการทหาร', detail: 'ยื่นล่วงหน้าอย่างน้อย 1 วัน', Icon: Shield, advance: true, noteRequired: false },
+  { type: 'ลาอุปสมบท', detail: 'ยื่นล่วงหน้าอย่างน้อย 1 วัน', Icon: BookOpen, advance: true, noteRequired: false },
+  { type: 'ลาคลอด', detail: 'ยื่นล่วงหน้าอย่างน้อย 1 วัน', Icon: Baby, advance: true, noteRequired: false },
+  { type: 'ลาเพื่อทำหมัน', detail: 'ยื่นล่วงหน้าอย่างน้อย 1 วัน', Icon: Stethoscope, advance: true, noteRequired: false },
+  { type: 'ลากิจโดยไม่รับค่าจ้าง', detail: 'ยื่นล่วงหน้าอย่างน้อย 1 วัน', Icon: ClipboardList, advance: true, noteRequired: false },
+  { type: 'ลาฉุกเฉิน', detail: 'ไม่ต้องยื่นล่วงหน้า · ต้องระบุหมายเหตุ', Icon: Siren, advance: false, noteRequired: true },
+  { type: 'อื่นๆ', detail: 'ไม่ต้องยื่นล่วงหน้า · ต้องระบุหมายเหตุ', Icon: MoreHorizontal, advance: false, noteRequired: true },
 ] as const;
 const statusLabels: Record<LeaveStatus, string> = {
   pending: 'รออนุมัติ', approved: 'อนุมัติแล้ว', rejected: 'ไม่อนุมัติ',
@@ -54,6 +73,12 @@ function formatDate(iso: string) {
 }
 function formatRange(start: string, end: string) {
   return start === end ? formatDate(start) : formatDate(start) + ' – ' + formatDate(end);
+}
+function countCalendarDays(start: string, end: string) {
+  const first = Date.parse(start + 'T12:00:00Z');
+  const last = Date.parse(end + 'T12:00:00Z');
+  return Number.isFinite(first) && Number.isFinite(last) && last >= first
+    ? Math.round((last - first) / 86_400_000) + 1 : 0;
 }
 function bangkokToday(date: Date) {
   const parts = new Intl.DateTimeFormat('en-GB', {
@@ -79,7 +104,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
   const [filter, setFilter] = useState<LeaveFilter>('all');
   const [modal, setModal] = useState<Modal>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [leaveType, setLeaveType] = useState<LeaveType>('ลากิจ');
+  const [leaveType, setLeaveType] = useState<LeaveType>('ลาป่วย');
   const [typeOpen, setTypeOpen] = useState(false);
   const [start, setStart] = useState(today);
   const [end, setEnd] = useState(today);
@@ -186,12 +211,21 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
 
   const submitPreview = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!start || !end || !reason.trim()) {
-      setFormError('กรุณาเลือกวันที่และระบุเหตุผลการลา');
+    if (!start || !end) {
+      setFormError('กรุณาเลือกช่วงวันที่ลาให้ครบ');
       return;
     }
     if (end < start) {
       setFormError('วันที่สิ้นสุดต้องไม่อยู่ก่อนวันที่เริ่มลา');
+      return;
+    }
+    const selectedRule = leaveOptions.find((option) => option.type === leaveType)!;
+    if (selectedRule.noteRequired && !reason.trim()) {
+      setFormError('การลาประเภทนี้ต้องระบุหมายเหตุ');
+      return;
+    }
+    if (selectedRule.advance && start <= today) {
+      setFormError('การลาประเภทนี้ต้องยื่นล่วงหน้าอย่างน้อย 1 วัน');
       return;
     }
     setRequests((current) => [{
@@ -200,7 +234,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
     }, ...current]);
     setFilter('all');
     setFeedback(true);
-    setLeaveType('ลากิจ');
+    setLeaveType('ลาป่วย');
     setStart(today);
     setEnd(today);
     setReason('');
@@ -321,6 +355,19 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
 
               {modal === 'form' ? (
                 <form className="leave-form" onSubmit={submitPreview}>
+                  <section className="leave-employee" aria-label="ข้อมูลผู้ลา">
+                    <div className="leave-employee__head">
+                      <UserRound size={17} aria-hidden="true" />
+                      <strong>ข้อมูลผู้ลา</strong>
+                      <small>รอเชื่อมโปรไฟล์จริง</small>
+                    </div>
+                    <div className="leave-employee__grid">
+                      <div><span>ชื่อ-นามสกุล</span><strong>—</strong></div>
+                      <div><span>รหัสพนักงาน</span><strong>—</strong></div>
+                      <div><span>แผนก</span><strong>—</strong></div>
+                      <div><span>ตำแหน่ง</span><strong>—</strong></div>
+                    </div>
+                  </section>
                   <div className="leave-form__field leave-type-group" ref={typeControlRef}>
                     <span className="leave-form__label">ประเภทการลา <em>*</em></span>
                     <button type="button" className={'leave-control leave-control--select' + (typeOpen ? ' leave-control--expanded' : '')}
@@ -332,11 +379,12 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
                     </button>
                     {typeOpen && (
                       <div className="leave-type-options" role="listbox" aria-label="เลือกประเภทการลา">
+                        <div className="leave-type-options__heading">เลือกประเภทการลา <span>10 ประเภท</span></div>
                         {leaveOptions.map(({ type, detail, Icon }) => (
                           <button type="button" role="option" key={type}
                             aria-selected={leaveType === type}
                             className={'leave-type-option' + (leaveType === type ? ' leave-type-option--selected' : '')}
-                            onClick={() => { setLeaveType(type); setTypeOpen(false); }}>
+                            onClick={() => { setLeaveType(type); setTypeOpen(false); setFormError(''); }}>
                             <span className="leave-type-option__icon"><Icon size={19} strokeWidth={1.9} aria-hidden="true" /></span>
                             <span className="leave-type-option__text"><strong>{type}</strong><small>{detail}</small></span>
                             {leaveType === type && <Check size={19} strokeWidth={2.3} aria-hidden="true" />}
@@ -345,6 +393,13 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
                       </div>
                     )}
                   </div>
+
+                  <p className="leave-form__rule">
+                    <Info size={15} aria-hidden="true" />
+                    <span>{selectedOption.advance
+                      ? 'ประเภทนี้ต้องยื่นล่วงหน้าอย่างน้อย 1 วัน'
+                      : 'ประเภทนี้ไม่บังคับให้ยื่นล่วงหน้า'}</span>
+                  </p>
 
                   <div className="leave-form__field">
                     <span className="leave-form__label">ช่วงวันที่ลา <em>*</em></span>
@@ -361,12 +416,20 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
                         <span className="leave-date-trigger__value"><CalendarDays size={17} aria-hidden="true" />{formatDate(end)}</span>
                       </button>
                     </div>
+                    <p className="leave-form__duration">
+                      <CalendarCheck2 size={15} aria-hidden="true" />
+                      รวม {countCalendarDays(start, end)} วันตามช่วงวันที่
+                      <small> (ยังไม่หักวันหยุด)</small>
+                    </p>
                   </div>
 
                   <label className="leave-form__field">
-                    <span className="leave-form__label">เหตุผลการลา <em>*</em></span>
+                    <span className="leave-form__label">หมายเหตุ / เหตุผลการลา {selectedOption.noteRequired
+                      ? <em>*</em>
+                      : <small>(ไม่บังคับ)</small>}</span>
                     <textarea className="leave-reason" rows={3} maxLength={500} value={reason}
-                      placeholder="ระบุเหตุผลการลา..." required
+                      placeholder={selectedOption.noteRequired ? 'โปรดระบุหมายเหตุสำหรับการลาประเภทนี้...' : 'ระบุรายละเอียดเพิ่มเติม (ถ้ามี)...'}
+                      required={selectedOption.noteRequired}
                       onChange={(event) => { setReason(event.target.value); setFormError(''); }} />
                     <small className="leave-form__characters">{reason.length}/500</small>
                   </label>
@@ -389,7 +452,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
                     </div>
                   </div>
                   {formError && <p className="leave-form__error" role="alert">{formError}</p>}
-                  <p className="leave-form__hint"><Info size={14} aria-hidden="true" /> แบบทดลองเท่านั้น ไม่มีการส่งคำขอหรืออัปโหลดเอกสารจริง</p>
+                  <p className="leave-form__hint"><Info size={14} aria-hidden="true" /> แบบทดลองเท่านั้น จำนวนวันยังไม่ตรวจสอบวันหยุด และไม่มีการส่งข้อมูลจริง</p>
                   <button type="submit" className="leave-modal__primary"><Send size={18} aria-hidden="true" /> ทดลองส่งคำขอ</button>
                 </form>
               ) : selectedRequest ? (
@@ -408,7 +471,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
                     <div><small>สถานะคำขอ</small><strong>{statusLabels[selectedRequest.status]} (ข้อมูลตัวอย่าง)</strong></div>
                   </div>
                   <div className="leave-detail__note">
-                    <span>เหตุผลการลา</span><p>{selectedRequest.reason}</p>
+                    <span>หมายเหตุ / เหตุผลการลา</span><p>{selectedRequest.reason || 'ไม่ได้ระบุหมายเหตุ'}</p>
                   </div>
                   <p className="leave-form__hint"><Info size={14} aria-hidden="true" /> ยังไม่ใช่ข้อมูลการอนุมัติจริงจากบริษัท</p>
                   <button className="leave-modal__primary" type="button" onClick={closeModal}>ปิดรายละเอียด</button>
