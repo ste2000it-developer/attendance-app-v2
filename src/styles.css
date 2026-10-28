@@ -356,12 +356,11 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   background: #21ab91;
   color: #071f2d;
 }
-/* History has its own screen surface, so its system bar must match that
-   surface instead of retaining the Home scene's sky colour. */
-.app-shell[data-view="history"]:not([data-period="night"]) {
-  --status-bar-edge: #f0f5f5;
+/* Sky colors are exclusive to Home; other light screens get a white bar. */
+.app-shell:not([data-view="home"]):not([data-period="night"]) {
+  --status-bar-edge: #ffffff;
 }
-.app-shell[data-view="history"][data-period="night"] {
+.app-shell:not([data-view="home"])[data-period="night"] {
   --status-bar-edge: #0e233b;
 }
 
@@ -397,14 +396,15 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   :root[data-period="evening"] body { background-color: #563ea3; }
   :root[data-period="night"],
   :root[data-period="night"] body { background-color: #0b2856; }
-  /* Use the visible screen's own surface colour after navigation. */
-  :root[data-view="history"]:not([data-period="night"]),
-  :root[data-view="history"]:not([data-period="night"]) body {
-    background-color: #f0f5f5;
+  /* Non-Home screens: pure white system bar in light themes, navy at night.
+     Only the iOS canvas/chrome changes; each page keeps its own background. */
+  :root:not([data-view="home"]):not([data-period="night"]),
+  :root:not([data-view="home"]):not([data-period="night"]) body {
+    background-color: #ffffff;
     color-scheme: light;
   }
-  :root[data-view="history"][data-period="night"],
-  :root[data-view="history"][data-period="night"] body {
+  :root:not([data-view="home"])[data-period="night"],
+  :root:not([data-view="home"])[data-period="night"] body {
     background-color: #0e233b;
     color-scheme: dark;
   }
