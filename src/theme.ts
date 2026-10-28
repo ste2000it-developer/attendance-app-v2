@@ -34,6 +34,6 @@ export const periodThemeColors: Record<DayPeriod, string> = {
   day: '#34a3fd',
   // Evening is sampled from the first row of the approved sunset artwork.
   evening: '#563ea3',
-  // A calmer navy that sits closer to the night sky than the old vivid blue.
-  night: '#0b2856',
+  // Sampled from the first visible row of the approved night Pixel Art on iPhone.
+  night: '#032b71',
 };
