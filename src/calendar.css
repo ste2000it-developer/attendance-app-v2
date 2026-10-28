@@ -216,7 +216,7 @@
   .calendar-grid { gap: 2px; }
 }
 
-/* Details overlay only. The monthly calendar remains a full page. */
+/* Day detail opens in its own dialog above the calendar popup. */
 .calendar-day-overlay {
   position: fixed;
   inset: 0;
@@ -237,6 +237,9 @@
   border-radius: 24px 24px 0 0;
   background: #ffffff;
   color: #203b43;
+  --cal-soft: #e8f2f5;
+  --cal-accent: #205d73;
+  --cal-muted: #637d89;
   box-shadow: 0 -10px 40px rgba(11, 37, 44, .13);
 }
 .calendar-day-popup::-webkit-scrollbar { display: none; }
@@ -310,6 +313,9 @@
   font-weight: 800;
 }
 .app-shell[data-period="night"] .calendar-day-popup {
+  --cal-soft: #243e57;
+  --cal-accent: #9fdae2;
+  --cal-muted: #b1c4d5;
   background: #182e47;
   color: #f0f6ff;
   border: 1px solid #35516e;
@@ -326,4 +332,64 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .calendar-day-popup { animation: none; }
+}
+
+/* Calendar bottom sheet: scroll within the modal, not the Home/History page. */
+.calendar-popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  background: rgba(6, 21, 32, .60);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.calendar-popup {
+  width: min(100%, 480px);
+  max-height: min(88dvh, 850px);
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  border-radius: 24px 24px 0 0;
+  background: #ffffff;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-shadow: 0 -15px 50px rgba(0, 0, 0, .18);
+  outline: none;
+}
+.calendar-popup::-webkit-scrollbar { display: none; }
+.calendar-popup .calendar-page {
+  min-height: 0;
+  padding: 17px 15px 24px;
+}
+.calendar-close {
+  border: 1px solid var(--cal-panel-line);
+  background: var(--cal-soft);
+  color: var(--cal-accent);
+  height: 41px;
+  width: 41px;
+  flex: 0 0 41px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+}
+.app-shell[data-period="night"] .calendar-popup {
+  background: #0e233b;
+  box-shadow: 0 -15px 50px rgba(0, 0, 0, .4);
+}
+@media (min-width: 540px) {
+  .calendar-popup-overlay {
+    align-items: center;
+    padding: 20px;
+  }
+  .calendar-popup {
+    max-height: 88dvh;
+    border-radius: 24px;
+    padding-bottom: 0;
+  }
+}
+@media (max-width: 355px) {
+  .calendar-popup .calendar-page { padding-left: 11px; padding-right: 11px; }
+  .calendar-heading { gap: 6px; }
+  .calendar-today { padding: 7px; }
 }

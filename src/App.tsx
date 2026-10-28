@@ -70,7 +70,9 @@ function App() {
   const [dialog, setDialog] = useState<Dialog>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [activeTab, setActiveTab] = useState<'home' | 'history' | 'calendar'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'history'>('home');
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const calendarDialogRef = useRef<HTMLElement>(null);
 
   const period = previewTheme ?? getBangkokPeriod(now);
   // Firebase attendance is not connected. Do not invent check-in/out records.
@@ -168,6 +170,43 @@ function App() {
       previousFocus?.focus();
     };
   }, [dialog]);
+
+  useEffect(() => {
+    if (!calendarOpen) return;
+    const dialogElement = calendarDialogRef.current;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    dialogElement?.querySelector<HTMLButtonElement>('.calendar-close')?.focus();
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      // Day details are a second dialog above the calendar. Let that dialog
+      // handle Escape/Tab first, so Esc closes only the selected day.
+      if (document.querySelector('.calendar-day-overlay')) return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setCalendarOpen(false);
+      }
+      if (event.key !== 'Tab' || !dialogElement) return;
+      const focusable = Array.from(dialogElement.querySelectorAll<HTMLElement>(
+        'button:not(:disabled), a[href], [tabindex]:not([tabindex="-1"])',
+      )).filter((element) => element.getClientRects().length > 0);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      previousFocus?.focus();
+    };
+  }, [calendarOpen]);
 
   const openInfo = (title: string, description: string) => setDialog({ title, description });
   const openClockInfo = () => openInfo(
@@ -313,8 +352,6 @@ function App() {
           </p>
         </main>
           </>
-        ) : activeTab === 'calendar' ? (
-          <CalendarPage now={now} />
         ) : (
           <HistoryPage onBack={() => setActiveTab('home')} />
         )}
@@ -325,19 +362,37 @@ function App() {
           <button
             key={key}
             type="button"
-            className={'bottom-nav__item' + (key === activeTab ? ' bottom-nav__item--active' : '')}
-            aria-current={key === activeTab ? 'page' : undefined}
+            className={'bottom-nav__item' + ((key === 'calendar' ? calendarOpen : key === activeTab) ? ' bottom-nav__item--active' : '')}
+            aria-current={key !== 'calendar' && key === activeTab && !calendarOpen ? 'page' : undefined}
+            aria-haspopup={key === 'calendar' ? 'dialog' : undefined}
+            aria-expanded={key === 'calendar' ? calendarOpen : undefined}
             onClick={() => {
               if (key === 'home') setActiveTab('home');
-              else if (key === 'calendar') setActiveTab('calendar');
+              else if (key === 'calendar') setCalendarOpen(true);
               else openInfo(label, 'หน้านี้ยังไม่ได้พัฒนา เราจะออกแบบทีละหน้าตามที่ตกลงกัน');
             }}
           >
-            <Icon size={24} strokeWidth={key === activeTab ? 2.3 : 1.85} aria-hidden="true" />
+            <Icon size={24} strokeWidth={((key === 'calendar' ? calendarOpen : key === activeTab) ? 2.3 : 1.85)} aria-hidden="true" />
             <span>{label}</span>
           </button>
         ))}
       </nav>
+
+      {calendarOpen && (
+        <div className="calendar-popup-overlay" onMouseDown={(event) => {
+          if (event.target === event.currentTarget) setCalendarOpen(false);
+        }}>
+          <section
+            className="calendar-popup"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="calendar-popup-title"
+            ref={calendarDialogRef}
+          >
+            <CalendarPage now={now} onClose={() => setCalendarOpen(false)} />
+          </section>
+        </div>
+      )}
 
       {dialog !== null && (
         <div className="dialog-backdrop" onMouseDown={(event) => {

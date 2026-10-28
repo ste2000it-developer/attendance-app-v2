@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { CalendarDays, ChevronLeft, ChevronRight, Info, RotateCcw, X } from 'lucide-react';
 import './calendar.css';
 
@@ -53,7 +54,7 @@ function bangkokParts(date: Date) {
   return { year: part('year'), month: part('month') - 1, day: part('day') };
 }
 
-export default function CalendarPage({ now }: { now: Date }) {
+export default function CalendarPage({ now, onClose }: { now: Date; onClose: () => void }) {
   const today = bangkokParts(now);
   const [monthDate, setMonthDate] = useState(() => new Date(Date.UTC(today.year, today.month, 1)));
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
@@ -130,12 +131,15 @@ export default function CalendarPage({ now }: { now: Date }) {
           <CalendarDays size={24} strokeWidth={1.9} />
         </span>
         <div className="calendar-heading__title">
-          <h1>ปฏิทินการทำงาน</h1>
+          <h1 id="calendar-popup-title">ปฏิทินการทำงาน</h1>
           <p>ดูวันทำงาน วันหยุด และวันลา</p>
         </div>
         <button className="calendar-today" type="button" onClick={(event) => goToToday(event.currentTarget)} aria-label="กลับไปวันที่วันนี้">
           <RotateCcw size={16} strokeWidth={2} aria-hidden="true" />
           วันนี้
+        </button>
+        <button className="calendar-close" type="button" onClick={onClose} aria-label="ปิดปฏิทิน">
+          <X size={23} aria-hidden="true" />
         </button>
       </header>
 
@@ -213,7 +217,7 @@ export default function CalendarPage({ now }: { now: Date }) {
 
       <p className="calendar-footer-note">รายการที่แสดงเป็นข้อมูลจำลอง ไม่ใช่บันทึกการทำงานหรือวันลาจริง</p>
 
-      {selectedDay !== null && selectedDate && (
+      {selectedDay !== null && selectedDate && createPortal(
         <div
           className="calendar-day-overlay"
           onMouseDown={(event) => {
@@ -270,7 +274,8 @@ export default function CalendarPage({ now }: { now: Date }) {
               ปิดรายละเอียด
             </button>
           </section>
-        </div>
+        </div>,
+        document.querySelector('.app-shell') ?? document.body,
       )}
     </main>
   );
