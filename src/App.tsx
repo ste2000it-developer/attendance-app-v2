@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import SkyScene from './SkyScene';
 import HistoryPage from './HistoryPage';
+import CalendarPage from './CalendarPage';
 import {
   getBangkokPeriod,
   periodNames,
@@ -69,7 +70,7 @@ function App() {
   const [dialog, setDialog] = useState<Dialog>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [activeTab, setActiveTab] = useState<'home' | 'history'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'history' | 'calendar'>('home');
 
   const period = previewTheme ?? getBangkokPeriod(now);
   // Firebase attendance is not connected. Do not invent check-in/out records.
@@ -312,6 +313,8 @@ function App() {
           </p>
         </main>
           </>
+        ) : activeTab === 'calendar' ? (
+          <CalendarPage now={now} />
         ) : (
           <HistoryPage onBack={() => setActiveTab('home')} />
         )}
@@ -326,7 +329,7 @@ function App() {
             aria-current={key === activeTab ? 'page' : undefined}
             onClick={() => {
               if (key === 'home') setActiveTab('home');
-              else if (key === 'calendar') openInfo('ปฏิทิน', 'เราจะออกแบบหน้าปฏิทินสำหรับตารางงานและนัดหมายในขั้นตอนถัดไป');
+              else if (key === 'calendar') setActiveTab('calendar');
               else openInfo(label, 'หน้านี้ยังไม่ได้พัฒนา เราจะออกแบบทีละหน้าตามที่ตกลงกัน');
             }}
           >
