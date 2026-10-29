@@ -2,8 +2,8 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
 import {
   ArrowLeft, ArrowRight, CalendarCheck2, CalendarDays, Check,
-  ChevronDown, ChevronLeft, ChevronRight, ClipboardList, Clock3,
-  HeartPulse, Info, MoreHorizontal, Paperclip, UserRound,
+  ChevronLeft, ChevronRight, ClipboardList, Clock3,
+  HeartPulse, Info, MoreHorizontal, Paperclip,
   Palmtree, Plus, Send, X, GraduationCap, Shield, BookOpen,
   Baby, Stethoscope, Siren,
 } from 'lucide-react';
@@ -103,10 +103,10 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
   const [filter, setFilter] = useState<LeaveFilter>('all');
   const [modal, setModal] = useState<Modal>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [leaveType, setLeaveType] = useState<LeaveType>('ลาป่วย');
+  const [leaveType, setLeaveType] = useState<LeaveType | null>(null);
   const [typeOpen, setTypeOpen] = useState(false);
-  const [start, setStart] = useState(today);
-  const [end, setEnd] = useState(today);
+  const [start, setStart] = useState('');
+  const [end, setEnd] = useState('');
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [draftStart, setDraftStart] = useState<string | null>(null);
   const [draftEnd, setDraftEnd] = useState<string | null>(null);
@@ -115,6 +115,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
   const [reason, setReason] = useState('');
   const [attachmentName, setAttachmentName] = useState('');
   const [formError, setFormError] = useState('');
+  const [errorField, setErrorField] = useState<'type' | 'date' | 'reason' | 'file' | null>(null);
   const [feedback, setFeedback] = useState(false);
   const previousFocus = useRef<HTMLElement | null>(null);
   const modalPanelRef = useRef<HTMLElement>(null);
@@ -134,22 +135,31 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
   const countPending = requests.filter((request) => request.status === 'pending').length;
   const countApproved = requests.filter((request) => request.status === 'approved').length;
   const countRejected = requests.filter((request) => request.status === 'rejected').length;
-  const selectedRule = leaveOptions.find((option) => option.type === leaveType)!;
-  const SelectedTypeIcon = selectedRule.Icon;
+  const selectedRule = leaveOptions.find((option) => option.type === leaveType);
+  const SelectedTypeIcon = selectedRule?.Icon;
+  const clearError = () => { setFormError(''); setErrorField(null); };
   const validateLeaveRequest = () => {
+    if (!selectedRule) {
+      setFormError('กรุณาเลือกประเภทการลาก่อน');
+      setErrorField('type');
+      return false;
+    }
     if (!start || !end || end < start) {
-      setFormError('กรุณาเลือกช่วงวันที่ลาให้ถูกต้อง');
+      setFormError('กรุณาเลือกวันที่ต้องการลา');
+      setErrorField('date');
       return false;
     }
     if (selectedRule.advance && start <= today) {
-      setFormError('การลาประเภทนี้ต้องยื่นล่วงหน้าอย่างน้อย 1 วัน');
+      setFormError('ประเภทนี้ต้องยื่นล่วงหน้าอย่างน้อย 1 วัน กรุณาเลือกวันใหม่');
+      setErrorField('date');
       return false;
     }
     if (selectedRule.noteRequired && !reason.trim()) {
-      setFormError('การลาประเภทนี้ต้องระบุเหตุผล');
+      setFormError('กรุณาเขียนเหตุผลการลา');
+      setErrorField('reason');
       return false;
     }
-    setFormError('');
+    clearError();
     return true;
   };
 
@@ -157,10 +167,18 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
     previousFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setSelectedId(selected);
     setModal(next);
+    if (next === 'form') {
+      setLeaveType(null);
+      setStart('');
+      setEnd('');
+      setReason('');
+      setAttachmentName('');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
     setTypeOpen(false);
     setDatePickerOpen(false);
     setConfirmOpen(false);
-    setFormError('');
+    clearError();
   };
   const closeModal = () => {
     setConfirmOpen(false);
@@ -175,9 +193,9 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
   const openRangePicker = (trigger: HTMLButtonElement) => {
     dateTriggerRef.current = trigger;
     setTypeOpen(false);
-    setDraftStart(null);
-    setDraftEnd(null);
-    setPickerMonth(new Date(start + 'T12:00:00Z'));
+    setDraftStart(start || null);
+    setDraftEnd(end || null);
+    setPickerMonth(new Date((start || today) + 'T12:00:00Z'));
     setDatePickerOpen(true);
   };
   const selectRangeDate = (iso: string) => {
@@ -189,10 +207,10 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
     }
   };
   const acceptRange = () => {
-    if (!draftStart || !draftEnd) return;
+    if (!draftStart) return;
     setStart(draftStart);
-    setEnd(draftEnd);
-    setFormError('');
+    setEnd(draftEnd || draftStart);
+    clearError();
     setDatePickerOpen(false);
   };
 
@@ -260,19 +278,21 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
   };
 
   const confirmPreview = () => {
+    const confirmedType = leaveType;
+    if (!confirmedType || !start || !end) return;
     setRequests((current) => [{
-      id: 'preview-' + Date.now(), type: leaveType,
+      id: 'preview-' + Date.now(), type: confirmedType,
       start, end, reason: reason.trim(), status: 'pending',
     }, ...current]);
     setFilter('all');
     setFeedback(true);
-    setLeaveType('ลาป่วย');
-    setStart(today);
-    setEnd(today);
+    setLeaveType(null);
+    setStart('');
+    setEnd('');
     setReason('');
     setAttachmentName('');
     if (fileInputRef.current) fileInputRef.current.value = '';
-    setFormError('');
+    clearError();
     closeModal();
   };
 
@@ -376,124 +396,133 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
               <div className="leave-modal__handle" aria-hidden="true" />
               <header className="leave-modal__head">
                 <div>
-                  <span>LEAVE REQUEST <i>•</i> ทดลองดีไซน์</span>
+                  <span>แบบฟอร์มการลา <i>•</i> โหมดทดลอง</span>
                   <h2 id="leave-modal-title">{modal === 'form' ? 'ยื่นคำขอลา' : 'รายละเอียดคำขอ'}</h2>
-                  <p>{modal === 'form' ? 'กรอกข้อมูลในหน้าเดียว ตรวจสอบก่อนยืนยัน' : 'ข้อมูลคำขอและสถานะปัจจุบัน'}</p>
+                  <p>{modal === 'form' ? 'ทำตามลำดับง่าย ๆ แล้วตรวจสอบก่อนยืนยัน' : 'ข้อมูลคำขอและสถานะปัจจุบัน'}</p>
                 </div>
                 <button ref={modalCloseRef} className="leave-modal__close" type="button" onClick={closeModal}
                   aria-label="ปิดหน้าต่าง"><X size={21} aria-hidden="true" /></button>
               </header>
 
               {modal === 'form' ? (
-                <form className="leave-form leave-form--single" onSubmit={submitPreview}>
-                  <section className="leave-employee leave-employee--compact" aria-label="ข้อมูลผู้ยื่นลา">
-                    <span className="leave-employee__badge"><UserRound size={19} aria-hidden="true" /></span>
-                    <div className="leave-employee__identity">
-                      <strong>ข้อมูลผู้ยื่นลา</strong>
-                      <span>จะแสดงชื่อและข้อมูลพนักงานเมื่อเชื่อมโปรไฟล์</span>
+                <form className="leave-form leave-form--guided" onSubmit={submitPreview} noValidate>
+                  <p className="leave-guidance">เริ่มจากข้อ <strong>1</strong> แล้วทำตามลำดับลงมา ข้อที่เขียนว่า <strong>ข้ามได้</strong> ไม่จำเป็นต้องกรอก</p>
+
+                  <section id="leave-section-type" className="leave-guide-section" aria-labelledby="leave-guide-type">
+                    <div className="leave-guide-section__heading">
+                      <span className="leave-guide-section__number">1</span>
+                      <div><h3 id="leave-guide-type">ต้องการลาประเภทไหน?</h3><p>กดเลือกประเภทการลา</p></div>
+                      <span className="leave-guide-section__required">จำเป็น</span>
                     </div>
-                    <span className="leave-employee__pending">ทดลอง</span>
+                    <button type="button" className={'leave-guide-select' + (leaveType ? ' leave-guide-select--chosen' : '')}
+                      aria-haspopup="dialog" aria-expanded={typeOpen}
+                      aria-label={leaveType ? 'เปลี่ยนประเภทการลา ปัจจุบัน ' + leaveType : 'เลือกประเภทการลา'}
+                      onClick={(event) => openTypePicker(event.currentTarget)}>
+                      <span className="leave-guide-select__icon">
+                        {SelectedTypeIcon ? <SelectedTypeIcon size={22} strokeWidth={1.9} aria-hidden="true" /> : <ClipboardList size={22} aria-hidden="true" />}
+                      </span>
+                      <span className="leave-guide-select__main">
+                        <strong>{leaveType || 'กดเลือกประเภทการลา'}</strong>
+                        <small>{leaveType ? 'กดอีกครั้งเพื่อเปลี่ยน' : 'เช่น ลาป่วย ลากิจ ลาพักร้อน'}</small>
+                      </span>
+                      {leaveType ? <Check size={21} className="leave-guide-select__selected" aria-hidden="true" /> : <ChevronRight size={22} aria-hidden="true" />}
+                    </button>
+                    {selectedRule && <p className="leave-guide-rule"><Info size={16} aria-hidden="true" />
+                      <span>{selectedRule.advance ? 'ต้องยื่นล่วงหน้าอย่างน้อย 1 วัน' : 'ไม่บังคับให้ยื่นล่วงหน้า'}
+                        {selectedRule.noteRequired ? ' · ต้องเขียนเหตุผล' : ''}</span>
+                    </p>}
+                    {errorField === 'type' && <p className="leave-guide-error" role="alert">{formError}</p>}
                   </section>
 
-                  <div className="leave-form__field leave-type-group">
-                    <span className="leave-form__label">ประเภทการลา <em>*</em></span>
-                    <button type="button" className="leave-control leave-control--select"
-                      aria-haspopup="dialog" aria-expanded={typeOpen}
-                      aria-label={'เลือกประเภทการลา ปัจจุบัน ' + leaveType}
-                      onClick={(event) => openTypePicker(event.currentTarget)}>
-                      <span className="leave-control__icon"><SelectedTypeIcon size={20} strokeWidth={1.85} aria-hidden="true" /></span>
-                      <span className="leave-control__value">{leaveType}</span>
-                      <ChevronDown size={19} className="leave-control__chevron" aria-hidden="true" />
+                  <section id="leave-section-date" className="leave-guide-section" aria-labelledby="leave-guide-date">
+                    <div className="leave-guide-section__heading">
+                      <span className="leave-guide-section__number">2</span>
+                      <div><h3 id="leave-guide-date">จะลาวันไหน?</h3><p>กดเพื่อเลือกวันที่ในปฏิทิน</p></div>
+                      <span className="leave-guide-section__required">จำเป็น</span>
+                    </div>
+                    <button type="button" className={'leave-guide-select' + (start && end ? ' leave-guide-select--chosen' : '')}
+                      aria-label={start && end ? 'เปลี่ยนวันที่ลา ' + formatRange(start, end) : 'กดเลือกวันที่ต้องการลา'}
+                      onClick={(event) => openRangePicker(event.currentTarget)}>
+                      <span className="leave-guide-select__icon"><CalendarDays size={22} aria-hidden="true" /></span>
+                      <span className="leave-guide-select__main">
+                        <strong>{start && end ? formatRange(start, end) : 'กดเลือกวันที่ต้องการลา'}</strong>
+                        <small>{start && end ? 'กดอีกครั้งเพื่อเปลี่ยน' : 'เลือกวันเดียวหรือหลายวันก็ได้'}</small>
+                      </span>
+                      {start && end ? <Check size={21} className="leave-guide-select__selected" aria-hidden="true" /> : <ChevronRight size={22} aria-hidden="true" />}
                     </button>
-                    <p className="leave-form__rule">
-                      <Info size={15} aria-hidden="true" />
-                      <span>{selectedRule.advance
-                        ? 'ต้องยื่นล่วงหน้าอย่างน้อย 1 วัน'
-                        : 'ไม่บังคับให้ยื่นล่วงหน้า'}
-                        {selectedRule.noteRequired ? ' · ต้องระบุเหตุผล' : ''}</span>
-                    </p>
-                  </div>
-
-                  <div className="leave-form__field">
-                    <span className="leave-form__label">ช่วงวันที่ลา <em>*</em></span>
-                    <div className="leave-date-row">
-                      <button className="leave-control leave-date-trigger" type="button"
-                        onClick={(event) => openRangePicker(event.currentTarget)}
-                        aria-label={'เลือกช่วงวันที่ลา เริ่มวันที่ ' + formatDate(start)}>
-                        <span className="leave-date-trigger__caption">เริ่มต้น</span>
-                        <span className="leave-date-trigger__value"><CalendarDays size={17} aria-hidden="true" />{formatDate(start)}</span>
-                      </button>
-                      <ChevronRight size={18} className="leave-date-row__arrow" aria-hidden="true" />
-                      <button className="leave-control leave-date-trigger" type="button"
-                        onClick={(event) => openRangePicker(event.currentTarget)}
-                        aria-label={'เลือกช่วงวันที่ลา สิ้นสุดวันที่ ' + formatDate(end)}>
-                        <span className="leave-date-trigger__caption">สิ้นสุด</span>
-                        <span className="leave-date-trigger__value"><CalendarDays size={17} aria-hidden="true" />{formatDate(end)}</span>
-                      </button>
-                    </div>
-                    <div className="leave-date-total">
-                      <CalendarCheck2 size={22} aria-hidden="true" />
-                      <span>จำนวนวันตามปฏิทิน<strong>{countCalendarDays(start, end)} วัน</strong></span>
+                    {start && end && <p className="leave-guide-days">
+                      <CalendarCheck2 size={19} aria-hidden="true" />
+                      <span>รวม <strong>{countCalendarDays(start, end)} วัน</strong> ตามปฏิทิน</span>
                       <small>ยังไม่หักวันหยุด</small>
+                    </p>}
+                    {errorField === 'date' && <p className="leave-guide-error" role="alert">{formError}</p>}
+                  </section>
+
+                  <section id="leave-section-reason" className="leave-guide-section" aria-labelledby="leave-guide-reason">
+                    <div className="leave-guide-section__heading">
+                      <span className="leave-guide-section__number">3</span>
+                      <div><h3 id="leave-guide-reason">{leaveType === 'ลาป่วย' ? 'มีอาการอย่างไร?' : 'เหตุผลที่ขอลาคืออะไร?'}</h3>
+                        <p>{selectedRule?.noteRequired ? 'กรุณาเขียนเหตุผล' : 'เขียนรายละเอียดเพิ่มได้ถ้าต้องการ'}</p></div>
+                      <span className={selectedRule?.noteRequired ? 'leave-guide-section__required' : 'leave-guide-section__optional'}>
+                        {selectedRule?.noteRequired ? 'จำเป็น' : 'ข้ามได้'}</span>
                     </div>
-                  </div>
+                    <textarea id="leave-guide-reason-input" className="leave-reason leave-guide-textarea"
+                      rows={3} maxLength={500} value={reason}
+                      placeholder={leaveType === 'ลาป่วย' ? 'เช่น มีไข้และปวดศีรษะ' : 'เช่น มีธุระส่วนตัว หรือนัดหมายสำคัญ'}
+                      aria-required={Boolean(selectedRule?.noteRequired)}
+                      onChange={(event) => { setReason(event.target.value); clearError(); }} />
+                    {errorField === 'reason' && <p className="leave-guide-error" role="alert">{formError}</p>}
+                  </section>
 
-                  <label className="leave-form__field">
-                    <span className="leave-form__label">{leaveType === 'ลาป่วย' ? 'อาการ / เหตุผลการลา' : 'เหตุผลการลา'}
-                      {selectedRule.noteRequired ? <em> *</em> : <small> (ไม่บังคับ)</small>}</span>
-                    <textarea className="leave-reason" rows={3} maxLength={500} value={reason}
-                      placeholder={leaveType === 'ลาป่วย'
-                        ? 'ระบุอาการหรือรายละเอียดเพิ่มเติม (ถ้ามี)'
-                        : selectedRule.noteRequired ? 'โปรดระบุเหตุผลที่จำเป็น' : 'ระบุเหตุผลหรือรายละเอียดเพิ่มเติม (ถ้ามี)'}
-                      required={selectedRule.noteRequired}
-                      onChange={(event) => { setReason(event.target.value); setFormError(''); }} />
-                    <small className="leave-form__characters">{reason.length}/500</small>
-                  </label>
-
-                  <div className="leave-form__field">
-                    <span className="leave-form__label">
-                      {leaveType === 'ลาป่วย' ? 'ใบรับรองแพทย์' :
-                        leaveType === 'ลาเพื่อฝึกอบรม/พัฒนาความรู้' ? 'เอกสารการอบรม' : 'เอกสารประกอบ'}
-                      <small> (ถ้ามี)</small>
-                    </span>
+                  <section id="leave-section-file" className="leave-guide-section" aria-labelledby="leave-guide-attachment">
+                    <div className="leave-guide-section__heading">
+                      <span className="leave-guide-section__number">4</span>
+                      <div><h3 id="leave-guide-attachment">มีเอกสารแนบไหม?</h3><p>เช่น ใบรับรองแพทย์ หรือรูปเอกสาร</p></div>
+                      <span className="leave-guide-section__optional">ข้ามได้</span>
+                    </div>
                     <input className="leave-file-input" ref={fileInputRef} type="file" accept="image/*,.pdf"
                       onChange={(event) => {
                         const file = event.currentTarget.files?.[0];
                         if (file && file.size > 10 * 1024 * 1024) {
                           setFormError('ไฟล์มีขนาดเกิน 10 MB กรุณาเลือกไฟล์ใหม่');
+                          setErrorField('file');
                           setAttachmentName('');
                           event.currentTarget.value = '';
                           return;
                         }
                         setAttachmentName(file?.name ?? '');
-                        setFormError('');
+                        clearError();
                       }}
                       tabIndex={-1} aria-label="เลือกไฟล์เอกสารประกอบ" />
                     <div className="leave-attachment-row">
-                      <button type="button" className="leave-attachment" onClick={() => fileInputRef.current?.click()}>
-                        <Paperclip size={19} strokeWidth={1.9} aria-hidden="true" />
-                        <span>{attachmentName || 'เลือกไฟล์รูปภาพหรือ PDF (ไม่เกิน 10 MB)'}</span>
-                        <Plus size={17} strokeWidth={2} aria-hidden="true" />
+                      <button type="button" className="leave-guide-attachment"
+                        onClick={() => fileInputRef.current?.click()}>
+                        <Paperclip size={22} aria-hidden="true" />
+                        <span>{attachmentName || 'กดเพื่อแนบรูปภาพหรือ PDF'}</span>
+                        <ChevronRight size={20} aria-hidden="true" />
                       </button>
-                      {attachmentName && (
-                        <button className="leave-attachment__remove" type="button" aria-label="ลบไฟล์ที่เลือก"
-                          onClick={() => {
-                            setAttachmentName('');
-                            setFormError('');
-                            if (fileInputRef.current) fileInputRef.current.value = '';
-                          }}>
-                          <X size={17} aria-hidden="true" />
-                        </button>
-                      )}
+                      {attachmentName && <button type="button" className="leave-attachment__remove" aria-label="ลบเอกสารแนบ"
+                        onClick={() => { setAttachmentName(''); if (fileInputRef.current) fileInputRef.current.value = ''; clearError(); }}>
+                        <X size={18} aria-hidden="true" />
+                      </button>}
                     </div>
-                  </div>
+                    <p className="leave-guide-filehint">ไฟล์ไม่เกิน 10 MB · ไม่มีก็ไม่ต้องแนบ</p>
+                    {errorField === 'file' && <p className="leave-guide-error" role="alert">{formError}</p>}
+                  </section>
 
-                  {formError && <p className="leave-form__error" role="alert">{formError}</p>}
-                  <p className="leave-form__hint"><Info size={14} aria-hidden="true" />
-                    แบบทดลองเท่านั้น ยังไม่บันทึกข้อมูลหรือส่งคำขอจริง</p>
-                  <button type="submit" className="leave-modal__primary">
-                    <Check size={18} aria-hidden="true" /> ตรวจสอบก่อนส่ง
-                  </button>
+                  <div className="leave-guide-finish">
+                    {formError && <div className="leave-guide-bottom-error" role="alert">
+                      <strong>{formError}</strong>
+                      <button type="button" onClick={() => {
+                        document.getElementById('leave-section-' + (errorField || 'type'))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }}>กลับไปแก้ไข <ArrowRight size={17} aria-hidden="true" /></button>
+                    </div>}
+                    <p>กรอกเสร็จแล้ว กดปุ่มเพื่อตรวจสอบก่อนยืนยัน</p>
+                    <button type="submit" className="leave-modal__primary leave-guide-submit">
+                      <Check size={20} aria-hidden="true" /> ตรวจสอบคำขอลา <ArrowRight size={19} aria-hidden="true" />
+                    </button>
+                    <small>เป็นระบบทดลอง ยังไม่ส่งคำขอจริง</small>
+                  </div>
                 </form>
               ) : selectedRequest ? (
                 <div className="leave-detail">
@@ -528,7 +557,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
                 role="dialog" aria-modal="true" aria-labelledby="leave-type-title">
                 <div className="leave-picker__handle" aria-hidden="true" />
                 <header className="leave-picker__head">
-                  <div><span>มีทั้งหมด 10 ประเภท</span><h3 id="leave-type-title">เลือกประเภทการลา</h3></div>
+                  <div><span>แตะรายการที่ต้องการเลือก</span><h3 id="leave-type-title">ประเภทการลา (10 ประเภท)</h3></div>
                   <button type="button" ref={typeCloseRef} className="leave-picker__close"
                     onClick={() => setTypeOpen(false)} aria-label="ปิดตัวเลือกประเภทการลา">
                     <X size={21} aria-hidden="true" />
@@ -538,7 +567,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
                   {leaveOptions.map(({ type, detail, Icon }) => (
                     <button type="button" key={type} aria-pressed={leaveType === type}
                       className={'leave-type-option' + (leaveType === type ? ' leave-type-option--selected' : '')}
-                      onClick={() => { setLeaveType(type); setTypeOpen(false); setFormError(''); }}>
+                      onClick={() => { setLeaveType(type); setTypeOpen(false); clearError(); }}>
                       <span className="leave-type-option__icon"><Icon size={19} strokeWidth={1.9} aria-hidden="true" /></span>
                       <span className="leave-type-option__text"><strong>{type}</strong><small>{detail}</small></span>
                       {leaveType === type && <Check size={19} strokeWidth={2.3} aria-hidden="true" />}
@@ -557,21 +586,22 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
                 aria-labelledby="leave-picker-title">
                 <div className="leave-picker__handle" aria-hidden="true" />
                 <header className="leave-picker__head">
-                  <div><span>เลือกในปฏิทินเดียว</span>
-                    <h3 id="leave-picker-title">เลือกช่วงวันที่ลา</h3>
+                  <div><span>แตะวันที่ต้องการลา</span>
+                    <h3 id="leave-picker-title">เลือกวันที่ลา</h3>
                   </div>
                   <button ref={pickerCloseRef} type="button" className="leave-picker__close"
                     onClick={() => setDatePickerOpen(false)} aria-label="ปิดปฏิทินเลือกวัน"><X size={21} aria-hidden="true" /></button>
                 </header>
                 <div className="leave-picker__range-hint" role="status">
                   <span className={draftStart ? 'is-picked' : ''}>
-                    <small>วันเริ่มลา</small><strong>{draftStart ? formatDate(draftStart) : 'แตะเลือกวันแรก'}</strong>
+                    <small>วันเริ่มลา</small><strong>{draftStart ? formatDate(draftStart) : 'กดเลือกวันเริ่ม'}</strong>
                   </span>
                   <ChevronRight size={18} aria-hidden="true" />
                   <span className={draftEnd ? 'is-picked' : ''}>
-                    <small>วันสิ้นสุด</small><strong>{draftEnd ? formatDate(draftEnd) : 'แตะเลือกวันสุดท้าย'}</strong>
+                    <small>วันสิ้นสุด</small><strong>{draftEnd ? formatDate(draftEnd) : draftStart ? 'ลาแค่วันเดียว ยืนยันได้' : 'กดเลือกวันสิ้นสุด'}</strong>
                   </span>
                 </div>
+                <p className="leave-picker__instruction">ลา <strong>วันเดียว</strong> แตะวันที่ 1 ครั้งแล้วกดยืนยัน · ลา <strong>หลายวัน</strong> แตะวันเริ่มและวันสิ้นสุด</p>
                 <div className="leave-picker__month">
                   <button type="button" onClick={() => setPickerMonth(new Date(Date.UTC(year, month - 1, 1)))}
                     aria-label="เดือนก่อนหน้า"><ChevronLeft size={21} aria-hidden="true" /></button>
@@ -601,17 +631,12 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
                     );
                   })}
                 </div>
-                <div className="leave-picker__footer">
-                  <button type="button" onClick={() => {
-                    setPickerMonth(new Date(today + 'T12:00:00Z'));
-                    setDraftStart(today);
-                    setDraftEnd(today);
-                  }}>เลือกวันเดียว (วันนี้)</button>
-                  <span>{draftStart && draftEnd ? countCalendarDays(draftStart, draftEnd) + ' วัน (ยังไม่หักวันหยุด)' : 'พ.ศ. ' + (year + 543)}</span>
+                <div className="leave-picker__footer leave-picker__footer--simple">
+                  <span>{draftStart ? countCalendarDays(draftStart, draftEnd || draftStart) + ' วันตามปฏิทิน (ยังไม่หักวันหยุด)' : 'กรุณาแตะวันที่ต้องการลา'}</span>
                 </div>
                 <button className="leave-modal__primary leave-picker__apply" type="button"
-                  disabled={!draftStart || !draftEnd} onClick={acceptRange}>
-                  <Check size={18} aria-hidden="true" /> ใช้ช่วงวันที่นี้
+                  disabled={!draftStart} onClick={acceptRange}>
+                  <Check size={18} aria-hidden="true" /> {draftStart ? 'ยืนยันวันที่เลือก' : 'เลือกวันที่ก่อน'}
                 </button>
               </section>
             </div>
@@ -625,7 +650,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
                 role="dialog" aria-modal="true" aria-labelledby="leave-confirm-title">
                 <div className="leave-picker__handle" aria-hidden="true" />
                 <header className="leave-picker__head">
-                  <div><span>ตรวจข้อมูลก่อนยืนยัน</span><h3 id="leave-confirm-title">สรุปคำขอลา</h3></div>
+                  <div><span>ตรวจความถูกต้องก่อนยืนยัน</span><h3 id="leave-confirm-title">ตรวจสอบคำขอลา</h3></div>
                   <button type="button" ref={confirmCloseRef} className="leave-picker__close"
                     onClick={() => setConfirmOpen(false)} aria-label="ปิดหน้ายืนยัน"><X size={21} aria-hidden="true" /></button>
                 </header>
@@ -640,9 +665,9 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
                   นี่เป็นโหมดทดลอง ยืนยันแล้วจะแสดงคำขอจำลองเท่านั้น ไม่ส่งถึงแอดมิน
                 </p>
                 <div className="leave-confirm__actions">
-                  <button type="button" className="leave-confirm__edit" onClick={() => setConfirmOpen(false)}>กลับไปแก้ไข</button>
+                  <button type="button" className="leave-confirm__edit" onClick={() => setConfirmOpen(false)}>แก้ไขข้อมูล</button>
                   <button type="button" className="leave-modal__primary" onClick={confirmPreview}>
-                    <Send size={18} aria-hidden="true" /> ยืนยันคำขอทดลอง
+                    <Send size={18} aria-hidden="true" /> ยืนยัน (ทดลอง)
                   </button>
                 </div>
               </section>
