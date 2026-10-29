@@ -685,3 +685,32 @@
 @media (prefers-reduced-motion:reduce) {
   .leave-new-request:active { transform:none; }
 }
+
+
+/* Single-page leave form. Retains the existing teal palette and dialog geometry. */
+.leave-form--single { gap:15px; }
+.leave-form--single .leave-employee--compact { margin-bottom:1px; }
+.leave-form--single .leave-form__field { gap:8px; }
+.leave-form--single .leave-control--select { min-height:53px; }
+.leave-form--single .leave-form__rule {
+  margin:0;
+  padding:9px 10px;
+  border-radius:10px;
+  color:var(--lv-accent);
+}
+.leave-form--single .leave-date-trigger { min-height:56px; }
+.leave-form--single .leave-date-total { padding:10px 11px; }
+.leave-form--single .leave-reason { min-height:90px; resize:vertical; }
+.leave-form--single .leave-attachment {
+  min-height:52px;
+  border:1px dashed #a1c9c5;
+  border-radius:12px;
+  background:var(--lv-soft);
+  color:var(--lv-accent);
+}
+.leave-form--single .leave-attachment__remove { min-height:52px; }
+.leave-form--single .leave-modal__primary { min-height:52px; }
+@media (max-width:355px) {
+  .leave-form--single .leave-date-trigger__value { font-size:11px; }
+  .leave-form--single .leave-date-total small { font-size:9px; }
+}
