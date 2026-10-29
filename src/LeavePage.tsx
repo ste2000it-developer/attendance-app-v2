@@ -553,19 +553,22 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
           </div>
 
           {typeOpen && (
-            <div className="leave-type-overlay leave-type-overlay--fullscreen">
-              <section className="leave-type-sheet leave-type-sheet--fullscreen" ref={typePanelRef}
+            <div className="leave-type-overlay leave-type-overlay--popup" onMouseDown={(event) => {
+              if (event.target === event.currentTarget) setTypeOpen(false);
+            }}>
+              <section className="leave-type-sheet leave-type-sheet--popup" ref={typePanelRef}
                 role="dialog" aria-modal="true" aria-labelledby="leave-type-title">
+                <div className="leave-picker__handle" aria-hidden="true" />
                 <div className="leave-type-sheet__content">
                   <header className="leave-type-sheet__header">
-                    <button type="button" ref={typeCloseRef} className="leave-type-sheet__back"
-                      onClick={() => setTypeOpen(false)} aria-label="กลับไปฟอร์มใบลา">
-                      <ArrowLeft size={23} strokeWidth={1.9} aria-hidden="true" />
-                    </button>
                     <div>
                       <h3 id="leave-type-title">เลือกประเภทการลา</h3>
-                      <p>เลือกประเภทที่ต้องการ</p>
+                      <p>เลือก 1 ประเภท จากทั้งหมด 10 ประเภท</p>
                     </div>
+                    <button type="button" ref={typeCloseRef} className="leave-type-sheet__back"
+                      onClick={() => setTypeOpen(false)} aria-label="ปิดหน้าต่างเลือกประเภทการลา">
+                      <X size={21} strokeWidth={1.9} aria-hidden="true" />
+                    </button>
                   </header>
                   <div className="leave-type-options leave-type-options--grid" role="group" aria-label="ประเภทการลาทั้ง 10 ประเภท">
                     {leaveOptions.map(({ type, Icon }) => (

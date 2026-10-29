@@ -1104,7 +1104,7 @@
 }
 
 
-/* Full-screen leave-type picker: ten choices in a calm, two-column layout. */
+/* Two-column leave-type popup, consistent with the other leave dialogs. */
 .leave-form--simple .leave-simple-type-choice {
   display:flex;
   align-items:center;
@@ -1153,52 +1153,39 @@
   line-height:1.45;
 }
 .leave-simple-type-choice > svg:last-child { flex:0 0 auto; color:var(--lv-accent); }
-.leave-type-overlay--fullscreen {
+.leave-type-overlay--popup {
   position:fixed;
   inset:0;
-  display:flex;
-  align-items:stretch;
-  justify-content:stretch;
-  padding:0;
-  background:var(--lv-surface);
   z-index:90;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  padding:0;
+  background:rgba(7,22,32,.62);
 }
-.leave-type-overlay--fullscreen .leave-type-sheet--fullscreen {
-  width:100%;
-  min-width:0;
-  max-width:none;
-  height:100%;
-  min-height:0;
-  max-height:100dvh;
+.leave-type-overlay--popup .leave-type-sheet--popup {
+  display:block;
+  width:min(100%,480px);
+  height:auto;
+  max-height:88dvh;
   margin:0;
-  padding:calc(19px + env(safe-area-inset-top, 0px)) 17px calc(22px + env(safe-area-inset-bottom, 0px));
-  border-radius:0;
+  padding:11px 17px calc(20px + env(safe-area-inset-bottom,0px));
+  border-radius:24px 24px 0 0;
   overflow-y:auto;
-  overscroll-behavior:contain;
-  box-shadow:none;
+  overscroll-behavior-y:contain;
+  -webkit-overflow-scrolling:touch;
   background:var(--lv-surface);
+  box-shadow:0 -12px 35px rgba(5,24,37,.18);
 }
-.leave-type-sheet__content {
-  width:min(100%,540px);
-  margin:0 auto;
-}
+.leave-type-sheet__content { width:100%; margin:0 auto; }
 .leave-type-sheet__header {
   display:flex;
   align-items:center;
-  gap:13px;
-  margin:0 0 22px;
+  justify-content:space-between;
+  gap:12px;
+  margin:0 0 17px;
 }
-.leave-type-sheet__back {
-  display:grid;
-  place-items:center;
-  flex:0 0 44px;
-  width:44px;
-  height:44px;
-  border:1px solid var(--lv-line);
-  border-radius:12px;
-  background:var(--lv-soft);
-  color:var(--lv-ink);
-}
+.leave-type-sheet__header > div { flex:1; min-width:0; }
 .leave-type-sheet__header h3 {
   margin:0;
   color:var(--lv-ink);
@@ -1209,15 +1196,28 @@
 .leave-type-sheet__header p {
   margin:3px 0 0;
   color:var(--lv-muted);
-  font-size:13px;
+  font-size:12px;
   line-height:1.45;
 }
-.leave-type-sheet--fullscreen .leave-type-options--grid {
+.leave-type-sheet__back {
+  display:grid;
+  place-items:center;
+  flex:0 0 39px;
+  width:39px;
+  height:39px;
+  border:1px solid var(--lv-line);
+  border-radius:11px;
+  background:var(--lv-soft);
+  color:var(--lv-ink);
+}
+.leave-type-sheet--popup .leave-type-options--grid {
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:11px;
+  gap:10px;
+  flex:none;
   position:static;
   width:100%;
+  height:auto;
   min-height:0;
   max-height:none;
   overflow:visible;
@@ -1227,47 +1227,47 @@
   background:transparent;
   box-shadow:none;
 }
-.leave-type-sheet--fullscreen .leave-type-option--tile {
+.leave-type-sheet--popup .leave-type-option--tile {
   position:relative;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:12px;
+  gap:9px;
   min-width:0;
-  min-height:115px;
+  min-height:102px;
   width:100%;
   margin:0;
-  padding:16px 10px 13px;
+  padding:11px 9px;
   border:1px solid var(--lv-line);
-  border-radius:15px;
+  border-radius:13px;
   background:var(--lv-surface);
   color:var(--lv-ink);
   text-align:center;
   box-shadow:none;
 }
-.leave-type-sheet--fullscreen .leave-type-option--tile + .leave-type-option--tile { margin-top:0; }
-.leave-type-sheet--fullscreen .leave-type-option--tile.leave-type-option--selected {
+.leave-type-sheet--popup .leave-type-option--tile + .leave-type-option--tile { margin-top:0; }
+.leave-type-sheet--popup .leave-type-option--tile.leave-type-option--selected {
   border:2px solid var(--lv-accent);
   background:var(--lv-soft);
 }
-.leave-type-sheet--fullscreen .leave-type-option__icon--tile {
-  flex:0 0 46px;
-  width:46px;
-  height:46px;
+.leave-type-sheet--popup .leave-type-option__icon--tile {
+  flex:0 0 42px;
   display:grid;
   place-items:center;
-  border-radius:13px;
+  width:42px;
+  height:42px;
+  border-radius:12px;
   background:var(--lv-soft);
   color:var(--lv-accent);
 }
-.leave-type-sheet--fullscreen .leave-type-option--selected .leave-type-option__icon--tile {
+.leave-type-sheet--popup .leave-type-option--selected .leave-type-option__icon--tile {
   background:var(--lv-surface);
   color:var(--lv-accent);
 }
 .leave-type-option__name {
   color:var(--lv-ink);
-  font-size:14px;
+  font-size:13px;
   font-weight:750;
   line-height:1.45;
   overflow-wrap:anywhere;
@@ -1275,8 +1275,10 @@
 }
 .leave-type-option__check {
   position:absolute;
-  top:8px;
-  right:8px;
+  top:7px;
+  right:7px;
+  display:grid;
+  place-items:center;
   width:23px;
   height:23px;
   padding:4px;
@@ -1284,26 +1286,26 @@
   background:var(--lv-accent);
   color:var(--lv-surface);
 }
-.leave-type-sheet--fullscreen .leave-type-option--tile:focus-visible,
+.leave-type-sheet--popup .leave-type-option--tile:focus-visible,
 .leave-type-sheet__back:focus-visible,
 .leave-form--simple .leave-simple-type-choice:focus-visible {
   outline:3px solid var(--lv-accent);
-  outline-offset:3px;
+  outline-offset:2px;
 }
 @media (max-width:355px) {
-  .leave-type-overlay--fullscreen .leave-type-sheet--fullscreen {
+  .leave-type-overlay--popup .leave-type-sheet--popup {
     padding-left:12px;
     padding-right:12px;
   }
-  .leave-type-sheet--fullscreen .leave-type-options--grid { gap:8px; }
-  .leave-type-sheet--fullscreen .leave-type-option--tile { min-height:108px; gap:9px; padding:11px 7px; }
-  .leave-type-option__name { font-size:13px; }
+  .leave-type-sheet--popup .leave-type-options--grid { gap:8px; }
+  .leave-type-sheet--popup .leave-type-option--tile { min-height:98px; padding:10px 7px; }
+  .leave-type-option__name { font-size:12px; }
 }
 @media (min-width:540px) {
-  .leave-type-overlay--fullscreen { padding:0; align-items:stretch; }
-  .leave-type-overlay--fullscreen .leave-type-sheet--fullscreen {
-    height:100%;
-    max-height:100dvh;
-    border-radius:0;
+  .leave-type-overlay--popup { align-items:center; padding:20px; }
+  .leave-type-overlay--popup .leave-type-sheet--popup {
+    width:min(100%,480px);
+    max-height:87dvh;
+    border-radius:23px;
   }
 }
