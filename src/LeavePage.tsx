@@ -136,7 +136,9 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
   const countApproved = requests.filter((request) => request.status === 'approved').length;
   const countRejected = requests.filter((request) => request.status === 'rejected').length;
   const selectedRule = leaveOptions.find((option) => option.type === leaveType);
-  const SelectedTypeIcon = selectedRule?.Icon;
+  const commonLeaveTypes = leaveOptions.filter((option) =>
+    option.type === 'ลาป่วย' || option.type === 'ลากิจโดยไม่รับค่าจ้าง' ||
+    option.type === 'ลาพักร้อนประจำปี');
   const clearError = () => { setFormError(''); setErrorField(null); };
   const validateLeaveRequest = () => {
     if (!selectedRule) {
@@ -398,93 +400,102 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
                 <div>
                   <span>แบบฟอร์มการลา <i>•</i> โหมดทดลอง</span>
                   <h2 id="leave-modal-title">{modal === 'form' ? 'ยื่นคำขอลา' : 'รายละเอียดคำขอ'}</h2>
-                  <p>{modal === 'form' ? 'ทำตามลำดับง่าย ๆ แล้วตรวจสอบก่อนยืนยัน' : 'ข้อมูลคำขอและสถานะปัจจุบัน'}</p>
+                  <p>{modal === 'form' ? 'ประเภทการลา วันที่ และรายละเอียด' : 'ข้อมูลคำขอและสถานะปัจจุบัน'}</p>
                 </div>
                 <button ref={modalCloseRef} className="leave-modal__close" type="button" onClick={closeModal}
                   aria-label="ปิดหน้าต่าง"><X size={21} aria-hidden="true" /></button>
               </header>
 
               {modal === 'form' ? (
-                <form className="leave-form leave-form--guided" onSubmit={submitPreview} noValidate>
-                  <p className="leave-guidance">เริ่มจากข้อ <strong>1</strong> แล้วทำตามลำดับลงมา ข้อที่เขียนว่า <strong>ข้ามได้</strong> ไม่จำเป็นต้องกรอก</p>
-
-                  <section id="leave-section-type" className="leave-guide-section" aria-labelledby="leave-guide-type">
-                    <div className="leave-guide-section__heading">
-                      <span className="leave-guide-section__number">1</span>
-                      <div><h3 id="leave-guide-type">ต้องการลาประเภทไหน?</h3><p>กดเลือกประเภทการลา</p></div>
-                      <span className="leave-guide-section__required">จำเป็น</span>
+                <form className="leave-form leave-form--simple" onSubmit={submitPreview} noValidate>
+                  <section id="leave-section-type" className="leave-simple-section" aria-labelledby="leave-simple-type">
+                    <div className="leave-simple-label-row">
+                      <h3 id="leave-simple-type">ประเภทการลา <em>*</em></h3>
                     </div>
-                    <button type="button" className={'leave-guide-select' + (leaveType ? ' leave-guide-select--chosen' : '')}
+                    <div className="leave-simple-type-grid" role="group" aria-label="ประเภทการลาที่ใช้บ่อย">
+                      {commonLeaveTypes.map(({ type, Icon }) => (
+                        <button key={type} type="button" aria-pressed={leaveType === type}
+                          className={'leave-simple-type' + (leaveType === type ? ' leave-simple-type--selected' : '')}
+                          onClick={() => { setLeaveType(type); clearError(); }}>
+                          <span className="leave-simple-type__icon"><Icon size={24} strokeWidth={1.9} aria-hidden="true" /></span>
+                          <span>{type === 'ลากิจโดยไม่รับค่าจ้าง' ? 'ลากิจไม่รับค่าจ้าง' :
+                            type === 'ลาพักร้อนประจำปี' ? 'ลาพักร้อน' : type}</span>
+                          {leaveType === type && <Check className="leave-simple-type__check" size={15} aria-hidden="true" />}
+                        </button>
+                      ))}
+                    </div>
+                    <button type="button" className="leave-simple-more-types"
                       aria-haspopup="dialog" aria-expanded={typeOpen}
-                      aria-label={leaveType ? 'เปลี่ยนประเภทการลา ปัจจุบัน ' + leaveType : 'เลือกประเภทการลา'}
                       onClick={(event) => openTypePicker(event.currentTarget)}>
-                      <span className="leave-guide-select__icon">
-                        {SelectedTypeIcon ? <SelectedTypeIcon size={22} strokeWidth={1.9} aria-hidden="true" /> : <ClipboardList size={22} aria-hidden="true" />}
-                      </span>
-                      <span className="leave-guide-select__main">
-                        <strong>{leaveType || 'กดเลือกประเภทการลา'}</strong>
-                        <small>{leaveType ? 'กดอีกครั้งเพื่อเปลี่ยน' : 'เช่น ลาป่วย ลากิจ ลาพักร้อน'}</small>
-                      </span>
-                      {leaveType ? <Check size={21} className="leave-guide-select__selected" aria-hidden="true" /> : <ChevronRight size={22} aria-hidden="true" />}
+                      <span>{leaveType && !commonLeaveTypes.some((item) => item.type === leaveType)
+                        ? leaveType : 'ดูประเภทการลาทั้งหมด (10)'}</span>
+                      <ChevronRight size={19} aria-hidden="true" />
                     </button>
-                    {selectedRule && <p className="leave-guide-rule"><Info size={16} aria-hidden="true" />
-                      <span>{selectedRule.advance ? 'ต้องยื่นล่วงหน้าอย่างน้อย 1 วัน' : 'ไม่บังคับให้ยื่นล่วงหน้า'}
-                        {selectedRule.noteRequired ? ' · ต้องเขียนเหตุผล' : ''}</span>
-                    </p>}
+                    {selectedRule && (
+                      <div className="leave-simple-rule">
+                        <Info size={16} aria-hidden="true" />
+                        <span>{selectedRule.advance ? 'ยื่นล่วงหน้าอย่างน้อย 1 วัน' : 'ไม่ต้องยื่นล่วงหน้า'}
+                          {selectedRule.noteRequired ? ' · ต้องระบุเหตุผล' : ''}</span>
+                      </div>
+                    )}
                     {errorField === 'type' && <p className="leave-guide-error" role="alert">{formError}</p>}
                   </section>
 
-                  <section id="leave-section-date" className="leave-guide-section" aria-labelledby="leave-guide-date">
-                    <div className="leave-guide-section__heading">
-                      <span className="leave-guide-section__number">2</span>
-                      <div><h3 id="leave-guide-date">จะลาวันไหน?</h3><p>กดเพื่อเลือกวันที่ในปฏิทิน</p></div>
-                      <span className="leave-guide-section__required">จำเป็น</span>
+                  <section id="leave-section-date" className="leave-simple-section" aria-labelledby="leave-simple-dates">
+                    <div className="leave-simple-label-row">
+                      <h3 id="leave-simple-dates">วันที่ต้องการลา <em>*</em></h3>
                     </div>
-                    <button type="button" className={'leave-guide-select' + (start && end ? ' leave-guide-select--chosen' : '')}
-                      aria-label={start && end ? 'เปลี่ยนวันที่ลา ' + formatRange(start, end) : 'กดเลือกวันที่ต้องการลา'}
-                      onClick={(event) => openRangePicker(event.currentTarget)}>
-                      <span className="leave-guide-select__icon"><CalendarDays size={22} aria-hidden="true" /></span>
-                      <span className="leave-guide-select__main">
-                        <strong>{start && end ? formatRange(start, end) : 'กดเลือกวันที่ต้องการลา'}</strong>
-                        <small>{start && end ? 'กดอีกครั้งเพื่อเปลี่ยน' : 'เลือกวันเดียวหรือหลายวันก็ได้'}</small>
-                      </span>
-                      {start && end ? <Check size={21} className="leave-guide-select__selected" aria-hidden="true" /> : <ChevronRight size={22} aria-hidden="true" />}
-                    </button>
-                    {start && end && <p className="leave-guide-days">
-                      <CalendarCheck2 size={19} aria-hidden="true" />
-                      <span>รวม <strong>{countCalendarDays(start, end)} วัน</strong> ตามปฏิทิน</span>
-                      <small>ยังไม่หักวันหยุด</small>
-                    </p>}
+                    <div className="leave-simple-date-grid">
+                      <button type="button" className="leave-simple-date"
+                        onClick={(event) => openRangePicker(event.currentTarget)}
+                        aria-label={start ? 'เปลี่ยนวันเริ่มลา ' + formatDate(start) : 'เลือกวันเริ่มลา'}>
+                        <span>ตั้งแต่วันที่</span>
+                        <strong>{start ? formatDate(start) : 'เลือกวันที่'}</strong>
+                        <CalendarDays size={18} aria-hidden="true" />
+                      </button>
+                      <button type="button" className="leave-simple-date"
+                        onClick={(event) => openRangePicker(event.currentTarget)}
+                        aria-label={end ? 'เปลี่ยนวันสิ้นสุดลา ' + formatDate(end) : 'เลือกวันสิ้นสุดลา'}>
+                        <span>ถึงวันที่</span>
+                        <strong>{end ? formatDate(end) : 'เลือกวันที่'}</strong>
+                        <CalendarDays size={18} aria-hidden="true" />
+                      </button>
+                    </div>
+                    {start && end && (
+                      <div className="leave-simple-duration">
+                        <CalendarCheck2 size={17} aria-hidden="true" />
+                        <span>{countCalendarDays(start, end)} วันตามปฏิทิน</span>
+                        <small>ยังไม่ตรวจวันหยุด</small>
+                      </div>
+                    )}
                     {errorField === 'date' && <p className="leave-guide-error" role="alert">{formError}</p>}
                   </section>
 
-                  <section id="leave-section-reason" className="leave-guide-section" aria-labelledby="leave-guide-reason">
-                    <div className="leave-guide-section__heading">
-                      <span className="leave-guide-section__number">3</span>
-                      <div><h3 id="leave-guide-reason">{leaveType === 'ลาป่วย' ? 'มีอาการอย่างไร?' : 'เหตุผลที่ขอลาคืออะไร?'}</h3>
-                        <p>{selectedRule?.noteRequired ? 'กรุณาเขียนเหตุผล' : 'เขียนรายละเอียดเพิ่มได้ถ้าต้องการ'}</p></div>
-                      <span className={selectedRule?.noteRequired ? 'leave-guide-section__required' : 'leave-guide-section__optional'}>
-                        {selectedRule?.noteRequired ? 'จำเป็น' : 'ข้ามได้'}</span>
+                  <section id="leave-section-reason" className="leave-simple-section" aria-labelledby="leave-simple-reason">
+                    <div className="leave-simple-label-row">
+                      <h3 id="leave-simple-reason">{leaveType === 'ลาป่วย' ? 'อาการ / เหตุผลการลา' : 'เหตุผลการลา'}</h3>
+                      <span className="leave-simple-optional">{selectedRule?.noteRequired ? 'จำเป็น' : 'ไม่บังคับ'}</span>
                     </div>
-                    <textarea id="leave-guide-reason-input" className="leave-reason leave-guide-textarea"
-                      rows={3} maxLength={500} value={reason}
-                      placeholder={leaveType === 'ลาป่วย' ? 'เช่น มีไข้และปวดศีรษะ' : 'เช่น มีธุระส่วนตัว หรือนัดหมายสำคัญ'}
-                      aria-required={Boolean(selectedRule?.noteRequired)}
+                    <textarea className="leave-reason leave-simple-reason" rows={3} maxLength={500}
+                      value={reason} aria-required={Boolean(selectedRule?.noteRequired)}
+                      placeholder={leaveType === 'ลาป่วย'
+                        ? 'เช่น มีไข้และต้องการพักรักษาตัว'
+                        : selectedRule?.noteRequired ? 'กรุณาระบุเหตุผลการลา' : 'ระบุเหตุผล (ถ้ามี)'}
                       onChange={(event) => { setReason(event.target.value); clearError(); }} />
                     {errorField === 'reason' && <p className="leave-guide-error" role="alert">{formError}</p>}
                   </section>
 
-                  <section id="leave-section-file" className="leave-guide-section" aria-labelledby="leave-guide-attachment">
-                    <div className="leave-guide-section__heading">
-                      <span className="leave-guide-section__number">4</span>
-                      <div><h3 id="leave-guide-attachment">มีเอกสารแนบไหม?</h3><p>เช่น ใบรับรองแพทย์ หรือรูปเอกสาร</p></div>
-                      <span className="leave-guide-section__optional">ข้ามได้</span>
+                  <section id="leave-section-file" className="leave-simple-section" aria-labelledby="leave-simple-file">
+                    <div className="leave-simple-label-row">
+                      <h3 id="leave-simple-file">เอกสารประกอบ</h3>
+                      <span className="leave-simple-optional">ไม่บังคับ</span>
                     </div>
-                    <input className="leave-file-input" ref={fileInputRef} type="file" accept="image/*,.pdf"
+                    <input className="leave-file-input" ref={fileInputRef} type="file"
+                      accept=".jpg,.jpeg,.png,.pdf" tabIndex={-1} aria-label="เลือกเอกสารประกอบ"
                       onChange={(event) => {
                         const file = event.currentTarget.files?.[0];
-                        if (file && file.size > 10 * 1024 * 1024) {
-                          setFormError('ไฟล์มีขนาดเกิน 10 MB กรุณาเลือกไฟล์ใหม่');
+                        if (file && file.size > 2 * 1024 * 1024) {
+                          setFormError('ไฟล์ต้องมีขนาดไม่เกิน 2 MB');
                           setErrorField('file');
                           setAttachmentName('');
                           event.currentTarget.value = '';
@@ -492,37 +503,38 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
                         }
                         setAttachmentName(file?.name ?? '');
                         clearError();
-                      }}
-                      tabIndex={-1} aria-label="เลือกไฟล์เอกสารประกอบ" />
+                      }} />
                     <div className="leave-attachment-row">
-                      <button type="button" className="leave-guide-attachment"
-                        onClick={() => fileInputRef.current?.click()}>
-                        <Paperclip size={22} aria-hidden="true" />
-                        <span>{attachmentName || 'กดเพื่อแนบรูปภาพหรือ PDF'}</span>
-                        <ChevronRight size={20} aria-hidden="true" />
+                      <button type="button" className="leave-simple-file" onClick={() => fileInputRef.current?.click()}>
+                        <Paperclip size={20} aria-hidden="true" />
+                        <span>{attachmentName || 'แนบรูปภาพหรือ PDF'}</span>
+                        <Plus size={18} aria-hidden="true" />
                       </button>
-                      {attachmentName && <button type="button" className="leave-attachment__remove" aria-label="ลบเอกสารแนบ"
-                        onClick={() => { setAttachmentName(''); if (fileInputRef.current) fileInputRef.current.value = ''; clearError(); }}>
-                        <X size={18} aria-hidden="true" />
-                      </button>}
+                      {attachmentName && (
+                        <button type="button" className="leave-attachment__remove"
+                          aria-label="ลบไฟล์ที่เลือก" onClick={() => {
+                            setAttachmentName('');
+                            if (fileInputRef.current) fileInputRef.current.value = '';
+                            clearError();
+                          }}><X size={18} aria-hidden="true" /></button>
+                      )}
                     </div>
-                    <p className="leave-guide-filehint">ไฟล์ไม่เกิน 10 MB · ไม่มีก็ไม่ต้องแนบ</p>
+                    <small className="leave-simple-file-hint">รองรับ JPG, PNG, PDF ขนาดไม่เกิน 2 MB</small>
                     {errorField === 'file' && <p className="leave-guide-error" role="alert">{formError}</p>}
                   </section>
 
-                  <div className="leave-guide-finish">
-                    {formError && <div className="leave-guide-bottom-error" role="alert">
-                      <strong>{formError}</strong>
-                      <button type="button" onClick={() => {
-                        document.getElementById('leave-section-' + (errorField || 'type'))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      }}>กลับไปแก้ไข <ArrowRight size={17} aria-hidden="true" /></button>
-                    </div>}
-                    <p>กรอกเสร็จแล้ว กดปุ่มเพื่อตรวจสอบก่อนยืนยัน</p>
-                    <button type="submit" className="leave-modal__primary leave-guide-submit">
-                      <Check size={20} aria-hidden="true" /> ตรวจสอบคำขอลา <ArrowRight size={19} aria-hidden="true" />
+                  <footer className="leave-simple-footer">
+                    {formError && <p className="leave-guide-bottom-error" role="alert">
+                      {formError}
+                      <button type="button" onClick={() =>
+                        document.getElementById('leave-section-' + (errorField || 'type'))
+                          ?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>แก้ไขข้อมูล <ArrowRight size={16} aria-hidden="true" /></button>
+                    </p>}
+                    <button type="submit" className="leave-modal__primary leave-simple-submit">
+                      ตรวจสอบใบลา <ArrowRight size={19} aria-hidden="true" />
                     </button>
-                    <small>เป็นระบบทดลอง ยังไม่ส่งคำขอจริง</small>
-                  </div>
+                    <small>โหมดทดลอง ยังไม่ส่งคำขอจริง</small>
+                  </footer>
                 </form>
               ) : selectedRequest ? (
                 <div className="leave-detail">

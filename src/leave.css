@@ -989,3 +989,116 @@
 @media (prefers-reduced-motion:reduce) {
   .leave-guide-select { transition:none; }
 }
+
+
+/* Leave form refresh — compact, self-explanatory UI, no numbered tutorial. */
+.leave-form--simple { display:flex; flex-direction:column; gap:0; }
+.leave-form--simple .leave-simple-section {
+  display:flex; flex-direction:column; gap:0;
+  padding:16px 0 19px; border-bottom:1px solid var(--lv-line);
+  scroll-margin-top:12px;
+}
+.leave-form--simple .leave-simple-section:first-child { padding-top:4px; }
+.leave-simple-label-row {
+  display:flex; align-items:baseline; justify-content:space-between;
+  gap:10px; margin:0 0 12px;
+}
+.leave-simple-label-row h3 {
+  margin:0; color:var(--lv-ink);
+  font-size:16px; font-weight:850; line-height:1.5;
+}
+.leave-simple-label-row h3 em { color:#c84f62; font-style:normal; }
+.leave-simple-optional { color:var(--lv-muted); font-size:12px; font-weight:650; white-space:nowrap; }
+.leave-simple-type-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
+.leave-simple-type {
+  position:relative;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:9px; width:100%; min-height:104px;
+  padding:12px 5px 10px;
+  background:var(--lv-surface); color:var(--lv-ink);
+  border:1px solid var(--lv-line); border-radius:14px;
+  text-align:center; font-size:12px; font-weight:750; line-height:1.4;
+  overflow-wrap:anywhere;
+}
+.leave-simple-type__icon {
+  display:grid; place-items:center; width:42px; height:42px; border-radius:12px;
+  color:var(--lv-accent); background:var(--lv-soft);
+}
+.leave-simple-type--selected { border:2px solid var(--lv-accent); background:var(--lv-soft); }
+.leave-simple-type--selected .leave-simple-type__icon { background:var(--lv-surface); }
+.leave-simple-type__check {
+  position:absolute; top:5px; right:5px;
+  display:block; border-radius:50%; background:var(--lv-accent); color:#fff;
+  width:18px; height:18px; padding:3px;
+}
+.leave-simple-more-types {
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  width:100%; min-height:46px; margin-top:10px;
+  padding:10px 13px; border:1px solid var(--lv-line);
+  border-radius:12px; color:var(--lv-accent); background:var(--lv-soft);
+  text-align:left; font-size:13px; font-weight:800;
+}
+.leave-simple-more-types > span { min-width:0; overflow-wrap:anywhere; }
+.leave-simple-more-types svg { flex:0 0 auto; }
+.leave-simple-rule {
+  display:flex; gap:7px; align-items:center;
+  margin:10px 0 0; color:var(--lv-accent);
+  font-size:12px; font-weight:650; line-height:1.5;
+}
+.leave-simple-rule svg { flex:0 0 auto; }
+.leave-simple-date-grid {
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px;
+}
+.leave-simple-date {
+  position:relative;
+  display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
+  gap:8px; min-width:0; min-height:85px; padding:12px 11px;
+  color:var(--lv-ink); background:var(--lv-surface);
+  border:1px solid var(--lv-line); border-radius:13px;
+  text-align:left;
+}
+.leave-simple-date span { color:var(--lv-muted); font-size:12px; line-height:1.4; font-weight:650; }
+.leave-simple-date strong {
+  display:block; font-size:14px; line-height:1.5; font-weight:800;
+  overflow-wrap:anywhere; max-width:100%;
+}
+.leave-simple-date svg { position:absolute; right:11px; top:12px; color:var(--lv-accent); }
+.leave-simple-date:active { background:var(--lv-soft); }
+.leave-simple-duration {
+  display:flex; align-items:center; gap:7px; flex-wrap:wrap;
+  padding:10px 0 0; color:var(--lv-accent); font-size:12px; font-weight:750;
+}
+.leave-simple-duration svg { flex:0 0 auto; }
+.leave-simple-duration small { color:var(--lv-muted); font-size:11px; font-weight:500; }
+.leave-simple-reason {
+  min-height:103px; width:100%; resize:vertical;
+  color:var(--lv-ink); background:var(--lv-surface);
+  border:1px solid var(--lv-line); border-radius:12px;
+  padding:12px 13px; font-size:15px; line-height:1.6;
+}
+.leave-simple-reason::placeholder { color:var(--lv-muted); }
+.leave-simple-file {
+  display:flex; align-items:center; gap:9px;
+  flex:1; min-width:0; min-height:51px;
+  padding:11px 13px; border:1px dashed var(--lv-line);
+  border-radius:12px; background:var(--lv-soft);
+  color:var(--lv-accent); text-align:left; font-size:13px; font-weight:700;
+}
+.leave-simple-file > svg { flex:0 0 auto; }
+.leave-simple-file span { flex:1; min-width:0; overflow-wrap:anywhere; }
+.leave-simple-file-hint { display:block; padding-top:7px; color:var(--lv-muted); font-size:11px; line-height:1.5; }
+.leave-form--simple .leave-attachment__remove { min-height:51px; }
+.leave-simple-footer { display:flex; flex-direction:column; gap:9px; padding:18px 0 4px; }
+.leave-simple-submit { min-height:53px; font-size:15px; font-weight:850; background:#087d78; }
+.leave-simple-footer > small { text-align:center; color:var(--lv-muted); font-size:11px; }
+.leave-form--simple button:focus-visible,
+.leave-form--simple textarea:focus-visible { outline:2px solid var(--lv-accent); outline-offset:2px; }
+.leave-form--simple .leave-guide-bottom-error { display:flex; flex-direction:column; gap:7px; font-size:13px; font-weight:750; }
+.leave-form--simple .leave-guide-bottom-error button { width:fit-content; }
+@media (max-width:355px) {
+  .leave-simple-type-grid, .leave-simple-date-grid { gap:6px; }
+  .leave-simple-type { font-size:11px; min-height:98px; }
+  .leave-simple-date { padding:9px; min-height:86px; }
+  .leave-simple-date strong { font-size:12px; }
+  .leave-simple-date svg { right:7px; top:9px; width:16px; height:16px; }
+}
