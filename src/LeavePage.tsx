@@ -136,9 +136,6 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
   const countApproved = requests.filter((request) => request.status === 'approved').length;
   const countRejected = requests.filter((request) => request.status === 'rejected').length;
   const selectedRule = leaveOptions.find((option) => option.type === leaveType);
-  const commonLeaveTypes = leaveOptions.filter((option) =>
-    option.type === 'ลาป่วย' || option.type === 'ลากิจโดยไม่รับค่าจ้าง' ||
-    option.type === 'ลาพักร้อนประจำปี');
   const clearError = () => { setFormError(''); setErrorField(null); };
   const validateLeaveRequest = () => {
     if (!selectedRule) {
@@ -412,24 +409,18 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
                     <div className="leave-simple-label-row">
                       <h3 id="leave-simple-type">ประเภทการลา <em>*</em></h3>
                     </div>
-                    <div className="leave-simple-type-grid" role="group" aria-label="ประเภทการลาที่ใช้บ่อย">
-                      {commonLeaveTypes.map(({ type, Icon }) => (
-                        <button key={type} type="button" aria-pressed={leaveType === type}
-                          className={'leave-simple-type' + (leaveType === type ? ' leave-simple-type--selected' : '')}
-                          onClick={() => { setLeaveType(type); clearError(); }}>
-                          <span className="leave-simple-type__icon"><Icon size={24} strokeWidth={1.9} aria-hidden="true" /></span>
-                          <span>{type === 'ลากิจโดยไม่รับค่าจ้าง' ? 'ลากิจไม่รับค่าจ้าง' :
-                            type === 'ลาพักร้อนประจำปี' ? 'ลาพักร้อน' : type}</span>
-                          {leaveType === type && <Check className="leave-simple-type__check" size={15} aria-hidden="true" />}
-                        </button>
-                      ))}
-                    </div>
-                    <button type="button" className="leave-simple-more-types"
+                    <button type="button" className={'leave-simple-type-choice' + (selectedRule ? ' leave-simple-type-choice--selected' : '')}
                       aria-haspopup="dialog" aria-expanded={typeOpen}
+                      aria-label={leaveType ? 'เปลี่ยนประเภทการลา ปัจจุบัน ' + leaveType : 'เลือกประเภทการลา'}
                       onClick={(event) => openTypePicker(event.currentTarget)}>
-                      <span>{leaveType && !commonLeaveTypes.some((item) => item.type === leaveType)
-                        ? leaveType : 'ดูประเภทการลาทั้งหมด (10)'}</span>
-                      <ChevronRight size={19} aria-hidden="true" />
+                      <span className="leave-simple-type-choice__icon">
+                        {selectedRule ? <selectedRule.Icon size={24} strokeWidth={1.85} aria-hidden="true" /> : <ClipboardList size={24} strokeWidth={1.85} aria-hidden="true" />}
+                      </span>
+                      <span className="leave-simple-type-choice__text">
+                        <strong>{leaveType || 'เลือกประเภทการลา'}</strong>
+                        <small>{leaveType ? 'เปลี่ยนประเภทการลา' : 'แตะเพื่อเลือกจาก 10 ประเภท'}</small>
+                      </span>
+                      <ChevronRight size={21} aria-hidden="true" />
                     </button>
                     {selectedRule && (
                       <div className="leave-simple-rule">
@@ -562,29 +553,33 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
           </div>
 
           {typeOpen && (
-            <div className="leave-type-overlay" onMouseDown={(event) => {
-              if (event.target === event.currentTarget) setTypeOpen(false);
-            }}>
-              <section className="leave-type-sheet" ref={typePanelRef}
+            <div className="leave-type-overlay leave-type-overlay--fullscreen">
+              <section className="leave-type-sheet leave-type-sheet--fullscreen" ref={typePanelRef}
                 role="dialog" aria-modal="true" aria-labelledby="leave-type-title">
-                <div className="leave-picker__handle" aria-hidden="true" />
-                <header className="leave-picker__head">
-                  <div><span>แตะรายการที่ต้องการเลือก</span><h3 id="leave-type-title">ประเภทการลา (10 ประเภท)</h3></div>
-                  <button type="button" ref={typeCloseRef} className="leave-picker__close"
-                    onClick={() => setTypeOpen(false)} aria-label="ปิดตัวเลือกประเภทการลา">
-                    <X size={21} aria-hidden="true" />
-                  </button>
-                </header>
-                <div className="leave-type-options" role="group" aria-label="ประเภทการลา">
-                  {leaveOptions.map(({ type, detail, Icon }) => (
-                    <button type="button" key={type} aria-pressed={leaveType === type}
-                      className={'leave-type-option' + (leaveType === type ? ' leave-type-option--selected' : '')}
-                      onClick={() => { setLeaveType(type); setTypeOpen(false); clearError(); }}>
-                      <span className="leave-type-option__icon"><Icon size={19} strokeWidth={1.9} aria-hidden="true" /></span>
-                      <span className="leave-type-option__text"><strong>{type}</strong><small>{detail}</small></span>
-                      {leaveType === type && <Check size={19} strokeWidth={2.3} aria-hidden="true" />}
+                <div className="leave-type-sheet__content">
+                  <header className="leave-type-sheet__header">
+                    <button type="button" ref={typeCloseRef} className="leave-type-sheet__back"
+                      onClick={() => setTypeOpen(false)} aria-label="กลับไปฟอร์มใบลา">
+                      <ArrowLeft size={23} strokeWidth={1.9} aria-hidden="true" />
                     </button>
-                  ))}
+                    <div>
+                      <h3 id="leave-type-title">เลือกประเภทการลา</h3>
+                      <p>เลือกประเภทที่ต้องการ</p>
+                    </div>
+                  </header>
+                  <div className="leave-type-options leave-type-options--grid" role="group" aria-label="ประเภทการลาทั้ง 10 ประเภท">
+                    {leaveOptions.map(({ type, Icon }) => (
+                      <button type="button" key={type} aria-pressed={leaveType === type}
+                        className={'leave-type-option leave-type-option--tile' + (leaveType === type ? ' leave-type-option--selected' : '')}
+                        onClick={() => { setLeaveType(type); setTypeOpen(false); clearError(); }}>
+                        <span className="leave-type-option__icon leave-type-option__icon--tile">
+                          <Icon size={26} strokeWidth={1.85} aria-hidden="true" />
+                        </span>
+                        <span className="leave-type-option__name">{type}</span>
+                        {leaveType === type && <Check className="leave-type-option__check" size={16} aria-hidden="true" />}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </section>
             </div>
