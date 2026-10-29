@@ -330,24 +330,24 @@
 
 /* ─── Attendance V2: clean leave workflow, no pixel-art, no fabricated balances ─── */
 .leave-page {
-  --lv-bg:#f4f8fc;
+  --lv-bg:#f6f9fa;
   --lv-surface:#fff;
-  --lv-ink:#182d48;
-  --lv-muted:#647995;
-  --lv-line:#e1e9f2;
-  --lv-soft:#edf5ff;
-  --lv-accent:#1978ee;
-  --lv-hero:#1978ee;
+  --lv-ink:#203b46;
+  --lv-muted:#6c818c;
+  --lv-line:#e3ebee;
+  --lv-soft:#edf5f6;
+  --lv-accent:#087d78;
+  --lv-hero:#087d78;
   padding:calc(22px + env(safe-area-inset-top,0px)) 17px 32px;
 }
 .app-shell[data-period="night"] .leave-page {
   --lv-bg:#0e233b;
   --lv-surface:#192f46;
-  --lv-ink:#f0f7fd;
-  --lv-muted:#b8c7d7;
-  --lv-line:#344f69;
-  --lv-soft:#203e60;
-  --lv-accent:#81baff;
+  --lv-ink:#eff7fe;
+  --lv-muted:#b3c6d4;
+  --lv-line:#36516b;
+  --lv-soft:#243d54;
+  --lv-accent:#77d7c9;
 }
 .leave-heading { margin-bottom:19px; gap:12px; }
 .leave-heading__back { width:43px; height:43px; color:var(--lv-ink); }
@@ -376,8 +376,8 @@
   border:0;
   border-radius:14px;
   color:#fff;
-  background:#1978ee;
-  box-shadow:0 7px 16px rgba(25,120,238,.14);
+  background:#087d78;
+  box-shadow:0 7px 16px rgba(8,125,120,.14);
   font-size:15px;
   font-weight:850;
 }
@@ -441,7 +441,7 @@
   font-size:12px;
   background:var(--lv-surface);
 }
-.leave-filter--active { background:#1978ee; color:#fff; border-color:#1978ee; }
+.leave-filter--active { background:#087d78; color:#fff; border-color:#087d78; }
 .app-shell[data-period="night"] .leave-filter--active { color:#fff; }
 .leave-list { gap:8px; }
 .leave-request {
@@ -464,11 +464,11 @@
 /* Keep dialogs lightweight and consistent with the new app surface. */
 .leave-modal, .leave-picker, .leave-type-sheet, .leave-confirm-sheet {
   --lv-surface:#fff;
-  --lv-ink:#182d48;
-  --lv-muted:#647995;
-  --lv-line:#e1e9f2;
-  --lv-soft:#edf5ff;
-  --lv-accent:#1978ee;
+  --lv-ink:#203b46;
+  --lv-muted:#6c818c;
+  --lv-line:#e3ebee;
+  --lv-soft:#edf5f6;
+  --lv-accent:#087d78;
   padding:11px 17px calc(19px + env(safe-area-inset-bottom,0px));
 }
 .app-shell[data-period="night"] .leave-modal,
@@ -476,11 +476,11 @@
 .app-shell[data-period="night"] .leave-type-sheet,
 .app-shell[data-period="night"] .leave-confirm-sheet {
   --lv-surface:#192f46;
-  --lv-ink:#f0f7fd;
-  --lv-muted:#b8c7d7;
-  --lv-line:#344f69;
-  --lv-soft:#203e60;
-  --lv-accent:#81baff;
+  --lv-ink:#eff7fe;
+  --lv-muted:#b3c6d4;
+  --lv-line:#36516b;
+  --lv-soft:#243d54;
+  --lv-accent:#77d7c9;
 }
 .leave-modal__head { margin-bottom:13px; }
 .leave-modal__head span i { color:var(--lv-accent); }
@@ -507,7 +507,7 @@
   line-height:1;
 }
 .leave-steps__item--current { color:var(--lv-accent); }
-.leave-steps__item--current .leave-steps__number { background:#1978ee; color:#fff; }
+.leave-steps__item--current .leave-steps__number { background:#087d78; color:#fff; }
 .leave-steps--review { margin-bottom:15px; }
 .leave-steps--review .leave-steps__item:not(:last-child) .leave-steps__number { background:#23aa85; }
 .leave-form { gap:12px; }
@@ -551,7 +551,7 @@
 .leave-type-tile:nth-child(5) > svg:first-child { color:#ca8c44; }
 .leave-type-tile:nth-child(6) > svg:first-child { color:#438bd5; }
 .leave-type-tile span { font-size:11px; font-weight:750; line-height:1.45; overflow-wrap:anywhere; }
-.leave-type-tile--selected { border:2px solid #1978ee; background:var(--lv-soft); }
+.leave-type-tile--selected { border:2px solid #087d78; background:var(--lv-soft); }
 .leave-type-tile__check {
   position:absolute;
   top:5px;
@@ -560,7 +560,7 @@
   width:18px;
   height:18px;
   border-radius:50%;
-  background:#1978ee;
+  background:#087d78;
   color:white;
 }
 .leave-more-types {
@@ -628,7 +628,7 @@
   gap:5px;
   width:100%;
   min-height:103px;
-  border:1.5px dashed #a4bddc;
+  border:1.5px dashed #a1c9c5;
   border-radius:13px;
   background:var(--lv-soft);
   color:var(--lv-accent);
@@ -638,7 +638,7 @@
 .leave-attached-file { display:flex; align-items:center; gap:8px; padding:10px; border:1px solid var(--lv-line); border-radius:11px; color:var(--lv-accent); }
 .leave-attached-file span { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--lv-ink); font-size:12px; }
 .leave-attached-file button { display:grid; place-items:center; width:33px; height:33px; padding:0; border:0; border-radius:8px; background:var(--lv-soft); color:var(--lv-muted); }
-.leave-modal__primary { background:#1978ee; min-height:51px; color:#fff; }
+.leave-modal__primary { background:#087d78; min-height:51px; color:#fff; }
 .leave-next-button { justify-content:center; }
 .leave-step-actions { display:flex; gap:10px; }
 .leave-step-actions .leave-modal__primary { flex:1 1 auto; width:auto; min-width:0; }
@@ -662,11 +662,11 @@
 .leave-confirm__summary strong { font-size:13px; }
 .leave-confirm__actions { gap:9px; }
 .leave-confirm__edit { background:var(--lv-surface); color:var(--lv-ink); }
-.leave-picker__day--selected { background:#1978ee; color:#fff; }
+.leave-picker__day--selected { background:#087d78; color:#fff; }
 .leave-picker__day--range { background:var(--lv-soft); }
-.leave-type-option--selected { border-color:#1978ee; }
-.leave-type-option--selected .leave-type-option__icon { background:#1978ee; }
-.leave-type-sheet .leave-type-option--selected { border-color:#1978ee; }
+.leave-type-option--selected { border-color:#087d78; }
+.leave-type-option--selected .leave-type-option__icon { background:#087d78; }
+.leave-type-sheet .leave-type-option--selected { border-color:#087d78; }
 @media (max-width:355px) {
   .leave-overview { gap:6px; }
   .leave-overview__item { padding:9px 6px!important; }
