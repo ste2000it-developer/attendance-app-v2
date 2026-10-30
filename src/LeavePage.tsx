@@ -108,6 +108,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
   const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [dateMode, setDateMode] = useState<'single' | 'range'>('single');
   const [draftStart, setDraftStart] = useState<string | null>(null);
   const [draftEnd, setDraftEnd] = useState<string | null>(null);
   const [pickerMonth, setPickerMonth] = useState(() => new Date(today + 'T12:00:00Z'));
@@ -192,13 +193,25 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
   const openRangePicker = (trigger: HTMLButtonElement) => {
     dateTriggerRef.current = trigger;
     setTypeOpen(false);
+    setDateMode(start && end && start !== end ? 'range' : 'single');
     setDraftStart(start || null);
     setDraftEnd(end || null);
     setPickerMonth(new Date((start || today) + 'T12:00:00Z'));
     setDatePickerOpen(true);
   };
+  const changeDateMode = (mode: 'single' | 'range') => {
+    if (mode === dateMode) return;
+    setDateMode(mode);
+    setDraftStart(null);
+    setDraftEnd(null);
+  };
   const selectRangeDate = (iso: string) => {
-    if (!draftStart || draftEnd || iso < draftStart) {
+    if (dateMode === 'single') {
+      setDraftStart(iso);
+      setDraftEnd(iso);
+      return;
+    }
+    if (!draftStart || draftEnd || iso <= draftStart) {
       setDraftStart(iso);
       setDraftEnd(null);
     } else {
@@ -206,9 +219,9 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
     }
   };
   const acceptRange = () => {
-    if (!draftStart) return;
+    if (!draftStart || (dateMode === 'range' && !draftEnd)) return;
     setStart(draftStart);
-    setEnd(draftEnd || draftStart);
+    setEnd(dateMode === 'single' ? draftStart : draftEnd!);
     clearError();
     setDatePickerOpen(false);
   };
@@ -602,16 +615,12 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
                   <button ref={pickerCloseRef} type="button" className="leave-picker__close"
                     onClick={() => setDatePickerOpen(false)} aria-label="ปิดปฏิทินเลือกวัน"><X size={21} aria-hidden="true" /></button>
                 </header>
-                <div className="leave-picker__range-hint" role="status">
-                  <span className={draftStart ? 'is-picked' : ''}>
-                    <small>วันเริ่มลา</small><strong>{draftStart ? formatDate(draftStart) : 'กดเลือกวันเริ่ม'}</strong>
-                  </span>
-                  <ChevronRight size={18} aria-hidden="true" />
-                  <span className={draftEnd ? 'is-picked' : ''}>
-                    <small>วันสิ้นสุด</small><strong>{draftEnd ? formatDate(draftEnd) : draftStart ? 'ลาแค่วันเดียว ยืนยันได้' : 'กดเลือกวันสิ้นสุด'}</strong>
-                  </span>
-                </div>
-                <p className="leave-picker__instruction">ลา <strong>วันเดียว</strong> แตะวันที่ 1 ครั้งแล้วกดยืนยัน · ลา <strong>หลายวัน</strong> แตะวันเริ่มและวันสิ้นสุด</p>
+                 <div className="leave-picker__mode" role="group" aria-label="จำนวนวันที่ต้องการลา">
+                   <button type="button" className={dateMode === 'single' ? 'leave-picker__mode-button is-active' : 'leave-picker__mode-button'}
+                     aria-pressed={dateMode === 'single'} onClick={() => changeDateMode('single')}>ลา 1 วัน</button>
+                   <button type="button" className={dateMode === 'range' ? 'leave-picker__mode-button is-active' : 'leave-picker__mode-button'}
+                     aria-pressed={dateMode === 'range'} onClick={() => changeDateMode('range')}>ลาหลายวัน</button>
+                 </div>
                 <div className="leave-picker__month">
                   <button type="button" onClick={() => setPickerMonth(new Date(Date.UTC(year, month - 1, 1)))}
                     aria-label="เดือนก่อนหน้า"><ChevronLeft size={21} aria-hidden="true" /></button>
@@ -622,7 +631,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
                 <div className="leave-picker__weekdays" aria-hidden="true">
                   {weekdays.map((name) => <span key={name}>{name}</span>)}
                 </div>
-                <div className="leave-picker__grid" role="group" aria-label="เลือกวันเริ่มลา แล้วเลือกวันสิ้นสุด">
+                <div className="leave-picker__grid" role="group" aria-label={dateMode === 'single' ? 'เลือกวันลา' : 'เลือกวันเริ่มลาและวันสิ้นสุด'}>
                   {grid.map((day, index) => {
                     if (day === null) return <span key={'empty-' + index} aria-hidden="true" />;
                     const iso = isoFromUtc(year, month, day);
@@ -641,13 +650,23 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
                     );
                   })}
                 </div>
-                <div className="leave-picker__footer leave-picker__footer--simple">
-                  <span>{draftStart ? countCalendarDays(draftStart, draftEnd || draftStart) + ' วันตามปฏิทิน (ยังไม่หักวันหยุด)' : 'กรุณาแตะวันที่ต้องการลา'}</span>
-                </div>
-                <button className="leave-modal__primary leave-picker__apply" type="button"
-                  disabled={!draftStart} onClick={acceptRange}>
-                  <Check size={18} aria-hidden="true" /> {draftStart ? 'ยืนยันวันที่เลือก' : 'เลือกวันที่ก่อน'}
-                </button>
+                 <div className="leave-picker__selection" role="status" aria-live="polite">
+                   <CalendarCheck2 size={19} aria-hidden="true" />
+                   <span>
+                     {dateMode === 'single'
+                       ? (draftStart ? formatDate(draftStart) + ' · 1 วัน' : 'ยังไม่ได้เลือกวันที่ลา')
+                       : !draftStart
+                         ? 'ยังไม่ได้เลือกวันเริ่มลา'
+                         : !draftEnd
+                           ? 'เริ่ม ' + formatDate(draftStart) + ' · เลือกวันสิ้นสุด'
+                           : formatRange(draftStart, draftEnd) + ' · ' + countCalendarDays(draftStart, draftEnd) + ' วัน'}
+                     <small>นับตามปฏิทิน · ยังไม่ตรวจวันหยุด</small>
+                   </span>
+                 </div>
+                 <button className="leave-modal__primary leave-picker__apply" type="button"
+                   disabled={!draftStart || (dateMode === 'range' && !draftEnd)} onClick={acceptRange}>
+                   <Check size={18} aria-hidden="true" /> ยืนยันวันที่เลือก
+                 </button>
               </section>
             </div>
           )}

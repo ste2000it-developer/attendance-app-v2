@@ -1309,3 +1309,86 @@
     border-radius:23px;
   }
 }
+
+
+/* Leave calendar: one-day or date-range selection without instructional steps. */
+.leave-picker__mode {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:5px;
+  padding:5px;
+  margin:1px 0 19px;
+  border:1px solid var(--lv-line);
+  border-radius:13px;
+  background:var(--lv-soft);
+}
+.leave-picker__mode-button {
+  display:grid;
+  place-items:center;
+  min-width:0;
+  min-height:45px;
+  padding:9px 6px;
+  border:0;
+  border-radius:10px;
+  background:transparent;
+  color:var(--lv-muted);
+  font-size:14px;
+  font-weight:750;
+  line-height:1.45;
+}
+.leave-picker__mode-button.is-active {
+  background:var(--lv-surface);
+  color:var(--lv-accent);
+  box-shadow:0 1px 5px rgba(8,42,48,.10);
+}
+.leave-picker__mode-button:focus-visible {
+  outline:2px solid var(--lv-accent);
+  outline-offset:1px;
+}
+.leave-picker__selection {
+  display:flex;
+  align-items:center;
+  gap:11px;
+  min-height:69px;
+  margin:18px 0 13px;
+  padding:12px 13px;
+  border-radius:13px;
+  background:var(--lv-soft);
+  color:var(--lv-ink);
+}
+.leave-picker__selection > svg { flex:0 0 auto; color:var(--lv-accent); }
+.leave-picker__selection > span {
+  display:flex;
+  flex-direction:column;
+  flex:1;
+  min-width:0;
+  gap:5px;
+  font-size:14px;
+  font-weight:750;
+  line-height:1.45;
+  overflow-wrap:anywhere;
+}
+.leave-picker__selection small {
+  color:var(--lv-muted);
+  font-size:11px;
+  font-weight:500;
+  line-height:1.4;
+}
+.leave-picker__day--range {
+  background:var(--lv-soft);
+  color:var(--lv-accent);
+  border-radius:7px;
+}
+.leave-picker__day--selected,
+.leave-picker__day--selected.leave-picker__day--today {
+  background:var(--lv-accent);
+  color:#fff;
+  border-color:var(--lv-accent);
+  border-radius:11px;
+}
+.leave-picker__apply:disabled { opacity:.5; cursor:not-allowed; }
+@media (max-width:355px) {
+  .leave-picker__mode { margin-bottom:13px; }
+  .leave-picker__mode-button { min-height:42px; font-size:13px; }
+  .leave-picker__selection { min-height:61px; margin-top:12px; }
+}
