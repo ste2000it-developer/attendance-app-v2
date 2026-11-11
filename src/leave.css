@@ -1392,3 +1392,65 @@
   .leave-picker__mode-button { min-height:42px; font-size:13px; }
   .leave-picker__selection { min-height:61px; margin-top:12px; }
 }
+
+
+/* Native-like bottom-sheet motion for leave form and calendar only. */
+@keyframes leave-sheet-in {
+  from { transform:translate3d(0,110dvh,0); }
+  to { transform:translate3d(0,0,0); }
+}
+@keyframes leave-sheet-out {
+  from { transform:translate3d(0,var(--leave-sheet-drag-y,0px),0); }
+  to { transform:translate3d(0,110dvh,0); }
+}
+@keyframes leave-backdrop-in {
+  from { opacity:0; }
+  to { opacity:1; }
+}
+@keyframes leave-backdrop-out {
+  from { opacity:1; }
+  to { opacity:0; }
+}
+.leave-modal-overlay,
+.leave-picker-overlay {
+  animation:leave-backdrop-in 220ms ease-out backwards;
+}
+.leave-modal-overlay > .leave-modal,
+.leave-picker-overlay > .leave-picker {
+  animation:leave-sheet-in 335ms cubic-bezier(.19,.85,.24,1) backwards;
+  will-change:transform;
+}
+.leave-modal-overlay.is-closing,
+.leave-picker-overlay.is-closing {
+  animation:leave-backdrop-out 280ms ease-in forwards;
+}
+.leave-modal-overlay.is-closing > .leave-modal,
+.leave-picker-overlay.is-closing > .leave-picker {
+  animation:leave-sheet-out 280ms cubic-bezier(.4,0,.95,.65) forwards;
+}
+.leave-modal__handle,
+.leave-picker__handle,
+.leave-modal__head,
+.leave-picker__head {
+  touch-action:none;
+  user-select:none;
+  -webkit-user-select:none;
+}
+.leave-modal__handle,
+.leave-picker__handle { cursor:grab; }
+.leave-modal__head,
+.leave-picker__head { cursor:grab; }
+.leave-modal__head button,
+.leave-picker__head button { cursor:pointer; }
+@media (prefers-reduced-motion:reduce) {
+  .leave-modal-overlay,
+  .leave-picker-overlay,
+  .leave-modal-overlay > .leave-modal,
+  .leave-picker-overlay > .leave-picker,
+  .leave-modal-overlay.is-closing,
+  .leave-picker-overlay.is-closing,
+  .leave-modal-overlay.is-closing > .leave-modal,
+  .leave-picker-overlay.is-closing > .leave-picker {
+    animation:none;
+  }
+}

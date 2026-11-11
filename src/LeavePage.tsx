@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent, type PointerEvent as ReactPointerEvent } from 'react';
 import { createPortal } from 'react-dom';
 import {
   ArrowLeft, ArrowRight, CalendarCheck2, CalendarDays, Check,
@@ -31,6 +31,8 @@ type LeaveRequest = {
   status: LeaveStatus;
 };
 type Modal = 'form' | 'detail' | null;
+type SlidingSheet = 'form' | 'calendar';
+type SheetDrag = { pointerId: number; startY: number; lastY: number; startedAt: number; kind: SlidingSheet };
 
 const demoRequests: LeaveRequest[] = [
   { id: 'demo-1', type: 'ลากิจโดยไม่รับค่าจ้าง', start: '2026-11-03', end: '2026-11-03', reason: 'ธุระส่วนตัว (ข้อมูลตัวอย่าง)', status: 'pending' },
@@ -108,6 +110,8 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
   const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [modalExiting, setModalExiting] = useState(false);
+  const [datePickerExiting, setDatePickerExiting] = useState(false);
   const [dateMode, setDateMode] = useState<'single' | 'range'>('single');
   const [draftStart, setDraftStart] = useState<string | null>(null);
   const [draftEnd, setDraftEnd] = useState<string | null>(null);
@@ -130,6 +134,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
   const confirmPanelRef = useRef<HTMLElement>(null);
   const confirmCloseRef = useRef<HTMLButtonElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dragRef = useRef<SheetDrag | null>(null);
 
   const visibleRequests = requests.filter((request) => filter === 'all' || request.status === filter);
   const selectedRequest = requests.find((request) => request.id === selectedId);
@@ -166,6 +171,8 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
   const openModal = (next: Modal, selected: string | null = null) => {
     previousFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setSelectedId(selected);
+    setModalExiting(false);
+    setDatePickerExiting(false);
     setModal(next);
     if (next === 'form') {
       setLeaveType(null);
@@ -180,12 +187,30 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
     setConfirmOpen(false);
     clearError();
   };
-  const closeModal = () => {
-    setConfirmOpen(false);
-    setDatePickerOpen(false);
-    setTypeOpen(false);
-    setModal(null);
+  const closeDatePicker = () => {
+    if (datePickerOpen && !datePickerExiting) setDatePickerExiting(true);
   };
+  const closeModal = () => {
+    if (!modal || modalExiting) return;
+    setConfirmOpen(false);
+    setTypeOpen(false);
+    setDatePickerOpen(false);
+    setDatePickerExiting(false);
+    setModalExiting(true);
+  };
+  // Keep a closing sheet mounted until its exit transition finishes.
+  useEffect(() => {
+    if (!modalExiting) return;
+    const ms = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 360;
+    const timer = window.setTimeout(() => { setModal(null); setModalExiting(false); }, ms);
+    return () => window.clearTimeout(timer);
+  }, [modalExiting]);
+  useEffect(() => {
+    if (!datePickerExiting) return;
+    const ms = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 360;
+    const timer = window.setTimeout(() => { setDatePickerOpen(false); setDatePickerExiting(false); }, ms);
+    return () => window.clearTimeout(timer);
+  }, [datePickerExiting]);
   const openTypePicker = (trigger: HTMLButtonElement) => {
     typeTriggerRef.current = trigger;
     setTypeOpen(true);
@@ -197,6 +222,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
     setDraftStart(start || null);
     setDraftEnd(end || null);
     setPickerMonth(new Date((start || today) + 'T12:00:00Z'));
+    setDatePickerExiting(false);
     setDatePickerOpen(true);
   };
   const changeDateMode = (mode: 'single' | 'range') => {
@@ -223,7 +249,51 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
     setStart(draftStart);
     setEnd(dateMode === 'single' ? draftStart : draftEnd!);
     clearError();
-    setDatePickerOpen(false);
+    closeDatePicker();
+  };
+
+  // Swipe down on the grabber or heading; scrollable content stays untouched.
+  const beginSheetDrag = (event: ReactPointerEvent<HTMLElement>, kind: SlidingSheet) => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    if (modalExiting || datePickerExiting) return;
+    if ((event.target as HTMLElement).closest('button, input, textarea, a, select')) return;
+    const panel = kind === 'form' ? modalPanelRef.current : pickerPanelRef.current;
+    if (!panel || panel.getAnimations().some((animation) => animation.playState === 'running')) return;
+    panel.style.transition = 'none';
+    dragRef.current = { pointerId: event.pointerId, startY: event.clientY, lastY: 0, startedAt: performance.now(), kind };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+  const moveSheetDrag = (event: ReactPointerEvent<HTMLElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const panel = drag.kind === 'form' ? modalPanelRef.current : pickerPanelRef.current;
+    if (!panel) return;
+    drag.lastY = Math.max(0, event.clientY - drag.startY);
+    panel.style.transform = 'translate3d(0,' + drag.lastY + 'px,0)';
+  };
+  const endSheetDrag = (event: ReactPointerEvent<HTMLElement>, cancelled = false) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    dragRef.current = null;
+    const panel = drag.kind === 'form' ? modalPanelRef.current : pickerPanelRef.current;
+    if (!panel) return;
+    const dy = drag.lastY;
+    const elapsed = Math.max(1, performance.now() - drag.startedAt);
+    if (!cancelled && (dy > 100 || (dy > 48 && dy / elapsed > 0.55))) {
+      panel.style.setProperty('--leave-sheet-drag-y', dy + 'px');
+      panel.style.transition = '';
+      panel.style.transform = '';
+      if (drag.kind === 'form') closeModal();
+      else closeDatePicker();
+    } else {
+      panel.style.transition = 'transform 210ms cubic-bezier(.2,.85,.2,1)';
+      panel.style.transform = 'translate3d(0,0,0)';
+      panel.addEventListener('transitionend', (transitionEvent) => {
+        if (transitionEvent.target !== panel || transitionEvent.propertyName !== 'transform') return;
+        panel.style.transition = '';
+        panel.style.transform = '';
+      }, { once: true });
+    }
   };
 
   useEffect(() => {
@@ -255,7 +325,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
       if (event.key === 'Escape') {
         event.preventDefault();
         if (confirmOpen) setConfirmOpen(false);
-        else if (datePickerOpen) setDatePickerOpen(false);
+        else if (datePickerOpen) closeDatePicker();
         else if (typeOpen) setTypeOpen(false);
         else closeModal();
         return;
@@ -298,13 +368,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
     }, ...current]);
     setFilter('all');
     setFeedback(true);
-    setLeaveType(null);
-    setStart('');
-    setEnd('');
-    setReason('');
-    setAttachmentName('');
-    if (fileInputRef.current) fileInputRef.current.value = '';
-    clearError();
+    // The filled form stays visible while sliding away; the next open resets it.
     closeModal();
   };
 
@@ -400,13 +464,27 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
 
       {modal && createPortal(
         <>
-          <div className="leave-modal-overlay" onMouseDown={(event) => {
+          <div className={'leave-modal-overlay' + (modalExiting ? ' is-closing' : '')} onMouseDown={(event) => {
             if (event.target === event.currentTarget) closeModal();
           }}>
             <section ref={modalPanelRef} className="leave-modal"
-              role="dialog" aria-modal="true" aria-labelledby="leave-modal-title">
-              <div className="leave-modal__handle" aria-hidden="true" />
-              <header className="leave-modal__head">
+              role="dialog" aria-modal="true" aria-labelledby="leave-modal-title"
+              onAnimationEnd={(event) => {
+                if (event.target === event.currentTarget && event.animationName === 'leave-sheet-out' && modalExiting) {
+                  setModal(null);
+                  setModalExiting(false);
+                }
+              }}>
+              <div className="leave-modal__handle" aria-hidden="true"
+                onPointerDown={(event) => beginSheetDrag(event, 'form')}
+                onPointerMove={moveSheetDrag}
+                onPointerUp={endSheetDrag}
+                onPointerCancel={(event) => endSheetDrag(event, true)} />
+              <header className="leave-modal__head"
+                onPointerDown={(event) => beginSheetDrag(event, 'form')}
+                onPointerMove={moveSheetDrag}
+                onPointerUp={endSheetDrag}
+                onPointerCancel={(event) => endSheetDrag(event, true)}>
                 <div>
                   <span>แบบฟอร์มการลา <i>•</i> โหมดทดลอง</span>
                   <h2 id="leave-modal-title">{modal === 'form' ? 'ยื่นคำขอลา' : 'รายละเอียดคำขอ'}</h2>
@@ -602,18 +680,32 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
           )}
 
           {datePickerOpen && (
-            <div className="leave-picker-overlay" onMouseDown={(event) => {
-              if (event.target === event.currentTarget) setDatePickerOpen(false);
+            <div className={'leave-picker-overlay' + (datePickerExiting ? ' is-closing' : '')} onMouseDown={(event) => {
+              if (event.target === event.currentTarget) closeDatePicker();
             }}>
               <section className="leave-picker" ref={pickerPanelRef} role="dialog" aria-modal="true"
-                aria-labelledby="leave-picker-title">
-                <div className="leave-picker__handle" aria-hidden="true" />
-                <header className="leave-picker__head">
+                aria-labelledby="leave-picker-title"
+                onAnimationEnd={(event) => {
+                  if (event.target === event.currentTarget && event.animationName === 'leave-sheet-out' && datePickerExiting) {
+                    setDatePickerOpen(false);
+                    setDatePickerExiting(false);
+                  }
+                }}>
+                <div className="leave-picker__handle" aria-hidden="true"
+                  onPointerDown={(event) => beginSheetDrag(event, 'calendar')}
+                  onPointerMove={moveSheetDrag}
+                  onPointerUp={endSheetDrag}
+                  onPointerCancel={(event) => endSheetDrag(event, true)} />
+                <header className="leave-picker__head"
+                  onPointerDown={(event) => beginSheetDrag(event, 'calendar')}
+                  onPointerMove={moveSheetDrag}
+                  onPointerUp={endSheetDrag}
+                  onPointerCancel={(event) => endSheetDrag(event, true)}>
                   <div><span>แตะวันที่ต้องการลา</span>
                     <h3 id="leave-picker-title">เลือกวันที่ลา</h3>
                   </div>
                   <button ref={pickerCloseRef} type="button" className="leave-picker__close"
-                    onClick={() => setDatePickerOpen(false)} aria-label="ปิดปฏิทินเลือกวัน"><X size={21} aria-hidden="true" /></button>
+                    onClick={closeDatePicker} aria-label="ปิดปฏิทินเลือกวัน"><X size={21} aria-hidden="true" /></button>
                 </header>
                  <div className="leave-picker__mode" role="group" aria-label="จำนวนวันที่ต้องการลา">
                    <button type="button" className={dateMode === 'single' ? 'leave-picker__mode-button is-active' : 'leave-picker__mode-button'}
