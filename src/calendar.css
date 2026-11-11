@@ -413,3 +413,72 @@
   .calendar-heading { gap: 6px; }
   .calendar-today { padding: 7px; }
 }
+
+
+/* Calendar and daily-detail sheets share the slide-up / swipe-down interaction. */
+@keyframes calendar-sheet-enter {
+  from { transform:translate3d(0,110dvh,0); }
+  to { transform:translate3d(0,0,0); }
+}
+@keyframes calendar-sheet-exit {
+  from { transform:translate3d(0,var(--calendar-drag-start,0px),0); }
+  to { transform:translate3d(0,110dvh,0); }
+}
+@keyframes calendar-backdrop-enter {
+  from { opacity:0; }
+  to { opacity:1; }
+}
+@keyframes calendar-backdrop-exit {
+  from { opacity:1; }
+  to { opacity:0; }
+}
+.calendar-popup-overlay,
+.calendar-day-overlay {
+  animation:calendar-backdrop-enter 220ms ease-out both;
+}
+.calendar-popup,
+.calendar-day-popup {
+  animation:calendar-sheet-enter 335ms cubic-bezier(.19,.85,.24,1) both;
+  will-change:transform;
+}
+.calendar-popup-overlay.is-closing,
+.calendar-day-overlay.is-closing {
+  animation:calendar-backdrop-exit 280ms ease-in forwards;
+}
+.calendar-popup-overlay.is-closing > .calendar-popup,
+.calendar-day-overlay.is-closing > .calendar-day-popup {
+  animation:calendar-sheet-exit 280ms cubic-bezier(.4,0,.95,.65) forwards;
+}
+.calendar-popup__handle {
+  width:38px;
+  height:4px;
+  margin:11px auto -4px;
+  border-radius:6px;
+  background:#dfe8e5;
+}
+.app-shell[data-period="night"] .calendar-popup__handle { background:#557087; }
+.calendar-popup__handle,
+.calendar-heading[data-sheet-drag],
+.calendar-day-popup__handle[data-sheet-drag],
+.calendar-day-popup__heading[data-sheet-drag] {
+  touch-action:none;
+  -webkit-user-select:none;
+  user-select:none;
+  cursor:grab;
+}
+.calendar-heading[data-sheet-drag] button,
+.calendar-day-popup__heading[data-sheet-drag] button {
+  cursor:pointer;
+}
+@media (prefers-reduced-motion:reduce) {
+  .calendar-popup-overlay,
+  .calendar-day-overlay,
+  .calendar-popup,
+  .calendar-day-popup,
+  .calendar-popup-overlay.is-closing,
+  .calendar-day-overlay.is-closing,
+  .calendar-popup-overlay.is-closing > .calendar-popup,
+  .calendar-day-overlay.is-closing > .calendar-day-popup {
+    animation:none;
+  }
+}

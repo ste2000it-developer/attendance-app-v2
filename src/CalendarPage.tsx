@@ -11,6 +11,7 @@ import {
   X,
 } from 'lucide-react';
 import './calendar.css';
+import { useSheetSwipe } from './useSheetSwipe';
 
 type WorkEvent = {
   id: string;
@@ -66,6 +67,19 @@ export default function CalendarPage({ now, onClose }: { now: Date; onClose: () 
   const today = bangkokParts(now);
   const [monthDate, setMonthDate] = useState(() => new Date(Date.UTC(today.year, today.month, 1)));
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [dayClosing, setDayClosing] = useState(false);
+  const closeDay = () => {
+    if (selectedDay !== null && !dayClosing) setDayClosing(true);
+  };
+  const daySwipe = useSheetSwipe(closeDay, dayClosing);
+  useEffect(() => {
+    if (!dayClosing) return;
+    const timeout = window.setTimeout(() => {
+      setSelectedDay(null);
+      setDayClosing(false);
+    }, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 360);
+    return () => window.clearTimeout(timeout);
+  }, [dayClosing]);
   const popupCloseRef = useRef<HTMLButtonElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const popupRef = useRef<HTMLElement>(null);
@@ -100,7 +114,7 @@ export default function CalendarPage({ now, onClose }: { now: Date; onClose: () 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        setSelectedDay(null);
+        closeDay();
       }
       if (event.key !== 'Tab' || !popup) return;
       const buttons = Array.from(popup.querySelectorAll<HTMLButtonElement>('button:not(:disabled)'));
@@ -129,6 +143,7 @@ export default function CalendarPage({ now, onClose }: { now: Date; onClose: () 
   };
   const openDay = (day: number, button: HTMLButtonElement) => {
     previousFocusRef.current = button;
+    setDayClosing(false);
     setSelectedDay(day);
   };
   const goToToday = (button: HTMLButtonElement) => {
@@ -138,7 +153,7 @@ export default function CalendarPage({ now, onClose }: { now: Date; onClose: () 
 
   return (
     <main className="calendar-page">
-      <header className="calendar-heading">
+      <header className="calendar-heading" data-sheet-drag>
         <span className="calendar-heading__icon" aria-hidden="true">
           <CalendarDays size={24} strokeWidth={1.9} />
         </span>
@@ -235,9 +250,9 @@ export default function CalendarPage({ now, onClose }: { now: Date; onClose: () 
 
       {selectedDay !== null && selectedDate && createPortal(
         <div
-          className="calendar-day-overlay"
+          className={'calendar-day-overlay' + (dayClosing ? ' is-closing' : '')}
           onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setSelectedDay(null);
+            if (event.target === event.currentTarget) closeDay();
           }}
         >
           <section
@@ -246,9 +261,17 @@ export default function CalendarPage({ now, onClose }: { now: Date; onClose: () 
             aria-modal="true"
             aria-labelledby="calendar-day-popup-title"
             ref={popupRef}
+            {...daySwipe}
+            onAnimationEnd={(event) => {
+              if (event.target === event.currentTarget &&
+                  event.animationName === 'calendar-sheet-exit' && dayClosing) {
+                setSelectedDay(null);
+                setDayClosing(false);
+              }
+            }}
           >
-            <div className="calendar-day-popup__handle" aria-hidden="true" />
-            <div className="calendar-day-popup__heading">
+            <div className="calendar-day-popup__handle" data-sheet-drag aria-hidden="true" />
+            <div className="calendar-day-popup__heading" data-sheet-drag>
               <div>
                 <span>กำหนดการประจำวัน · ข้อมูลตัวอย่าง</span>
                 <h2 id="calendar-day-popup-title">{dateFormatter.format(selectedDate)}</h2>
@@ -257,7 +280,7 @@ export default function CalendarPage({ now, onClose }: { now: Date; onClose: () 
                 className="calendar-day-popup__close"
                 ref={popupCloseRef}
                 type="button"
-                onClick={() => setSelectedDay(null)}
+                onClick={closeDay}
                 aria-label="ปิดรายละเอียดกำหนดการ"
               >
                 <X size={21} aria-hidden="true" />
@@ -284,7 +307,7 @@ export default function CalendarPage({ now, onClose }: { now: Date; onClose: () 
               <p className="calendar-detail__empty">ไม่มีกำหนดการงานตัวอย่างสำหรับวันนี้</p>
             )}
 
-            <button className="calendar-day-popup__done" type="button" onClick={() => setSelectedDay(null)}>
+            <button className="calendar-day-popup__done" type="button" onClick={closeDay}>
               ปิดรายละเอียด
             </button>
           </section>

@@ -21,6 +21,7 @@ import {
 import SkyScene from './SkyScene';
 import HistoryPage from './HistoryPage';
 import CalendarPage from './CalendarPage';
+import { useSheetSwipe } from './useSheetSwipe';
 import LeavePage from './LeavePage';
 import ProfilePage from './ProfilePage';
 import {
@@ -85,7 +86,21 @@ function App() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<'home' | 'history' | 'leave' | 'profile'>('home');
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [calendarClosing, setCalendarClosing] = useState(false);
   const calendarDialogRef = useRef<HTMLElement>(null);
+  const closeCalendar = () => {
+    if (calendarOpen && !calendarClosing) setCalendarClosing(true);
+  };
+  const calendarSwipe = useSheetSwipe(closeCalendar, calendarClosing);
+
+  useEffect(() => {
+    if (!calendarClosing) return;
+    const timeout = window.setTimeout(() => {
+      setCalendarOpen(false);
+      setCalendarClosing(false);
+    }, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 360);
+    return () => window.clearTimeout(timeout);
+  }, [calendarClosing]);
 
   const period = previewTheme ?? getBangkokPeriod(now);
   // Firebase attendance is not connected. Do not invent check-in/out records.
@@ -203,7 +218,7 @@ function App() {
       if (document.querySelector('.calendar-day-overlay')) return;
       if (event.key === 'Escape') {
         event.preventDefault();
-        setCalendarOpen(false);
+        closeCalendar();
       }
       if (event.key !== 'Tab' || !dialogElement) return;
       const focusable = Array.from(dialogElement.querySelectorAll<HTMLElement>(
@@ -388,7 +403,7 @@ function App() {
             aria-expanded={key === 'calendar' ? calendarOpen : undefined}
             onClick={() => {
               if (key === 'home') setActiveTab('home');
-              else if (key === 'calendar') setCalendarOpen(true);
+              else if (key === 'calendar') { setCalendarClosing(false); setCalendarOpen(true); }
               else if (key === 'leave') setActiveTab('leave');
               else if (key === 'profile') setActiveTab('profile');
             }}
@@ -400,17 +415,27 @@ function App() {
       </nav>
 
       {calendarOpen && (
-        <div className="calendar-popup-overlay" onMouseDown={(event) => {
-          if (event.target === event.currentTarget) setCalendarOpen(false);
-        }}>
+        <div className={'calendar-popup-overlay' + (calendarClosing ? ' is-closing' : '')}
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) closeCalendar();
+          }}>
           <section
             className="calendar-popup"
             role="dialog"
             aria-modal="true"
             aria-labelledby="calendar-popup-title"
             ref={calendarDialogRef}
+            {...calendarSwipe}
+            onAnimationEnd={(event) => {
+              if (event.target === event.currentTarget &&
+                  event.animationName === 'calendar-sheet-exit' && calendarClosing) {
+                setCalendarOpen(false);
+                setCalendarClosing(false);
+              }
+            }}
           >
-            <CalendarPage now={now} onClose={() => setCalendarOpen(false)} />
+            <div className="calendar-popup__handle" data-sheet-drag aria-hidden="true" />
+            <CalendarPage now={now} onClose={closeCalendar} />
           </section>
         </div>
       )}
