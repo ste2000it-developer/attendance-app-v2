@@ -46,7 +46,7 @@ export function useSheetSwipe(onDismiss: () => void, disabled = false) {
     sheet.style.transition = 'transform 210ms cubic-bezier(.2,.85,.2,1)';
     sheet.style.transform = 'translate3d(0,0,0)';
     sheet.addEventListener('transitionend', (transitionEvent) => {
-      if (transitionEvent.target !== sheet || transitionEvent.propertyName !== 'transform') return;
+      if (transitionEvent.target !== sheet || (transitionEvent as TransitionEvent).propertyName !== 'transform') return;
       sheet.style.transition = '';
       sheet.style.transform = '';
     }, { once: true });
