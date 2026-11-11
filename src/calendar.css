@@ -434,11 +434,11 @@
 }
 .calendar-popup-overlay,
 .calendar-day-overlay {
-  animation:calendar-backdrop-enter 220ms ease-out both;
+  animation:calendar-backdrop-enter 220ms ease-out backwards;
 }
 .calendar-popup,
 .calendar-day-popup {
-  animation:calendar-sheet-enter 335ms cubic-bezier(.19,.85,.24,1) both;
+  animation:calendar-sheet-enter 335ms cubic-bezier(.19,.85,.24,1) backwards;
   will-change:transform;
 }
 .calendar-popup-overlay.is-closing,
