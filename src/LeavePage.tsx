@@ -467,7 +467,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
           <div className={'leave-modal-overlay' + (modalExiting ? ' is-closing' : '')} onMouseDown={(event) => {
             if (event.target === event.currentTarget) closeModal();
           }}>
-            <section ref={modalPanelRef} className="leave-modal"
+            <section ref={modalPanelRef} className={'leave-modal' + (modal === 'form' ? ' leave-modal--request' : '')}
               role="dialog" aria-modal="true" aria-labelledby="leave-modal-title"
               onAnimationEnd={(event) => {
                 if (event.target === event.currentTarget && event.animationName === 'leave-sheet-out' && modalExiting) {
