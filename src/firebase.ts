@@ -4,7 +4,7 @@ import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 // Firebase Web SDK configuration identifies the project; it is not an admin secret.
 // Firestore authorization is enforced separately by server-side Security Rules.
 const firebaseConfig = {
-  apiKey: 'AIzaSyBnFuIImyHnrH9YaWupzWQw7vNmFjq3UEs',
+  apiKey: 'AIzaSyBnFulImyHnrH9YaWupzWQw7vNmFjq3UEs',
   authDomain: 'attendance-app-v2-b0133.firebaseapp.com',
   projectId: 'attendance-app-v2-b0133',
   storageBucket: 'attendance-app-v2-b0133.firebasestorage.app',
