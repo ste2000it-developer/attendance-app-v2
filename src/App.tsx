@@ -107,15 +107,28 @@ function App() {
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (error) {
-      const code = (error as { code?: string }).code;
+      // Show the Firebase error *code* so a failed login can be diagnosed
+      // without displaying access tokens, credentials or sensitive details.
+      const code = typeof error === 'object' && error !== null && 'code' in error
+        && typeof error.code === 'string' ? error.code : 'unknown';
       if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
         // Choosing not to sign in is not an error.
-      } else if (code === 'auth/popup-blocked') {
-        setAuthError('เบราว์เซอร์บล็อกหน้าต่าง Google กรุณาอนุญาต Popup แล้วลองใหม่');
-      } else if (code === 'auth/unauthorized-domain') {
-        setAuthError('โดเมนเว็บยังไม่ได้รับอนุญาตใน Firebase Authentication');
       } else {
-        setAuthError('เข้าสู่ระบบ Google ไม่สำเร็จ กรุณาลองใหม่');
+        const descriptions: Record<string, string> = {
+          'auth/popup-blocked': 'เบราว์เซอร์บล็อกหน้าต่าง Google กรุณาอนุญาต Popup',
+          'auth/unauthorized-domain': 'โดเมนของเว็บไซต์ยังไม่ได้รับอนุญาตใน Authentication → Settings → Authorized domains',
+          'auth/app-not-authorized': 'เว็บยังไม่ได้รับอนุญาตให้ใช้ Firebase API Key นี้',
+          'auth/invalid-api-key': 'ค่า Firebase API Key ไม่ถูกต้อง',
+          'auth/operation-not-allowed': 'ยังไม่ได้เปิด Google ใน Authentication → Sign-in method',
+          'auth/network-request-failed': 'เชื่อมต่อบริการ Google ไม่สำเร็จ กรุณาตรวจสอบเครือข่ายและส่วนขยายเบราว์เซอร์',
+          'auth/internal-error': 'Firebase หรือ Google ตอบกลับข้อผิดพลาดภายใน',
+          'auth/invalid-oauth-client-id': 'การตั้งค่า OAuth Client ของ Google ไม่ถูกต้อง',
+          'auth/web-storage-unsupported': 'เบราว์เซอร์ปิดกั้นการจัดเก็บข้อมูลที่จำเป็นต่อการล็อกอิน',
+          'auth/too-many-requests': 'มีการพยายามเข้าสู่ระบบถี่เกินไป',
+        };
+        setAuthError((descriptions[code] ?? 'เข้าสู่ระบบ Google ไม่สำเร็จ')
+          + ' (รหัส: ' + code + ')');
+        console.error('Google sign-in failed:', code, error);
       }
     } finally {
       setAuthBusy(false);
