@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import { onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth';
+import { auth, googleProvider } from './firebase';
 import {
   CalendarDays,
   Check,
@@ -85,6 +87,51 @@ function App() {
   const closeRef = useRef<HTMLButtonElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<'home' | 'history' | 'leave' | 'profile'>('home');
+  const [authUser, setAuthUser] = useState<User | null>(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [authBusy, setAuthBusy] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  useEffect(() => onAuthStateChanged(auth, (user) => {
+    setAuthUser(user);
+    setAuthReady(true);
+    setAuthError(null);
+  }, () => {
+    setAuthReady(true);
+    setAuthError('ไม่สามารถตรวจสอบสถานะบัญชี Google ได้');
+  }), []);
+
+  const handleGoogleSignIn = async () => {
+    setAuthBusy(true);
+    setAuthError(null);
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (error) {
+      const code = (error as { code?: string }).code;
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+        // Choosing not to sign in is not an error.
+      } else if (code === 'auth/popup-blocked') {
+        setAuthError('เบราว์เซอร์บล็อกหน้าต่าง Google กรุณาอนุญาต Popup แล้วลองใหม่');
+      } else if (code === 'auth/unauthorized-domain') {
+        setAuthError('โดเมนเว็บยังไม่ได้รับอนุญาตใน Firebase Authentication');
+      } else {
+        setAuthError('เข้าสู่ระบบ Google ไม่สำเร็จ กรุณาลองใหม่');
+      }
+    } finally {
+      setAuthBusy(false);
+    }
+  };
+  const handleGoogleSignOut = async () => {
+    setAuthBusy(true);
+    setAuthError(null);
+    try {
+      await signOut(auth);
+    } catch {
+      setAuthError('ออกจากระบบไม่สำเร็จ กรุณาลองใหม่');
+    } finally {
+      setAuthBusy(false);
+    }
+  };
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [calendarClosing, setCalendarClosing] = useState(false);
   const calendarDialogRef = useRef<HTMLElement>(null);
@@ -388,6 +435,12 @@ function App() {
             onBack={() => setActiveTab('home')}
             onHistory={() => setActiveTab('history')}
             onLeave={() => setActiveTab('leave')}
+            authUser={authUser}
+            authReady={authReady}
+            authBusy={authBusy}
+            authError={authError}
+            onGoogleSignIn={handleGoogleSignIn}
+            onGoogleSignOut={handleGoogleSignOut}
           />
         )}
       </div>

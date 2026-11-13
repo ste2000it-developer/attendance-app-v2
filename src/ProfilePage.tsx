@@ -1,6 +1,7 @@
+import type { User } from 'firebase/auth';
 import {
   ArrowLeft, CalendarDays, ChevronRight, ClipboardList,
-  ContactRound, Info, ShieldCheck, UserRound,
+  ContactRound, Info, LogIn, LogOut, ShieldCheck, UserRound,
 } from 'lucide-react';
 import './profile.css';
 
@@ -8,6 +9,12 @@ type ProfilePageProps = {
   onBack: () => void;
   onHistory: () => void;
   onLeave: () => void;
+  authUser: User | null;
+  authReady: boolean;
+  authBusy: boolean;
+  authError: string | null;
+  onGoogleSignIn: () => void;
+  onGoogleSignOut: () => void;
 };
 
 /**
@@ -15,7 +22,10 @@ type ProfilePageProps = {
  * Identity / role values intentionally remain empty until Firebase Auth
  * and the actual employee record are connected. No invented personal data.
  */
-export default function ProfilePage({ onBack, onHistory, onLeave }: ProfilePageProps) {
+export default function ProfilePage({
+  onBack, onHistory, onLeave,
+  authUser, authReady, authBusy, authError, onGoogleSignIn, onGoogleSignOut,
+}: ProfilePageProps) {
   return (
     <main className="profile-page">
       <header className="profile-heading">
@@ -34,21 +44,36 @@ export default function ProfilePage({ onBack, onHistory, onLeave }: ProfilePageP
       <section className="profile-hero" aria-label="บัญชีผู้ใช้งาน">
         <div className="profile-hero__top">
           <span className="profile-hero__eyebrow">EMPLOYEE PROFILE</span>
-          <span className="profile-hero__hint">ตัวอย่างดีไซน์</span>
+          <span className="profile-hero__hint">Google Authentication</span>
         </div>
         <div className="profile-hero__body">
           <span className="profile-hero__avatar" aria-hidden="true">
             <UserRound size={39} strokeWidth={1.55} />
           </span>
           <div className="profile-hero__identity">
-            <h2>ข้อมูลพนักงาน</h2>
-            <p>ชื่อและรายละเอียดจะแสดงที่นี่หลังเข้าสู่ระบบ</p>
+            <h2>{authUser?.displayName || 'ข้อมูลพนักงาน'}</h2>
+            <p>{authUser?.email || 'เข้าสู่ระบบด้วย Google เพื่อยืนยันตัวตน'}</p>
           </div>
         </div>
         <div className="profile-hero__status">
           <span className="profile-hero__status-dot" aria-hidden="true" />
-          ยังไม่เชื่อมบัญชีพนักงาน
+          {!authReady ? 'กำลังตรวจสอบบัญชี Google'
+            : authUser ? 'ยืนยันตัวตนแล้ว · ยังไม่ได้ผูกสิทธิ์พนักงาน'
+              : 'ยังไม่ได้เข้าสู่ระบบ'}
         </div>
+      </section>
+
+      <section className="profile-google-auth" aria-label="เชื่อมบัญชี Google">
+        <button type="button" className="profile-google-auth__button"
+          onClick={authUser ? onGoogleSignOut : onGoogleSignIn}
+          disabled={!authReady || authBusy}>
+          {authUser ? <LogOut size={19} aria-hidden="true" /> : <LogIn size={19} aria-hidden="true" />}
+          {authBusy ? 'กำลังดำเนินการ...' : authUser ? 'ออกจากระบบ Google' : 'เข้าสู่ระบบด้วย Google'}
+        </button>
+        <p>{authUser
+          ? 'เชื่อม Google สำเร็จแล้ว แต่ยังไม่เปิดสิทธิ์เข้าถึงข้อมูลพนักงานจริง'
+          : 'ทดสอบ Google Login ได้ โดยยังไม่มีการตอกบัตรหรือบันทึกข้อมูลจริง'}</p>
+        {authError && <p className="profile-google-auth__error" role="alert">{authError}</p>}
       </section>
 
       <section className="profile-section" aria-labelledby="profile-personal-title">
@@ -111,7 +136,7 @@ export default function ProfilePage({ onBack, onHistory, onLeave }: ProfilePageP
       </div>
 
       <p className="profile-footnote">
-        <Info size={14} aria-hidden="true" /> หน้านี้เป็นตัวอย่าง UI ยังไม่เชื่อม Firebase หรือข้อมูลพนักงานจริง
+        <Info size={14} aria-hidden="true" /> เชื่อม Google Login แล้ว แต่ข้อมูลและสิทธิ์พนักงานยังไม่เปิดใช้งานจริง
       </p>
     </main>
   );
