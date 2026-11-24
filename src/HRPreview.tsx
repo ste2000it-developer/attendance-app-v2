@@ -7,7 +7,7 @@ import {
   type AttendanceRecord, type DayShift, type Employee, type LeaveRequest,
   type GeoReading, type LocationDecision, type Worksite,
   bangkokInstant, effectiveShift, latenessMinutes, leaveDays, monthlyTimecard,
-  overtimeCycleBounds, scheduledReminders, sumOvertimeCycle, toThaiDate,
+  overtimeCycleBounds, sumOvertimeCycle, toThaiDate,
   validateCheckIn, validateCheckOut,
 } from './domain/attendanceRules';
 import './hr-preview.css';
@@ -167,7 +167,9 @@ export default function HRPreview() {
       id: nextId(), name: formString(data, 'name'), latitude: pin.latitude, longitude: pin.longitude,
       radiusMeters: Number(data.get('radius')), enabled: true,
     };
-    if (!site.name || !Number.isFinite(site.radiusMeters) || site.radiusMeters <= 0) {
+    if (!site.name || !Number.isFinite(site.radiusMeters) || site.radiusMeters <= 0 ||
+      !Number.isFinite(site.latitude) || Math.abs(site.latitude) > 90 ||
+      !Number.isFinite(site.longitude) || Math.abs(site.longitude) > 180) {
       setNotice('กรุณากรอกชื่อและรัศมีที่ถูกต้อง'); return;
     }
     setSites(prev => [...prev, site]); setGeoResult(null);
@@ -417,7 +419,7 @@ export default function HRPreview() {
               <label>พนักงาน<select value={selectedEmployee} onChange={e => setSelectedEmployee(e.target.value)}>
                 <option value="">เลือกพนักงาน</option>{employees.map(e => <option key={e.id} value={e.id}>{e.code} — {e.firstName}</option>)}
               </select></label>
-              <label>รอบ OT เริ่มวันที่ 25<input type="month" value={reportMonth} onChange={e => setReportMonth(e.target.value)} /></label>
+              <label>รอบ OT เริ่มวันที่ 25<input type="month" value={reportMonth} onChange={e => { if (e.target.value) setReportMonth(e.target.value); }} /></label>
             </div>
             <p>รอบ {prettyDate(overtimeCycleBounds(year, month).from)} – {prettyDate(overtime.through)}</p>
             <div className="hr-stats">
