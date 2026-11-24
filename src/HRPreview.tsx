@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import {
   ArrowLeft, BarChart3, CalendarDays, CalendarOff, CheckCircle2, ChevronDown,
   ChevronRight, ClipboardList, Clock3, FileSpreadsheet, Info, LayoutDashboard,
@@ -52,6 +52,10 @@ function showShift(shift: DayShift): string {
     : 'ยังไม่กำหนดเวลา';
 }
 export default function HRPreview() {
+  useEffect(() => {
+    document.body.classList.add('hr-admin-active');
+    return () => document.body.classList.remove('hr-admin-active');
+  }, []);
   const [tab, setTab] = useState<Tab>('overview');
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [sites, setSites] = useState<Worksite[]>([]);
