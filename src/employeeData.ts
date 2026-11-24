@@ -27,6 +27,7 @@ export type WorkdayRecord = {
 };
 
 type ReadState<T> = { data: T | null; loading: boolean; error: string | null };
+type ScopedReadState<T> = ReadState<T> & { scope: string | null };
 
 const text = (data: DocumentData, key: string) =>
   typeof data[key] === 'string' ? data[key].trim() : '';
@@ -69,43 +70,44 @@ export function bangkokDateISO(date: Date) {
 }
 
 export function useEmployeeRecord(uid: string | null): ReadState<EmployeeRecord> {
-  const [state, setState] = useState<ReadState<EmployeeRecord>>({
-    data: null, loading: Boolean(uid), error: null,
+  const [state, setState] = useState<ScopedReadState<EmployeeRecord>>({
+    scope: uid, data: null, loading: Boolean(uid), error: null,
   });
 
   useEffect(() => {
     if (!uid) {
-      setState({ data: null, loading: false, error: null });
+      setState({ scope: null, data: null, loading: false, error: null });
       return;
     }
-    setState({ data: null, loading: true, error: null });
+    setState({ scope: uid, data: null, loading: true, error: null });
     return onSnapshot(doc(db, 'employees', uid), (snapshot) => {
-      setState({ data: snapshot.exists() ? readEmployee(snapshot.data()) : null, loading: false, error: null });
+      setState({ scope: uid, data: snapshot.exists() ? readEmployee(snapshot.data()) : null, loading: false, error: null });
     }, () => {
-      setState({ data: null, loading: false, error: 'ไม่สามารถอ่านข้อมูลพนักงานจาก Firebase ได้' });
+      setState({ scope: uid, data: null, loading: false, error: 'ไม่สามารถอ่านข้อมูลพนักงานจาก Firebase ได้' });
     });
   }, [uid]);
-  return state;
+  return state.scope === uid ? state : { data: null, loading: Boolean(uid), error: null };
 }
 
 export function useWorkday(uid: string | null, date: string): ReadState<WorkdayRecord> {
-  const [state, setState] = useState<ReadState<WorkdayRecord>>({
-    data: null, loading: Boolean(uid), error: null,
+  const scope = uid ? uid + ':' + date : null;
+  const [state, setState] = useState<ScopedReadState<WorkdayRecord>>({
+    scope, data: null, loading: Boolean(uid), error: null,
   });
 
   useEffect(() => {
     if (!uid) {
-      setState({ data: null, loading: false, error: null });
+      setState({ scope: null, data: null, loading: false, error: null });
       return;
     }
-    setState({ data: null, loading: true, error: null });
+    setState({ scope, data: null, loading: true, error: null });
     return onSnapshot(doc(db, 'employees', uid, 'workDays', date), (snapshot) => {
-      setState({ data: snapshot.exists() ? readWorkday(snapshot.data()) : null, loading: false, error: null });
+      setState({ scope, data: snapshot.exists() ? readWorkday(snapshot.data()) : null, loading: false, error: null });
     }, () => {
-      setState({ data: null, loading: false, error: 'ไม่สามารถอ่านตารางงานจาก Firebase ได้' });
+      setState({ scope, data: null, loading: false, error: 'ไม่สามารถอ่านตารางงานจาก Firebase ได้' });
     });
   }, [uid, date]);
-  return state;
+  return state.scope === scope ? state : { data: null, loading: Boolean(uid), error: null };
 }
 
 const clockTime = (value: string) => /^([01]\d|2[0-3]):[0-5]\d$/.test(value);
