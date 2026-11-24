@@ -20,6 +20,7 @@ type LeaveType =
   | 'ลากิจโดยไม่รับค่าจ้าง'
   | 'ลาฉุกเฉิน'
   | 'อื่นๆ';
+type LeaveDuration = 'full' | 'morning' | 'afternoon';
 type LeaveStatus = 'pending' | 'approved' | 'rejected';
 type LeaveFilter = 'all' | LeaveStatus;
 type LeaveRequest = {
@@ -28,6 +29,7 @@ type LeaveRequest = {
   start: string;
   end: string;
   reason: string;
+  duration?: LeaveDuration;
   status: LeaveStatus;
 };
 type Modal = 'form' | 'detail' | null;
@@ -75,6 +77,15 @@ function formatDate(iso: string) {
 function formatRange(start: string, end: string) {
   return start === end ? formatDate(start) : formatDate(start) + ' – ' + formatDate(end);
 }
+const durationLabels: Record<LeaveDuration, string> = {
+  full: 'เต็มวัน', morning: 'ครึ่งวันเช้า', afternoon: 'ครึ่งวันบ่าย',
+};
+function leaveDurationSummary(request: Pick<LeaveRequest, 'start' | 'end' | 'duration'>) {
+  const duration = request.duration ?? 'full';
+  return duration === 'full'
+    ? countCalendarDays(request.start, request.end) + ' วันตามปฏิทิน'
+    : '0.5 วัน · ' + durationLabels[duration];
+}
 function countCalendarDays(start: string, end: string) {
   const first = Date.parse(start + 'T12:00:00Z');
   const last = Date.parse(end + 'T12:00:00Z');
@@ -118,6 +129,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
   const [pickerMonth, setPickerMonth] = useState(() => new Date(today + 'T12:00:00Z'));
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [reason, setReason] = useState('');
+  const [duration, setDuration] = useState<LeaveDuration>('full');
   const [attachmentName, setAttachmentName] = useState('');
   const [formError, setFormError] = useState('');
   const [errorField, setErrorField] = useState<'type' | 'date' | 'reason' | 'file' | null>(null);
@@ -159,6 +171,11 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
       setErrorField('date');
       return false;
     }
+    if (duration !== 'full' && start !== end) {
+      setFormError('การลาครึ่งวันต้องเลือกเพียง 1 วัน');
+      setErrorField('date');
+      return false;
+    }
     if (selectedRule.noteRequired && !reason.trim()) {
       setFormError('กรุณาเขียนเหตุผลการลา');
       setErrorField('reason');
@@ -176,6 +193,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
     setModal(next);
     if (next === 'form') {
       setLeaveType(null);
+      setDuration('full');
       setStart('');
       setEnd('');
       setReason('');
@@ -228,6 +246,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
   const changeDateMode = (mode: 'single' | 'range') => {
     if (mode === dateMode) return;
     setDateMode(mode);
+    if (mode === 'range') setDuration('full');
     setDraftStart(null);
     setDraftEnd(null);
   };
@@ -248,6 +267,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
     if (!draftStart || (dateMode === 'range' && !draftEnd)) return;
     setStart(draftStart);
     setEnd(dateMode === 'single' ? draftStart : draftEnd!);
+    if (dateMode === 'range') setDuration('full');
     clearError();
     closeDatePicker();
   };
@@ -364,7 +384,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
     if (!confirmedType || !start || !end) return;
     setRequests((current) => [{
       id: 'preview-' + Date.now(), type: confirmedType,
-      start, end, reason: reason.trim(), status: 'pending',
+      start, end, reason: reason.trim(), duration, status: 'pending',
     }, ...current]);
     setFilter('all');
     setFeedback(true);
@@ -446,7 +466,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
               </span>
               <span className="leave-request__main">
                 <strong>{request.type}</strong>
-                <small>{formatRange(request.start, request.end)} · {countCalendarDays(request.start, request.end)} วันตามปฏิทิน</small>
+                <small>{formatRange(request.start, request.end)} · {leaveDurationSummary(request)}</small>
               </span>
               <span className={'leave-status leave-status--' + request.status}>{statusLabels[request.status]}</span>
               <ChevronRight className="leave-request__arrow" size={17} aria-hidden="true" />
@@ -543,10 +563,20 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
                         <CalendarDays size={18} aria-hidden="true" />
                       </button>
                     </div>
+                    <div className="leave-simple-partday" role="group" aria-label="เลือกลาเต็มวันหรือครึ่งวัน">
+                      {(['full', 'morning', 'afternoon'] as const).map((option) => (
+                        <button key={option} type="button" aria-pressed={duration === option}
+                          disabled={option !== 'full' && Boolean(start && end && start !== end)}
+                          className={'leave-simple-partday__button' + (duration === option ? ' is-active' : '')}
+                          onClick={() => { setDuration(option); clearError(); }}>
+                          {durationLabels[option]}
+                        </button>
+                      ))}
+                    </div>
                     {start && end && (
                       <div className="leave-simple-duration">
                         <CalendarCheck2 size={17} aria-hidden="true" />
-                        <span>{countCalendarDays(start, end)} วันตามปฏิทิน</span>
+                        <span>{leaveDurationSummary({ start, end, duration })}</span>
                         <small>ยังไม่ตรวจวันหยุด</small>
                       </div>
                     )}
@@ -627,7 +657,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
                   </div>
                   <div className="leave-detail__row">
                     <CalendarDays size={19} aria-hidden="true" />
-                    <div><small>ช่วงวันที่ลา</small><strong>{formatRange(selectedRequest.start, selectedRequest.end)}</strong></div>
+                    <div><small>ช่วงวันที่ลา</small><strong>{formatRange(selectedRequest.start, selectedRequest.end)} · {leaveDurationSummary(selectedRequest)}</strong></div>
                   </div>
                   <div className="leave-detail__row">
                     <Clock3 size={19} aria-hidden="true" />
@@ -778,7 +808,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
                 <div className="leave-confirm__summary">
                   <div><span>ประเภทการลา</span><strong>{leaveType}</strong></div>
                   <div><span>วันที่ลา</span><strong>{formatRange(start, end)}</strong></div>
-                  <div><span>ระยะเวลา</span><strong>{countCalendarDays(start, end)} วันตามปฏิทิน (ยังไม่หักวันหยุด)</strong></div>
+                  <div><span>ระยะเวลา</span><strong>{leaveDurationSummary({ start, end, duration })} (ยังไม่หักวันหยุด)</strong></div>
                   <div><span>เหตุผลการลา</span><strong>{reason.trim() || 'ไม่ได้ระบุ'}</strong></div>
                   <div><span>ไฟล์ที่เลือก (ยังไม่อัปโหลด)</span><strong>{attachmentName || 'ไม่ได้เลือกไฟล์'}</strong></div>
                 </div>
