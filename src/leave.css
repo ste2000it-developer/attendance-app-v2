@@ -1064,6 +1064,23 @@
 }
 .leave-simple-date svg { position:absolute; right:11px; top:12px; color:var(--lv-accent); }
 .leave-simple-date:active { background:var(--lv-soft); }
+.leave-simple-partday {
+  display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin-top:11px;
+}
+.leave-simple-partday__button {
+  min-width:0; min-height:43px; padding:7px 3px;
+  border:1px solid var(--lv-line); border-radius:11px;
+  background:var(--lv-surface); color:var(--lv-ink);
+  font:inherit; font-size:12px; line-height:1.4; font-weight:750;
+}
+.leave-simple-partday__button.is-active {
+  background:var(--lv-soft); color:var(--lv-accent); border-color:var(--lv-accent);
+}
+.leave-simple-partday__button:disabled { opacity:.4; cursor:not-allowed; }
+@media (max-width:355px) {
+  .leave-simple-partday { gap:5px; }
+  .leave-simple-partday__button { font-size:11px; padding-inline:2px; }
+}
 .leave-simple-duration {
   display:flex; align-items:center; gap:7px; flex-wrap:wrap;
   padding:10px 0 0; color:var(--lv-accent); font-size:12px; font-weight:750;
