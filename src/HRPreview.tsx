@@ -11,6 +11,7 @@ import {
   validateCheckIn, validateCheckOut,
 } from './domain/attendanceRules';
 import './hr-preview.css';
+import { exportLeaveA5 } from './exportLeaveExcel';
 
 type Tab = 'overview' | 'employees' | 'schedules' | 'sites' | 'holidays' | 'leave' | 'reports';
 type DemoLeave = LeaveRequest & { id: string; reviewedAt?: string };
@@ -232,6 +233,18 @@ export default function HRPreview() {
     setPunches(prev => [...prev.filter(p => p.employeeId !== selected.id || p.date !== date), record]);
     setNotice('เพิ่มข้อมูลตอกบัตรเพื่อทดสอบรายงานเท่านั้น');
   };
+  const downloadLeave = async (request: DemoLeave) => {
+    const employee = employees.find(x => x.id === request.employeeId);
+    if (!employee) { setNotice('ไม่พบพนักงานสำหรับใบลานี้'); return; }
+    try {
+      const count = leaveDays(request, employee.workPattern, holidaySet,
+        new Map(shifts.filter(s => s.employeeId === employee.id).map(s => [s.shift.date, s.shift])));
+      await exportLeaveA5(request, employee.firstName + ' ' + employee.lastName, employee.code, count);
+      setNotice('สร้างไฟล์ Excel ใบลา A5 จากข้อมูลทดลองเรียบร้อยแล้ว');
+    } catch (error) {
+      setNotice(error instanceof Error ? 'ส่งออก Excel ไม่สำเร็จ: ' + error.message : 'ส่งออก Excel ไม่สำเร็จ');
+    }
+  };
   const selectedName = (id: string) => {
     const employee = employees.find(item => item.id === id);
     return employee ? employee.firstName + ' ' + employee.lastName : '—';
@@ -410,7 +423,9 @@ export default function HRPreview() {
                   <td>{l.status === 'pending' && <>
                     <button type="button" className="hr-text-button" onClick={() => setLeaves(p => p.map(x => x.id === l.id ? { ...x, status: 'approved', reviewedAt: new Date().toISOString() } : x))}>อนุมัติ</button>
                     <button type="button" className="hr-text-button" onClick={() => setLeaves(p => p.map(x => x.id === l.id ? { ...x, status: 'rejected', reviewedAt: new Date().toISOString() } : x))}>ไม่อนุมัติ</button>
-                  </>}</td>
+                  </>}
+                    <button type="button" className="hr-text-button" onClick={() => { void downloadLeave(l); }}>Excel A5</button>
+                  </td>
                 </tr>)}</tbody></table></div>}</div>
         </>}
         {tab === 'reports' && <>
@@ -459,7 +474,7 @@ export default function HRPreview() {
             </div>}
           </div>
           <div className="hr-card hr-status-info"><FileSpreadsheet size={20} />
-            Export Excel/A5, สิทธิ์ HR และข้อมูลรายงานจริงจะเปิดได้หลังเชื่อมระบบจัดเก็บและอนุมัติข้อมูลอย่างปลอดภัย
+            ส่งออกใบลา Excel A5 ทดลองได้จากแท็บการลา ส่วน Excel รายงานจริงและสิทธิ์ HR รอการเชื่อมระบบจัดเก็บที่ปลอดภัย
           </div>
         </>}
       </main>
