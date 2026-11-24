@@ -114,6 +114,9 @@ export default function HRPreview() {
   const [holidays, setHolidays] = useState<string[]>([]);
   const [leaves, setLeaves] = useState<DemoLeave[]>([]);
   const [punches, setPunches] = useState<AttendanceRecord[]>([]);
+  const [lateExemptions, setLateExemptions] = useState<Record<string, string>>({});
+  const [editingExemptionId, setEditingExemptionId] = useState<string | null>(null);
+  const [exemptionReason, setExemptionReason] = useState('');
   const [selectedEmployee, setSelectedEmployee] = useState('');
   const [workday, setWorkday] = useState(today);
   const [reportMonth, setReportMonth] = useState(today.slice(0, 7));
@@ -226,6 +229,8 @@ export default function HRPreview() {
       id: nextId(), employeeId: selected.id, date,
       checkIn: inTime ? new Date(bangkokInstant(date, inTime)).toISOString() : null,
       checkOut: outTime ? new Date(bangkokInstant(date, outTime, nextDay)).toISOString() : null,
+      manualIn: d.get('manual') === 'on', manualOut: d.get('manual') === 'on',
+      hrReviewed: d.get('manual') !== 'on',
     };
     if (record.checkIn && record.checkOut && Date.parse(record.checkOut) < Date.parse(record.checkIn)) {
       setNotice('เวลาออกต้องอยู่หลังเวลาเข้า เลือกช่องข้ามวันถ้าทำงานข้ามคืน'); return;
@@ -451,6 +456,7 @@ export default function HRPreview() {
               <label>เวลาเข้า<input name="inTime" type="time" /></label>
               <label>เวลาออก<input name="outTime" type="time" /></label>
               <label className="hr-check"><input name="nextDay" type="checkbox" /> เวลาออกเป็นวันถัดไป</label>
+              <label className="hr-check"><input name="manual" type="checkbox" /> พนักงานกรอกย้อนหลัง (รอ HR ตรวจ)</label>
             </div>
             <button className="hr-primary" type="submit" disabled={!selected}><Plus size={18} /> เพิ่มรายการเพื่อทดสอบ</button>
           </form>
@@ -461,13 +467,44 @@ export default function HRPreview() {
                 <tbody>{monthlyTimecard(year, month, filteredPunches).map(row => {
                   const shift = effectiveShift(row.date, selected.workPattern, holidaySet,
                     shifts.find(s => s.employeeId === selected.id && s.shift.date === row.date)?.shift);
-                  const ot = row.record && row.checkOut ? sumOvertimeCycle([row.record], year, month, holidaySet, selected.workPattern, overrides).minutes : null;
-                  const late = row.record ? latenessMinutes(row.record.checkIn, shift) : null;
+                  const otResult = row.record && row.checkOut
+                    ? sumOvertimeCycle([row.record], year, month, holidaySet, selected.workPattern, overrides) : null;
+                  const ot = otResult && otResult.pendingHrReviewCount === 0 && otResult.missingCheckoutCount === 0
+                    ? otResult.minutes : null;
+                  const originalLate = row.record ? latenessMinutes(row.record.checkIn, shift) : null;
+                  const late = row.record ? latenessMinutes(row.record.checkIn, shift, Boolean(lateExemptions[row.record.id])) : null;
                   return <tr key={row.date}>
                     <td>{prettyDate(row.date)}</td>
                     <td>{row.checkIn ? new Date(row.checkIn).toLocaleTimeString('en-GB', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit' }) : '✎'}</td>
                     <td>{row.checkOut ? new Date(row.checkOut).toLocaleTimeString('en-GB', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit' }) : '✎'}</td>
-                    <td>{late ?? '—'}</td><td>{ot === null ? '—' : formatMinutes(ot)}</td>
+                    <td>{late ?? '—'}
+                      {row.record && originalLate !== null && originalLate > 0 && (
+                        lateExemptions[row.record.id]
+                          ? <small>ยกเว้น: {lateExemptions[row.record.id]}</small>
+                          : <button type="button" className="hr-text-button" onClick={() => {
+                              setEditingExemptionId(row.record?.id ?? null); setExemptionReason('');
+                            }}>HR ยกเว้น</button>
+                      )}
+                      {row.record && editingExemptionId === row.record.id && (
+                        <form className="hr-excuse" onSubmit={event => {
+                          event.preventDefault();
+                          if (!exemptionReason.trim()) return;
+                          setLateExemptions(prev => ({ ...prev, [row.record!.id]: exemptionReason.trim() }));
+                          setEditingExemptionId(null); setExemptionReason('');
+                        }}>
+                          <input type="text" required placeholder="เหตุผลที่ HR ยกเว้น" value={exemptionReason}
+                            onChange={event => setExemptionReason(event.target.value)} />
+                          <button type="submit" className="hr-text-button">บันทึกเหตุผล</button>
+                        </form>
+                      )}
+                    </td>
+                    <td>{ot === null ? '—' : formatMinutes(ot)}
+                      {row.record?.manualOut && !row.record.hrReviewed && (
+                        <button type="button" className="hr-text-button" onClick={() => {
+                          setPunches(prev => prev.map(item => item.id === row.record!.id ? { ...item, hrReviewed: true } : item));
+                        }}>HR ตรวจแล้ว</button>
+                      )}
+                    </td>
                   </tr>;
                 })}</tbody>
               </table>
