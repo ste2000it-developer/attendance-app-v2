@@ -1,0 +1,22 @@
+name: Validate Attendance V2 feature branch
+
+on:
+  push:
+    branches: [feat/v2-approved-systems-2026-11-24]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Test and build without publishing
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npm test
+      - run: npm run build
