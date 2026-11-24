@@ -274,10 +274,13 @@ export function scheduledReminders(shift: DayShift, record: Pick<AttendanceRecor
   if (!record?.checkIn || parseInstant(record.checkIn) > bounds.start + 5 * MS_MIN) add(bounds.start + 5 * MS_MIN, 'in-late-5');
   if (!record?.checkOut || parseInstant(record.checkOut) > bounds.end) add(bounds.end, 'out-now');
   if (!record?.checkOut || parseInstant(record.checkOut) > bounds.end + 5 * MS_MIN) add(bounds.end + 5 * MS_MIN, 'out-5');
-  const until = record?.checkOut ? Math.min(parseInstant(record.checkOut), horizon) : horizon;
+  const until = record?.checkOut ? Math.min(parseInstant(record.checkOut) - 1, horizon) : horizon;
   const otStart = bangkokInstant(shift.date, '19:00') + 60 * MS_MIN;
   if (isRegularWorkday && record?.checkIn && (!record.checkOut || parseInstant(record.checkOut) > otStart)) {
-    for (let at = otStart; at <= until; at += 60 * MS_MIN) add(at, 'ot-hourly');
+    const checkIn = parseInstant(record.checkIn);
+    const hour = 60 * MS_MIN;
+    const firstWhileWorking = Math.floor(checkIn / hour) * hour + hour;
+    for (let at = Math.max(otStart, firstWhileWorking); at <= until; at += hour) add(at, 'ot-hourly');
   }
   return result.sort((a, b) => a.at.localeCompare(b.at));
 }
