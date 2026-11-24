@@ -1,4 +1,5 @@
 import type { User } from 'firebase/auth';
+import { scheduleTypeLabels, type EmployeeRecord } from './employeeData';
 import {
   ArrowLeft, CalendarDays, ChevronRight, ClipboardList,
   ContactRound, Info, LogIn, LogOut, ShieldCheck, UserRound,
@@ -13,6 +14,9 @@ type ProfilePageProps = {
   authReady: boolean;
   authBusy: boolean;
   authError: string | null;
+  employee: EmployeeRecord | null;
+  employeeLoading: boolean;
+  employeeError: string | null;
   onGoogleSignIn: () => void;
   onGoogleSignOut: () => void;
 };
@@ -24,8 +28,15 @@ type ProfilePageProps = {
  */
 export default function ProfilePage({
   onBack, onHistory, onLeave,
-  authUser, authReady, authBusy, authError, onGoogleSignIn, onGoogleSignOut,
+  authUser, authReady, authBusy, authError, employee, employeeLoading, employeeError,
+  onGoogleSignIn, onGoogleSignOut,
 }: ProfilePageProps) {
+  const employeeName = employee
+    ? [employee.firstName, employee.lastName].filter(Boolean).join(' ')
+    : '';
+  const startDate = /^\\d{4}-\\d{2}-\\d{2}$/.test(employee?.startDate ?? '')
+    ? (employee?.startDate ?? '').split('-').reverse().join('/')
+    : '—';
   return (
     <main className="profile-page">
       <header className="profile-heading">
@@ -51,15 +62,18 @@ export default function ProfilePage({
             <UserRound size={39} strokeWidth={1.55} />
           </span>
           <div className="profile-hero__identity">
-            <h2>{authUser?.displayName || 'ข้อมูลพนักงาน'}</h2>
+            <h2>{employeeName || authUser?.displayName || 'ข้อมูลพนักงาน'}</h2>
             <p>{authUser?.email || 'เข้าสู่ระบบด้วย Google เพื่อยืนยันตัวตน'}</p>
           </div>
         </div>
         <div className="profile-hero__status">
           <span className="profile-hero__status-dot" aria-hidden="true" />
           {!authReady ? 'กำลังตรวจสอบบัญชี Google'
-            : authUser ? 'ยืนยันตัวตนแล้ว · ยังไม่ได้ผูกสิทธิ์พนักงาน'
-              : 'ยังไม่ได้เข้าสู่ระบบ'}
+            : !authUser ? 'ยังไม่ได้เข้าสู่ระบบ'
+              : employeeLoading ? 'กำลังโหลดข้อมูลพนักงาน'
+                : employeeError ? 'อ่านข้อมูลพนักงานไม่สำเร็จ'
+                  : employee ? 'ผูกข้อมูลพนักงานแล้ว · ' + (employee.status === 'active' ? 'เปิดใช้งาน' : 'ยังไม่เปิดใช้งาน')
+                    : 'ยืนยันตัวตนแล้ว · ยังไม่มีข้อมูลพนักงาน'}
         </div>
       </section>
 
@@ -71,8 +85,10 @@ export default function ProfilePage({
           {authBusy ? 'กำลังดำเนินการ...' : authUser ? 'ออกจากระบบ Google' : 'เข้าสู่ระบบด้วย Google'}
         </button>
         <p>{authUser
-          ? 'เชื่อม Google สำเร็จแล้ว แต่ยังไม่เปิดสิทธิ์เข้าถึงข้อมูลพนักงานจริง'
-          : 'ทดสอบ Google Login ได้ โดยยังไม่มีการตอกบัตรหรือบันทึกข้อมูลจริง'}</p>
+          ? employee ? 'อ่านโปรไฟล์พนักงานจาก Firebase แล้ว · ระบบตอกบัตรยังไม่เปิดใช้งานจริง'
+            : 'เข้าสู่ระบบ Google แล้ว แต่ยังไม่พบข้อมูลพนักงานที่ผูกกับบัญชีนี้'
+          : 'เข้าสู่ระบบด้วย Google เพื่อดูข้อมูลพนักงานและตารางงานของตัวเอง'}</p>
+        {employeeError && <p className="profile-google-auth__error" role="alert">{employeeError}</p>}
         {authError && <p className="profile-google-auth__error" role="alert">{authError}</p>}
       </section>
 
@@ -86,16 +102,25 @@ export default function ProfilePage({
         </div>
         <div className="profile-details">
           <div className="profile-details__row">
-            <span>ชื่อ-นามสกุล</span><strong>—</strong>
+            <span>ชื่อ-นามสกุล</span><strong>{employeeName || '—'}</strong>
           </div>
           <div className="profile-details__row">
-            <span>รหัสพนักงาน</span><strong>—</strong>
+            <span>รหัสพนักงาน</span><strong>{employee?.code || '—'}</strong>
           </div>
           <div className="profile-details__row">
-            <span>แผนก</span><strong>—</strong>
+            <span>แผนก</span><strong>{employee?.department || '—'}</strong>
           </div>
           <div className="profile-details__row">
-            <span>ตำแหน่ง</span><strong>—</strong>
+            <span>ตำแหน่ง</span><strong>{employee?.position || '—'}</strong>
+          </div>
+          <div className="profile-details__row">
+            <span>ชื่อเล่น</span><strong>{employee?.nickname || '—'}</strong>
+          </div>
+          <div className="profile-details__row">
+            <span>วันที่เริ่มงาน</span><strong>{startDate}</strong>
+          </div>
+          <div className="profile-details__row">
+            <span>ตารางงาน</span><strong>{employee ? scheduleTypeLabels[employee.scheduleType] : '—'}</strong>
           </div>
         </div>
       </section>
@@ -136,7 +161,7 @@ export default function ProfilePage({
       </div>
 
       <p className="profile-footnote">
-        <Info size={14} aria-hidden="true" /> เชื่อม Google Login แล้ว แต่ข้อมูลและสิทธิ์พนักงานยังไม่เปิดใช้งานจริง
+        <Info size={14} aria-hidden="true" /> ข้อมูลพนักงานดึงจาก Firebase เฉพาะบัญชีที่ผูกไว้ · การลงเวลายังอยู่ระหว่างพัฒนา
       </p>
     </main>
   );
