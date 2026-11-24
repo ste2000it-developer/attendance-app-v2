@@ -26,6 +26,7 @@ import CalendarPage from './CalendarPage';
 import { useSheetSwipe } from './useSheetSwipe';
 import LeavePage from './LeavePage';
 import ProfilePage from './ProfilePage';
+import { bangkokDateISO, useEmployeeRecord, useWorkday, workdayDisplay } from './employeeData';
 import {
   getBangkokPeriod,
   periodNames,
@@ -91,6 +92,20 @@ function App() {
   const [authReady, setAuthReady] = useState(false);
   const [authBusy, setAuthBusy] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const { data: employee, loading: employeeLoading, error: employeeError } =
+    useEmployeeRecord(authUser?.uid ?? null);
+  const todayISO = bangkokDateISO(now);
+  const { data: workday, loading: workdayLoading, error: workdayError } =
+    useWorkday(employee?.status === 'active' ? authUser?.uid ?? null : null, todayISO);
+  const todayWork = !authReady ? 'กำลังตรวจสอบบัญชี'
+    : !authUser ? 'เข้าสู่ระบบเพื่อดูตารางงาน'
+      : employeeLoading ? 'กำลังโหลดข้อมูลพนักงาน'
+        : employeeError ? employeeError
+          : !employee ? 'ยังไม่ได้ผูกข้อมูลพนักงาน'
+            : employee.status !== 'active' ? 'บัญชีพนักงานยังไม่เปิดใช้งาน'
+              : workdayLoading ? 'กำลังโหลดตารางงานวันนี้'
+                : workdayError ? workdayError
+                  : workdayDisplay(employee, workday, todayISO);
 
   useEffect(() => onAuthStateChanged(auth, (user) => {
     setAuthUser(user);
@@ -418,7 +433,7 @@ function App() {
             <button
               className="work-today-card"
               type="button"
-              onClick={() => openInfo('งานวันนี้', 'ตารางงานจะเชื่อมกับข้อมูลจริงในขั้นตอนต่อไป')}
+              onClick={() => openInfo('งานวันนี้', todayWork + (employee && !workday && employee.workPattern === 'office' ? ' · วันหยุดพิเศษจะตรวจเพิ่มเมื่อเชื่อมปฏิทินบริษัท' : ''))}
               aria-label="งานวันนี้ ดูรายละเอียดและกำหนดการทั้งหมด"
             >
               <span className="work-today-card__icon" aria-hidden="true">
@@ -428,14 +443,14 @@ function App() {
                 <strong id="work-title">งานวันนี้</strong>
                 <span>{isPreviewingAttendance
                   ? 'งานปกติ · 08:30 – 17:30 (ตัวอย่าง)'
-                  : 'ยังไม่มีข้อมูลตารางงาน'}</span>
+                  : todayWork}</span>
               </span>
               <ChevronRight className="work-today-card__arrow" size={22} strokeWidth={1.9} aria-hidden="true" />
             </button>
           </section>
 
           <p className="preview-notice" role="status">
-            {isDemo ? 'กำลังแสดงธีม/สถานะตัวอย่าง · ไม่มีการบันทึกข้อมูลจริง' : 'เวอร์ชันทดลองดีไซน์ · ยังไม่เชื่อมระบบบันทึกเวลา'}
+            {isDemo ? 'กำลังแสดงธีม/สถานะตัวอย่าง · ไม่มีการบันทึกข้อมูลจริง' : 'การลงเวลายังเป็นโหมดทดลอง · ตารางงานแสดงจากบัญชีพนักงานเมื่อเชื่อมแล้ว'}
           </p>
         </main>
           </>
@@ -452,6 +467,9 @@ function App() {
             authReady={authReady}
             authBusy={authBusy}
             authError={authError}
+            employee={employee}
+            employeeLoading={employeeLoading}
+            employeeError={employeeError}
             onGoogleSignIn={handleGoogleSignIn}
             onGoogleSignOut={handleGoogleSignOut}
           />
