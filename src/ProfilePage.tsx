@@ -21,11 +21,7 @@ type ProfilePageProps = {
   onGoogleSignOut: () => void;
 };
 
-/**
- * Employee profile design preview.
- * Identity / role values intentionally remain empty until Firebase Auth
- * and the actual employee record are connected. No invented personal data.
- */
+/** Read-only employee identity from Firestore; Google account details are distinct. */
 export default function ProfilePage({
   onBack, onHistory, onLeave,
   authUser, authReady, authBusy, authError, employee, employeeLoading, employeeError,
@@ -34,7 +30,7 @@ export default function ProfilePage({
   const employeeName = employee
     ? [employee.firstName, employee.lastName].filter(Boolean).join(' ')
     : '';
-  const startDate = /^\\d{4}-\\d{2}-\\d{2}$/.test(employee?.startDate ?? '')
+  const startDate = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(employee?.startDate ?? '')
     ? (employee?.startDate ?? '').split('-').reverse().join('/')
     : '—';
   return (
