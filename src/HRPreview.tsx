@@ -73,6 +73,7 @@ export default function HRPreview() {
   const [coordinateText, setCoordinateText] = useState({ latitude: '13.756300', longitude: '100.501800' });
   const [draftRadius, setDraftRadius] = useState(100);
   const [mapFocusSignal, setMapFocusSignal] = useState(0);
+  const [mapFocusPoint, setMapFocusPoint] = useState({ latitude: 13.7563, longitude: 100.5018 });
   const selectPin = (latitude: number, longitude: number) => {
     setPin({ latitude, longitude });
     setCoordinateText({ latitude: latitude.toFixed(6), longitude: longitude.toFixed(6) });
@@ -86,6 +87,7 @@ export default function HRPreview() {
       setNotice('พิกัดไม่ถูกต้อง: ละติจูดไม่เกิน ±85 และลองจิจูดไม่เกิน ±180'); return;
     }
     selectPin(latitude, longitude);
+    setMapFocusPoint({ latitude, longitude });
     setMapFocusSignal(v => v + 1);
     setNotice('');
   };
@@ -370,7 +372,7 @@ export default function HRPreview() {
                 <span className="hr-count">{sites.filter(site => site.enabled).length} ไซต์ที่เปิด</span>
               </div>
               <SiteMap sites={sites} pin={pin} radiusMeters={draftRadius}
-                focusSignal={mapFocusSignal}
+                focusSignal={mapFocusSignal} focusPoint={mapFocusPoint}
                 onPin={selectPin} />
             </section>
             <form className="hr-card hr-site-form" onSubmit={createSite}>
@@ -430,8 +432,7 @@ export default function HRPreview() {
                     <span className="hr-inline-status__dot" />{site.enabled ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}</span></td>
                   <td className="hr-table-actions">
                     <button className="hr-text-button" type="button" onClick={() => {
-                      selectPin(site.latitude, site.longitude);
-                      setDraftRadius(site.radiusMeters);
+                      setMapFocusPoint({ latitude: site.latitude, longitude: site.longitude });
                       setMapFocusSignal(v => v + 1);
                     }}>ดูบนแผนที่</button>
                     <button className="hr-text-button" type="button" onClick={() => setSites(prev => prev.map(x =>
