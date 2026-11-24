@@ -380,3 +380,42 @@
   .history-popup { animation: none; }
   .history-timecard__row--entry { transition: none; }
 }
+
+/* Backfill demo on empty timecard slots, without changing completed punches. */
+.history-timecard__stamp svg { vertical-align:middle; color:#0d817a; }
+.history-edit-preview {
+  display:flex; flex-direction:column; gap:10px; padding:12px 0;
+  border-top:1px solid #dce6e6;
+}
+.history-edit-preview p {
+  margin:0; font-size:12px; line-height:1.5; color:#526d74;
+}
+.history-edit-preview__actions { display:flex; flex-wrap:wrap; gap:8px; }
+.history-edit-preview__actions button {
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  min-height:42px; padding:9px 12px; border-radius:10px;
+  border:1px solid #99cec6; background:#e9f7f4; color:#086d68;
+  font:inherit; font-size:13px; font-weight:800;
+}
+.history-edit-preview__form {
+  display:flex; flex-direction:column; gap:10px; align-items:stretch;
+  padding:12px; background:#f3faf9; border-radius:11px;
+}
+.history-edit-preview__form label {
+  display:flex; flex-direction:column; gap:5px; font-size:13px; font-weight:700;
+  color:#31545d;
+}
+.history-edit-preview__form input[type="time"] {
+  min-height:44px; width:100%; border:1px solid #c4dad7;
+  border-radius:9px; background:white; padding:8px 10px; font:inherit;
+}
+.history-edit-preview__form label.history-edit-preview__next {
+  flex-direction:row; align-items:center; gap:8px; font-weight:650;
+}
+.history-edit-preview__next input { accent-color:#087d78; height:17px; width:17px; }
+.history-edit-preview__form button {
+  min-height:43px; padding:8px 13px; background:#087d78; color:white;
+  border:0; border-radius:10px; font:inherit; font-weight:800;
+}
+.history-edit-preview__form button:disabled { opacity:.5; }
+.history-edit-preview__feedback { color:#08766e; font-size:12px; line-height:1.5; font-weight:750; }
