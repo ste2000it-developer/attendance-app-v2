@@ -197,12 +197,16 @@ export function overtimeCycleBounds(year: number, month: number): { from: string
   return { from, through: nextMonth + '-24' };
 }
 export function sumOvertimeCycle(records: readonly AttendanceRecord[],
-  year: number, month: number, holidays: ReadonlySet<string>) {
+  year: number, month: number, holidays: ReadonlySet<string>,
+  workPattern?: EmployeeWorkPattern, overrides: ReadonlyMap<string, DayShift> = new Map()) {
   const bounds = overtimeCycleBounds(year, month);
   let minutes = 0, pending = 0, unverified = 0;
   for (const row of records) {
     if (row.date < bounds.from || row.date > bounds.through) continue;
-    const value = overtimeMinutes(row, holidays.has(row.date));
+    const holiday = holidays.has(row.date)
+      || (workPattern !== undefined && !isScheduledWorkday(row.date, workPattern, holidays))
+      || ['off', 'holiday'].includes(overrides.get(row.date)?.kind ?? '');
+    const value = overtimeMinutes(row, holiday);
     if (value === null) {
       if (!row.checkIn || !row.checkOut) pending++;
       else unverified++;
