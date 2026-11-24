@@ -189,13 +189,6 @@ export function overtimeMinutes(record: AttendanceRecord, isHoliday: boolean): n
   const otStart = bangkokInstant(record.date, '19:00');
   return Math.max(0, Math.round((end - Math.max(start, otStart)) / MS_MIN));
 }
-export function overtimeCycle(year: number, month: number): { from: string; through: string } {
-  if (!Number.isInteger(year) || !Number.isInteger(month) || month < 1 || month > 12) {
-    throw new Error('เดือนไม่ถูกต้อง');
-  }
-  const from = String(year).padStart(4, '0') + '-' + String(month).padStart(2, '0') + '-25';
-  return { from, through: nextThaiDay(from, 30 + (new Date(Date.UTC(year, month, 0)).getUTCDate() - 30) - 1) };
-}
 /** Use this instead of a fixed 30-day offset, as real months vary. */
 export function overtimeCycleBounds(year: number, month: number): { from: string; through: string } {
   const from = String(year) + '-' + String(month).padStart(2, '0') + '-25';
@@ -265,7 +258,7 @@ export type Reminder = {
 };
 /** Generates reminder moments for a scheduler; no push is sent from the browser. */
 export function scheduledReminders(shift: DayShift, record: Pick<AttendanceRecord, 'checkIn' | 'checkOut'> | null,
-  horizonISO: string): Reminder[] {
+  horizonISO: string, isRegularWorkday = true): Reminder[] {
   const bounds = shiftInstants(shift);
   if (!bounds) return [];
   const horizon = parseInstant(horizonISO), result: Reminder[] = [];
@@ -275,11 +268,11 @@ export function scheduledReminders(shift: DayShift, record: Pick<AttendanceRecor
   add(bounds.start - 30 * MS_MIN, 'in-30');
   add(bounds.start - 5 * MS_MIN, 'in-5');
   if (!record?.checkIn || parseInstant(record.checkIn) > bounds.start + 5 * MS_MIN) add(bounds.start + 5 * MS_MIN, 'in-late-5');
-  add(bounds.end, 'out-now');
+  if (!record?.checkOut || parseInstant(record.checkOut) > bounds.end) add(bounds.end, 'out-now');
   if (!record?.checkOut || parseInstant(record.checkOut) > bounds.end + 5 * MS_MIN) add(bounds.end + 5 * MS_MIN, 'out-5');
   const until = record?.checkOut ? Math.min(parseInstant(record.checkOut), horizon) : horizon;
   const otStart = bangkokInstant(shift.date, '19:00') + 60 * MS_MIN;
-  if (record?.checkIn && (!record.checkOut || parseInstant(record.checkOut) > otStart)) {
+  if (isRegularWorkday && record?.checkIn && (!record.checkOut || parseInstant(record.checkOut) > otStart)) {
     for (let at = otStart; at <= until; at += 60 * MS_MIN) add(at, 'ot-hourly');
   }
   return result.sort((a, b) => a.at.localeCompare(b.at));
