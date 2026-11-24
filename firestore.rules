@@ -1,0 +1,23 @@
+// Attendance App V2 — starter rules for employee profile and daily schedules.
+// NOT deployed by the GitHub Pages workflow. Review existing project rules
+// before applying: Firestore rules replace the whole ruleset.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /employees/{employeeUid} {
+      // Only the signed-in employee can read their own company record.
+      allow get: if request.auth != null && request.auth.uid == employeeUid;
+      allow list: if false;
+
+      // HR/admin-managed records; do not let a client set their own status,
+      // employee code, department, shifts or privilege-related fields.
+      allow create, update, delete: if false;
+
+      match /workDays/{date} {
+        allow get: if request.auth != null && request.auth.uid == employeeUid;
+        allow list: if false;
+        allow create, update, delete: if false;
+      }
+    }
+  }
+}
