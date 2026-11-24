@@ -94,6 +94,25 @@ test('leave full day or half day counts workdays but not scheduled days off', ()
   assert.throws(() => leaveDays({ ...leave, portion: 'morning' }, 'office', holidays));
 });
 
+test('OT reminders never fire before late-night clock-in or at clock-out', () => {
+  const shift = { date: '2026-11-23', kind: 'work', startTime: '23:00', endTime: '04:00' };
+  const timecard = { checkIn: '2026-11-23T16:10:00Z', checkOut: '2026-11-23T18:00:00Z' }; // 23:10–01:00 BKK
+  const list = scheduledReminders(shift, timecard, '2026-11-24T00:00:00Z');
+  assert.ok(list.some(x => x.type === 'ot-hourly' && x.at === '2026-11-23T17:00:00.000Z')); // midnight
+  assert.equal(list.some(x => x.type === 'ot-hourly' && x.at === '2026-11-23T13:00:00.000Z'), false);
+  assert.equal(list.some(x => x.type === 'ot-hourly' && x.at === '2026-11-23T18:00:00.000Z'), false);
+});
+
+test('office weekend overtime counts from actual start even with an assigned work shift', () => {
+  const row = {
+    id: 'off-1', employeeId: 'emp', date: '2026-11-28',
+    checkIn: '2026-11-28T01:00:00Z', // Sat 08:00
+    checkOut: '2026-11-28T05:00:00Z', // Sat 12:00
+  };
+  assert.equal(sumOvertimeCycle([row], 2026, 11, new Set(), 'office').minutes, 240);
+  assert.equal(sumOvertimeCycle([row], 2026, 11, new Set(), 'field').minutes, 0);
+});
+
 test('reminders include OT hourly across midnight, suppressed for holiday', () => {
   const shift = { date: '2026-11-23', kind: 'work', startTime: '08:00', endTime: '17:00' };
   const result = scheduledReminders(shift, { checkIn: '2026-11-23T01:00:00Z', checkOut: null }, '2026-11-24T00:00:00Z');
