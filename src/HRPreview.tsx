@@ -278,15 +278,19 @@ export default function HRPreview() {
           </div>}
           <main className="hr-content">
         {tab === 'overview' && <>
-          <div className="hr-section-heading"><h2>ภาพรวมระบบ</h2><p>จำนวนที่แสดงเป็นข้อมูลทดลองในหน้านี้เท่านั้น</p></div>
           <div className="hr-stats">
             <article><Users /><strong>{employees.length}</strong><span>พนักงานทดลอง</span></article>
             <article><MapPin /><strong>{sites.filter(s => s.enabled).length}</strong><span>ไซต์งานเปิดใช้งาน</span></article>
             <article><ClipboardList /><strong>{leaves.filter(l => l.status === 'pending').length}</strong><span>ใบลารออนุมัติ</span></article>
             <article><Clock3 /><strong>{punches.length}</strong><span>รายการเวลาทดลอง</span></article>
           </div>
-          <div className="hr-card">
-            <h3>ขอบเขตที่พัฒนาไว้ในโหมดทดลอง</h3>
+          <div className="hr-quick-actions" role="group" aria-label="ไปยังงานที่ใช้บ่อย">
+            <button type="button" onClick={() => setTab('employees')}><Users size={21}/><span><strong>จัดการพนักงาน</strong><small>เพิ่มและดูรายชื่อ</small></span><ChevronRight size={18}/></button>
+            <button type="button" onClick={() => setTab('schedules')}><CalendarDays size={21}/><span><strong>กำหนดตารางงาน</strong><small>รายวันและรายบุคคล</small></span><ChevronRight size={18}/></button>
+            <button type="button" onClick={() => setTab('sites')}><MapPin size={21}/><span><strong>สถานที่ทำงาน</strong><small>ปักหมุดและตั้งรัศมี</small></span><ChevronRight size={18}/></button>
+          </div>
+          <div className="hr-card hr-overview-note">
+            <h3>สถานะระบบทดลอง</h3>
             <p>จัดการพนักงานและตารางงานรายวัน ปักหมุดและเปิด–ปิด GPS Geofence ตรวจ GPS ปัจจุบัน
               ทดลองอนุมัติลา ตรวจชั่วโมง OT ข้ามวันและรอบ 25–24</p>
             <p>การลงเวลาจริง การส่ง Push Notification การอ่าน Google Calendar และการเชื่อมฐานข้อมูลยังไม่เปิดใช้
@@ -294,8 +298,8 @@ export default function HRPreview() {
           </div>
         </>}
         {tab === 'employees' && <>
-          <div className="hr-section-heading"><h2>จัดการพนักงาน</h2><p>ไม่มีช่องสาขาและประเภทการจ้าง</p></div>
-          <form className="hr-card hr-form" onSubmit={createEmployee}>
+          <details className="hr-card hr-disclosure"><summary><span><Plus size={19} /> เพิ่มพนักงาน</span><ChevronDown size={20} /></summary>
+            <form className="hr-form hr-disclosure__form" onSubmit={createEmployee}>
             <div className="hr-form-grid">
               <label>รหัสพนักงาน<input name="code" required placeholder="เช่น EMP001" /></label>
               <label>ชื่อ<input name="firstName" required /></label>
@@ -311,8 +315,8 @@ export default function HRPreview() {
                 <option value="morning">เช้า</option><option value="afternoon">บ่าย</option>
                 <option value="night">กลางคืน</option><option value="byJob">ตามงาน</option>
               </select></label>
-            </div><button className="hr-primary" type="submit"><Plus size={18} /> เพิ่มพนักงานทดลอง</button>
-          </form>
+            </div><button className="hr-primary" type="submit"><Plus size={18} /> เพิ่มพนักงานทดลอง</button></form>
+          </details>
           <section className="hr-card"><h3>รายชื่อพนักงาน ({employees.length})</h3>
             {!employees.length ? <p>ยังไม่ได้เพิ่มพนักงานทดลอง</p> :
               <div className="hr-table-wrap"><table><thead><tr><th>รหัส</th><th>ชื่อ</th><th>แผนก/ตำแหน่ง</th><th>ตาราง</th><th>สถานะ</th></tr></thead>
@@ -323,7 +327,6 @@ export default function HRPreview() {
               </table></div>}</section>
         </>}
         {tab === 'schedules' && <>
-          <div className="hr-section-heading"><h2>ตารางงานรายวัน</h2><p>ออฟฟิศ 08:00–17:00 จ.–ศ. / ช่างกำหนดตามงาน</p></div>
           <div className="hr-card">
             <div className="hr-form-grid">
               <label>พนักงาน<select value={selectedEmployee} onChange={e => setSelectedEmployee(e.target.value)}>
@@ -334,8 +337,9 @@ export default function HRPreview() {
             {chosenShift ? <div className="hr-status-info"><CalendarDays size={19} />
               ตารางที่ใช้: <strong>{showShift(chosenShift)}</strong></div> : <p>เพิ่มพนักงานทดลองก่อน</p>}
           </div>
-          <form key={selectedEmployee + ':' + workday} className="hr-card hr-form" onSubmit={createShift}>
-            <h3>กำหนดหรือยกเว้นตารางงาน</h3>
+          <details className="hr-card hr-disclosure" key={selectedEmployee + ':' + workday}>
+            <summary><span><Plus size={19} /> กำหนดตารางงานรายวัน</span><ChevronDown size={20} /></summary>
+            <form className="hr-form hr-disclosure__form" onSubmit={createShift}>
             <div className="hr-form-grid">
               <label>วันที่<input type="date" name="date" required value={workday} onChange={e => setWorkday(e.target.value)} /></label>
               <label>ประเภทวัน<select name="kind" defaultValue="work">
@@ -344,8 +348,8 @@ export default function HRPreview() {
               <label>เวลาเข้า<input type="time" name="startTime" defaultValue="08:00" /></label>
               <label>เวลาออก<input type="time" name="endTime" defaultValue="17:00" /></label>
               <label>งานที่ได้รับ<input name="title" placeholder="เช่น งานติดตั้ง" /></label>
-            </div><button type="submit" className="hr-primary" disabled={!selected}><Plus size={18} /> บันทึกตารางทดลอง</button>
-          </form>
+            </div><button type="submit" className="hr-primary" disabled={!selected}><Plus size={18} /> บันทึกตารางทดลอง</button></form>
+          </details>
           <div className="hr-card"><h3>ตารางที่กำหนด ({shifts.length})</h3>
             {!shifts.length ? <p>ยังไม่ได้กำหนดตารางรายวัน</p> :
               <div className="hr-table-wrap"><table><thead><tr><th>พนักงาน</th><th>วันที่</th><th>ตาราง</th><th>จัดการ</th></tr></thead>
@@ -454,7 +458,6 @@ export default function HRPreview() {
           </section>
         </>}
         {tab === 'holidays' && <>
-          <div className="hr-section-heading"><h2>วันหยุดบริษัท</h2><p>ส่วนนี้ใช้วันที่ที่กรอกเพื่อทดลองการนับวันลาและตารางงาน ไม่ได้เชื่อม Google Calendar จริง</p></div>
           <form className="hr-card hr-form" onSubmit={addHoliday}>
             <label>เพิ่มวันหยุดทดลอง<input type="date" name="holiday" defaultValue={today} required /></label>
             <button className="hr-primary" type="submit"><Plus size={18} /> เพิ่มวันหยุด</button>
@@ -466,9 +469,8 @@ export default function HRPreview() {
               </div>)}</div>}</section>
         </>}
         {tab === 'leave' && <>
-          <div className="hr-section-heading"><h2>จัดการคำขอลา</h2><p>10 ประเภท ลาเต็มวัน/ครึ่งวันเช้า/ครึ่งวันบ่าย</p></div>
-          <form className="hr-card hr-form" onSubmit={createLeave}>
-            <h3>สร้างใบลาเพื่อทดสอบการอนุมัติ</h3>
+          <details className="hr-card hr-disclosure"><summary><span><Plus size={19} /> สร้างใบลาทดลอง</span><ChevronDown size={20} /></summary>
+            <form className="hr-form hr-disclosure__form" onSubmit={createLeave}>
             <div className="hr-form-grid">
               <label>พนักงาน<select name="employeeId" required><option value="">เลือกพนักงาน</option>
                 {employees.map(e => <option key={e.id} value={e.id}>{e.code} — {e.firstName}</option>)}</select></label>
@@ -480,8 +482,8 @@ export default function HRPreview() {
                 <option value="afternoon">ครึ่งวันบ่าย</option>
               </select></label>
               <label>หมายเหตุ<input name="reason" /></label>
-            </div><button type="submit" className="hr-primary" disabled={!employees.length}><Plus size={18} /> สร้างคำขอทดลอง</button>
-          </form>
+            </div><button type="submit" className="hr-primary" disabled={!employees.length}><Plus size={18} /> สร้างคำขอทดลอง</button></form>
+          </details>
           <div className="hr-card"><h3>คำขอทั้งหมด ({leaves.length})</h3>
             {!leaves.length ? <p>ยังไม่มีคำขอตัวอย่าง และยังไม่เชื่อมใบลาจริงจากหน้าพนักงาน</p> :
               <div className="hr-table-wrap"><table><thead><tr><th>พนักงาน</th><th>ประเภท</th><th>ช่วงวันที่</th><th>สถานะ</th><th>อนุมัติ</th></tr></thead>
@@ -498,7 +500,6 @@ export default function HRPreview() {
                 </tr>)}</tbody></table></div>}</div>
         </>}
         {tab === 'reports' && <>
-          <div className="hr-section-heading"><h2>รายงานและรอบ OT</h2><p>ป้อนเวลาเพื่อทดสอบสูตรเท่านั้น ไม่ได้ตอกบัตรจริง</p></div>
           <div className="hr-card">
             <div className="hr-form-grid">
               <label>พนักงาน<select value={selectedEmployee} onChange={e => setSelectedEmployee(e.target.value)}>
@@ -513,8 +514,8 @@ export default function HRPreview() {
               <article><ShieldCheck /><strong>{overtime.pendingHrReviewCount}</strong><span>รอ HR ตรวจสอบ</span></article>
             </div>
           </div>
-          <form className="hr-card hr-form" onSubmit={addPunch}>
-            <h3>เพิ่มรายการทดลอง</h3>
+          <details className="hr-card hr-disclosure"><summary><span><Plus size={19} /> เพิ่มเวลาตอกบัตรเพื่อทดสอบ</span><ChevronDown size={20} /></summary>
+            <form className="hr-form hr-disclosure__form" onSubmit={addPunch}>
             <div className="hr-form-grid">
               <label>วันทำงาน<input name="date" type="date" defaultValue={today} required /></label>
               <label>เวลาเข้า<input name="inTime" type="time" /></label>
@@ -522,8 +523,8 @@ export default function HRPreview() {
               <label className="hr-check"><input name="nextDay" type="checkbox" /> เวลาออกเป็นวันถัดไป</label>
               <label className="hr-check"><input name="manual" type="checkbox" /> พนักงานกรอกย้อนหลัง (รอ HR ตรวจ)</label>
             </div>
-            <button className="hr-primary" type="submit" disabled={!selected}><Plus size={18} /> เพิ่มรายการเพื่อทดสอบ</button>
-          </form>
+            <button className="hr-primary" type="submit" disabled={!selected}><Plus size={18} /> เพิ่มรายการเพื่อทดสอบ</button></form>
+          </details>
           <div className="hr-card"><h3>บัตรตอกเวลารายเดือน (ตัวอย่าง)</h3>
             <p className="hr-muted">แสดงทุกวันของเดือนรวมวันหยุด ไม่มีการเดาเวลาออก</p>
             {!selected ? <p>เลือกพนักงานก่อน</p> : <div className="hr-table-wrap">
