@@ -12,6 +12,7 @@ type SiteMapProps = {
   radiusMeters: number;
   onPin: (latitude: number, longitude: number) => void;
   focusSignal: number;
+  focusPoint: Point;
 };
 
 const pointIsValid = (p: Point) =>
@@ -41,7 +42,7 @@ function textTooltip(text: string) {
  * Leaflet manages pan/zoom/coordinates. React only manages the selected pin
  * and circles, so editing a form never recreates the map or resets its zoom.
  */
-export default function SiteMap({ sites, pin, radiusMeters, onPin, focusSignal }: SiteMapProps) {
+export default function SiteMap({ sites, pin, radiusMeters, onPin, focusSignal, focusPoint }: SiteMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const tileRef = useRef<L.TileLayer | null>(null);
@@ -83,7 +84,7 @@ export default function SiteMap({ sites, pin, radiusMeters, onPin, focusSignal }
       onPinRef.current(location.latitude, location.longitude);
     });
 
-    let frame = requestAnimationFrame(() => map.invalidateSize({ pan: false, debounceMoveend: true }));
+    const frame = requestAnimationFrame(() => map.invalidateSize({ pan: false, debounceMoveend: true }));
     const observer = typeof ResizeObserver !== 'undefined'
       ? new ResizeObserver(() => map.invalidateSize({ pan: false, debounceMoveend: true }))
       : null;
@@ -119,10 +120,11 @@ export default function SiteMap({ sites, pin, radiusMeters, onPin, focusSignal }
     const url = alternateTiles
       ? 'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
       : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-    const layer = L.tileLayer(url, options).addTo(map);
-    tileRef.current = layer;
+    const layer = L.tileLayer(url, options);
     layer.on('tileerror', () => setTileIssue(true));
     layer.on('load', () => setTileIssue(false));
+    layer.addTo(map);
+    tileRef.current = layer;
     return () => {
       layer.off();
       layer.remove();
@@ -180,8 +182,8 @@ export default function SiteMap({ sites, pin, radiusMeters, onPin, focusSignal }
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !pointIsValid(pin) || focusSignal === 0) return;
-    map.flyTo([pin.latitude, pin.longitude], Math.max(map.getZoom(), 15), { duration: 0.42 });
+    if (!map || !pointIsValid(focusPoint) || focusSignal === 0) return;
+    map.flyTo([focusPoint.latitude, focusPoint.longitude], Math.max(map.getZoom(), 15), { duration: 0.42 });
   }, [focusSignal]); // Focus only on the explicit action, never whenever a coordinate input changes.
 
   const focusPin = () => {
@@ -207,8 +209,8 @@ export default function SiteMap({ sites, pin, radiusMeters, onPin, focusSignal }
       <div className="hr-map-actions" aria-label="เครื่องมือแผนที่">
         <button type="button" onClick={focusPin}><LocateFixed size={16} /> ไปที่หมุด</button>
         <button type="button" onClick={showAll}><Crosshair size={16} /> ดูทั้งหมด</button>
-        {tileIssue && <button type="button" onClick={() => { setTileIssue(false); setAlternateTiles(v => !v); }}>
-          <RefreshCcw size={15} /> เปลี่ยนแผนที่สำรอง</button>}
+        <button type="button" onClick={() => { setTileIssue(false); setAlternateTiles(v => !v); }}>
+          <RefreshCcw size={15} /> {alternateTiles ? 'แผนที่มาตรฐาน' : tileIssue ? 'ลองแผนที่สำรอง' : 'เปลี่ยนแบบแผนที่'}</button>
       </div>
       <p className="hr-map-helper">
         แตะพื้นที่เพื่อปักหมุด หรือลากหมุดสีส้มเพื่อปรับตำแหน่ง • ใช้ปุ่ม +/− บนแผนที่เพื่อซูม
