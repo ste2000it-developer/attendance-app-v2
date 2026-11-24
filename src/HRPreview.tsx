@@ -126,7 +126,8 @@ export default function HRPreview() {
     shifts.find(item => item.employeeId === selected.id && item.shift.date === workday)?.shift) : null;
   const [year, month] = reportMonth.split('-').map(Number);
   const filteredPunches = selected ? punches.filter(p => p.employeeId === selected.id) : [];
-  const overtime = sumOvertimeCycle(filteredPunches, year, month, holidaySet);
+  const overrides = new Map(shifts.filter(s => s.employeeId === selected?.id).map(s => [s.shift.date, s.shift] as const));
+  const overtime = sumOvertimeCycle(filteredPunches, year, month, holidaySet, selected?.workPattern, overrides);
   const [locating, setLocating] = useState(false);
   const createEmployee = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -445,7 +446,7 @@ export default function HRPreview() {
                 <tbody>{monthlyTimecard(year, month, filteredPunches).map(row => {
                   const shift = effectiveShift(row.date, selected.workPattern, holidaySet,
                     shifts.find(s => s.employeeId === selected.id && s.shift.date === row.date)?.shift);
-                  const ot = row.record && row.checkOut ? sumOvertimeCycle([row.record], year, month, holidaySet).minutes : null;
+                  const ot = row.record && row.checkOut ? sumOvertimeCycle([row.record], year, month, holidaySet, selected.workPattern, overrides).minutes : null;
                   const late = row.record ? latenessMinutes(row.record.checkIn, shift) : null;
                   return <tr key={row.date}>
                     <td>{prettyDate(row.date)}</td>
