@@ -220,25 +220,63 @@ export default function HRPreview() {
   };
   return (
     <div className="hr-page">
-      <header className="hr-header">
-        <div>
-          <a className="hr-back" href="./"><ArrowLeft size={16} /> กลับหน้าพนักงาน</a>
-          <h1>Attendance V2 <span>HR / Admin</span></h1>
-          <p>หน้าทดลองระบบจัดการบริษัท — ไม่มีการเชื่อมต่อหรือบันทึกข้อมูลจริง</p>
+      <aside className="hr-sidebar" aria-label="เมนูจัดการ HR">
+        <div className="hr-brand">
+          <span className="hr-brand__icon"><Clock3 size={23} strokeWidth={2.2} /></span>
+          <div><strong>Attendance</strong><small>ADMIN WORKSPACE</small></div>
         </div>
-        <span className="hr-preview-pill">DEMO ONLY</span>
-      </header>
-      <div className="hr-demo-banner" role="status"><Info size={20} />
-        ข้อมูลที่กรอกจะอยู่ในหน้านี้ชั่วคราวเท่านั้นและหายเมื่อรีเฟรช ไม่ใช้สำหรับบันทึกเวลางานหรือข้อมูล HR จริง
-      </div>
-      <nav className="hr-tabs" aria-label="เมนูแอดมิน">
-        {(Object.keys(tabNames) as Tab[]).map(key =>
-          <button type="button" key={key} className={tab === key ? 'active' : ''} onClick={() => { setTab(key); setNotice(''); }}>
-            {tabNames[key]}
-          </button>)}
-      </nav>
-      {notice && <div className="hr-message" role="status"><Info size={16} />{notice}<button type="button" onClick={() => setNotice('')}>ปิด</button></div>}
-      <main className="hr-content">
+        <div className="hr-sidebar__label">เมนูจัดการ</div>
+        <nav className="hr-tabs" aria-label="เมนูแอดมิน">
+          {(Object.keys(tabNames) as Tab[]).map(key => {
+            const Icon = tabIcons[key];
+            return <button type="button" key={key}
+              className={tab === key ? 'active' : ''}
+              aria-current={tab === key ? 'page' : undefined}
+              onClick={() => { setTab(key); setNotice(''); }}>
+              <Icon size={20} strokeWidth={1.8} />
+              <span>{tabNames[key]}</span>
+              <ChevronRight className="hr-tab-chevron" size={16} />
+            </button>;
+          })}
+        </nav>
+        <div className="hr-sidebar__bottom">
+          <div className="hr-sidebar__demo"><span /> พื้นที่ทดลองระบบ</div>
+          <a className="hr-back" href="./"><ArrowLeft size={16} /> กลับหน้าพนักงาน</a>
+        </div>
+      </aside>
+      <div className="hr-workspace">
+        <header className="hr-header">
+          <div>
+            <span className="hr-eyebrow">ATTENDANCE V2 <span>/</span> ADMIN WORKSPACE</span>
+            <h1>{tabNames[tab]}</h1>
+            <p>{tabDescriptions[tab]}</p>
+          </div>
+          <div className="hr-header__actions">
+            <span className="hr-preview-pill"><span /> โหมดทดลอง</span>
+            <a className="hr-header__back" href="./"><ArrowLeft size={16} /> หน้าพนักงาน</a>
+          </div>
+        </header>
+        <div className="hr-demo-banner" role="status">
+          <Info size={19} />
+          <span>พื้นที่ทดลองเท่านั้น — ข้อมูลที่กรอกจะหายเมื่อรีเฟรช ไม่มีการบันทึกเข้าระบบบริษัท</span>
+        </div>
+        <nav className="hr-mobile-tabs" aria-label="เมนูจัดการ">
+          {(Object.keys(tabNames) as Tab[]).map(key => {
+            const Icon = tabIcons[key];
+            return <button type="button" key={key}
+              className={tab === key ? 'active' : ''}
+              aria-current={tab === key ? 'page' : undefined}
+              onClick={() => { setTab(key); setNotice(''); }}>
+              <Icon size={17} strokeWidth={1.9} />{tabNames[key]}
+            </button>;
+          })}
+        </nav>
+        <div className="hr-content-area">
+          {notice && <div className="hr-message" role="status">
+            <Info size={16} />{notice}
+            <button type="button" onClick={() => setNotice('')}>ปิด</button>
+          </div>}
+          <main className="hr-content">
         {tab === 'overview' && <>
           <div className="hr-section-heading"><h2>ภาพรวมระบบ</h2><p>จำนวนที่แสดงเป็นข้อมูลทดลองในหน้านี้เท่านั้น</p></div>
           <div className="hr-stats">
@@ -540,8 +578,10 @@ export default function HRPreview() {
             ส่งออกใบลา Excel A5 ทดลองได้จากแท็บการลา ส่วน Excel รายงานจริงและสิทธิ์ HR รอการเชื่อมระบบจัดเก็บที่ปลอดภัย
           </div>
         </>}
-      </main>
-      <footer className="hr-footer"><RefreshCcw size={15} /> ตัวอย่างเท่านั้น · การรีเฟรชจะล้างข้อมูลที่กรอกในหน้านี้</footer>
+          </main>
+          <footer className="hr-footer"><RefreshCcw size={15} /> ข้อมูลทดลองจะถูกล้างเมื่อรีเฟรชหน้าเว็บ</footer>
+        </div>
+      </div>
     </div>
   );
 }
