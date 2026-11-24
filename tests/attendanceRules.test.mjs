@@ -64,7 +64,7 @@ test('OT summaries cycle 25th to 24th, and do not invent missing exit', () => {
   assert.deepEqual(overtimeCycleBounds(2026, 12), { from: '2026-12-25', through: '2027-01-24' });
   const rows = [
     { ...rec, date: '2026-11-24' }, // excluded
-    { ...rec, id: 'in', date: '2026-11-25' }, // included
+    { ...rec, id: 'in', date: '2026-11-25', checkIn: '2026-11-25T11:00:00Z', checkOut: '2026-11-26T00:15:00Z' }, // included
     { ...rec, id: 'miss', date: '2026-12-24', checkOut: null },
     { ...rec, id: 'after', date: '2026-12-25' }, // excluded
   ];
