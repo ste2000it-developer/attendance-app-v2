@@ -3,12 +3,13 @@ import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
-  Clock3,
+  Pencil,
   Info,
   History,
   X,
 } from 'lucide-react';
 import './history.css';
+import { bangkokInstant, fillEmptyPunch, type AttendanceRecord } from './domain/attendanceRules';
 
 type DayStatus = 'work' | 'leave' | 'holiday';
 type DayEntry = {
@@ -17,6 +18,7 @@ type DayEntry = {
   checkOut?: string;
   minutes?: number;
   note?: string;
+  manual?: boolean;
 };
 
 const statusLabels: Record<DayStatus, string> = {
@@ -92,13 +94,26 @@ function HistoryPage({ onBack }: { onBack: () => void }) {
     return new Date(Date.UTC(today.year, today.month, 1));
   });
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [manualTimes, setManualTimes] = useState<Record<string, { checkIn?: string; checkOut?: string; outNextDay?: boolean }>>({});
+  const [editing, setEditing] = useState<'checkIn' | 'checkOut' | null>(null);
+  const [editTime, setEditTime] = useState('');
+  const [outNextDay, setOutNextDay] = useState(false);
+  const [editError, setEditError] = useState('');
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
   const year = monthDate.getUTCFullYear();
   const month = monthDate.getUTCMonth();
   const isSampleMonth = year === 2026 && month === 9;
-  const entries = isSampleMonth ? sampleEntries : {};
+  const monthPrefix = year + '-' + String(month + 1).padStart(2, '0') + '-';
+  const entries: Record<number, DayEntry> = isSampleMonth ? { ...sampleEntries } : {};
+  for (const [date, values] of Object.entries(manualTimes)) {
+    if (!date.startsWith(monthPrefix)) continue;
+    const day = Number(date.slice(-2));
+    entries[day] = { ...entries[day], status: 'work', checkIn: values.checkIn ?? entries[day]?.checkIn,
+      checkOut: values.checkOut ?? entries[day]?.checkOut, manual: true,
+      note: 'เวลาที่กรอกย้อนหลัง (ตัวอย่าง) · รอ HR ตรวจสอบ' };
+  }
   const today = todayInBangkok();
   const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
   const days = Array.from({ length: daysInMonth }, (_, index) => index + 1);
@@ -107,6 +122,32 @@ function HistoryPage({ onBack }: { onBack: () => void }) {
   const totalMinutes = allEntries.reduce((sum, entry) => sum + (entry.minutes ?? 0), 0);
   const selectedEntry = selectedDay === null ? undefined : (entries as Record<number, DayEntry>)[selectedDay];
   const selectedStatus = selectedEntry?.status ?? 'empty';
+  const selectedISO = selectedDay === null ? '' : monthPrefix + String(selectedDay).padStart(2, '0');
+  const todayISO = today.year + '-' + String(today.month + 1).padStart(2, '0') + '-' + String(today.day).padStart(2, '0');
+  const canEditSelected = Boolean(selectedISO && selectedISO <= todayISO);
+  const saveManualTime = () => {
+    if (!selectedDay || !editing || !editTime || !canEditSelected) return;
+    const row = selectedEntry;
+    if (row?.[editing]) { setEditError('ช่องเวลานี้มีข้อมูลแล้ว ไม่สามารถแก้ไขได้'); return; }
+    try {
+      const date = selectedISO;
+      const record: AttendanceRecord = {
+        id: 'preview-' + date, employeeId: 'preview', date,
+        checkIn: row?.checkIn ? new Date(bangkokInstant(date, row.checkIn)).toISOString() : null,
+        checkOut: row?.checkOut
+          ? new Date(bangkokInstant(date, row.checkOut, manualTimes[date]?.outNextDay ?? false)).toISOString() : null,
+      };
+      const iso = new Date(bangkokInstant(date, editTime, editing === 'checkOut' && outNextDay)).toISOString();
+      fillEmptyPunch(record, editing, iso, new Date().toISOString());
+      setManualTimes(current => ({
+        ...current, [date]: { ...current[date], [editing]: editTime,
+          ...(editing === 'checkOut' ? { outNextDay } : {}) },
+      }));
+      setEditing(null);
+      setEditTime('');
+      setEditError('บันทึกในโหมดทดลองแล้ว · รอ HR ตรวจสอบ (ไม่ได้ส่งข้อมูลจริง)');
+    } catch (error) { setEditError(error instanceof Error ? error.message : 'เวลาไม่ถูกต้อง'); }
+  };
 
   useEffect(() => {
     if (selectedDay === null) return;
@@ -129,6 +170,10 @@ function HistoryPage({ onBack }: { onBack: () => void }) {
   const openDay = (day: number, element: HTMLButtonElement) => {
     previousFocusRef.current = element;
     setSelectedDay(day);
+    setEditing(null);
+    setEditTime('');
+    setOutNextDay(false);
+    setEditError('');
   };
 
   return (
@@ -176,13 +221,15 @@ function HistoryPage({ onBack }: { onBack: () => void }) {
             <strong>พนักงานตัวอย่าง</strong>
           </div>
           <div>
+            <span>รหัสพนักงาน / ID</span><strong>—</strong>
+          </div>
+          <div>
             <span>ประจำเดือน / PERIOD</span>
             <strong>{thaiMonth.format(monthDate)}</strong>
           </div>
         </div>
 
-        {isSampleMonth ? (
-          <div className="history-timecard__table" aria-label="รายการลงเวลาแต่ละวัน">
+        <div className="history-timecard__table" aria-label="รายการลงเวลาแต่ละวัน">
             <div className="history-timecard__row history-timecard__row--header" aria-hidden="true">
               <span>วันที่</span>
               <span>เข้างาน</span>
@@ -193,7 +240,6 @@ function HistoryPage({ onBack }: { onBack: () => void }) {
               const date = new Date(Date.UTC(year, month, day));
               const isFuture = date.getTime() > Date.UTC(today.year, today.month, today.day);
               const status = record?.status ?? 'empty';
-              const hasTimes = Boolean(record?.checkIn && record.checkOut);
               const explanation = record
                 ? statusLabels[status as DayStatus]
                 : isFuture ? 'ยังไม่ถึงวัน' : 'ไม่มีข้อมูล';
@@ -210,25 +256,16 @@ function HistoryPage({ onBack }: { onBack: () => void }) {
                     <strong>{String(day).padStart(2, '0')}</strong>
                     <small>{weekdays[date.getUTCDay()]}</small>
                   </span>
-                  {hasTimes ? (
-                    <>
-                      <span className="history-timecard__stamp">{record?.checkIn}</span>
-                      <span className="history-timecard__stamp">{record?.checkOut}</span>
-                    </>
-                  ) : (
+                  {record?.status === 'holiday' || record?.status === 'leave' ? (
                     <span className="history-timecard__special">{explanation}</span>
-                  )}
+                  ) : <>
+                    <span className="history-timecard__stamp">{record?.checkIn ?? (isFuture ? '—' : <Pencil size={16} aria-label="กรอกเวลาเข้าที่ว่าง" />)}</span>
+                    <span className="history-timecard__stamp">{record?.checkOut ?? (isFuture ? '—' : <Pencil size={16} aria-label="กรอกเวลาออกที่ว่าง" />)}</span>
+                  </>}
                 </button>
               );
             })}
           </div>
-        ) : (
-          <div className="history-timecard__no-data">
-            <Clock3 size={25} strokeWidth={1.65} aria-hidden="true" />
-            <strong>ยังไม่มีข้อมูลตัวอย่างของเดือนนี้</strong>
-            <span>ลองเลือกเดือนตุลาคม 2569 เพื่อดูรูปแบบบัตรตอกเวลา</span>
-          </div>
-        )}
 
         <div className="history-timecard__summary" aria-label="สรุปเวลาประจำเดือน">
           <div>
@@ -280,25 +317,25 @@ function HistoryPage({ onBack }: { onBack: () => void }) {
 
             <div className={'history-popup__status history-popup__status--' + selectedStatus}>
               <span className="history-popup__status-dot" aria-hidden="true" />
-              {selectedEntry ? statusLabels[selectedStatus as DayStatus] : 'ไม่มีข้อมูลตัวอย่าง'}
+              {selectedEntry ? statusLabels[selectedStatus as DayStatus] : 'ยังไม่มีข้อมูล'}
             </div>
 
-            {selectedEntry?.checkIn && selectedEntry.checkOut ? (
+            {selectedEntry?.checkIn || selectedEntry?.checkOut ? (
               <>
                 <div className="history-popup__times">
                   <div>
                     <span>เวลาเข้างาน</span>
-                    <strong>{selectedEntry.checkIn}</strong>
+                    <strong>{selectedEntry.checkIn ?? '—'}</strong>
                   </div>
                   <div>
                     <span>เวลาออกงาน</span>
-                    <strong>{selectedEntry.checkOut}</strong>
+                    <strong>{selectedEntry.checkOut ?? '—'}</strong>
                   </div>
                 </div>
-                <div className="history-popup__line">
+                {selectedEntry?.minutes !== undefined && !selectedEntry.manual && <div className="history-popup__line">
                   <span>ชั่วโมงทำงานรวม</span>
-                  <strong>{formatDuration(selectedEntry.minutes ?? 0)}</strong>
-                </div>
+                  <strong>{formatDuration(selectedEntry.minutes)}</strong>
+                </div>}
                 {selectedEntry.note && <p className="history-popup__note">{selectedEntry.note}</p>}
               </>
             ) : (
@@ -307,6 +344,25 @@ function HistoryPage({ onBack }: { onBack: () => void }) {
                   ?? 'ยังไม่มีรายการเวลาเข้างานหรือออกงานในข้อมูลตัวอย่างของวันนี้'}
               </p>
             )}
+            {canEditSelected && (!selectedEntry?.checkIn || !selectedEntry?.checkOut) && (
+              <div className="history-edit-preview">
+                <p>แตะกรอกได้เฉพาะช่องที่ยังว่าง · การกรอกนี้เป็นเพียงการทดลอง</p>
+                <div className="history-edit-preview__actions">
+                  {!selectedEntry?.checkIn && <button type="button" onClick={() => { setEditing('checkIn'); setEditError(''); }}>กรอกเวลาเข้า <Pencil size={14} /></button>}
+                  {!selectedEntry?.checkOut && <button type="button" onClick={() => { setEditing('checkOut'); setEditError(''); }}>กรอกเวลาออก <Pencil size={14} /></button>}
+                </div>
+                {editing && <div className="history-edit-preview__form">
+                  <label>{editing === 'checkIn' ? 'เวลาเข้างาน' : 'เวลาออกงาน'}
+                    <input type="time" required value={editTime} onChange={event => setEditTime(event.target.value)} />
+                  </label>
+                  {editing === 'checkOut' && <label className="history-edit-preview__next">
+                    <input type="checkbox" checked={outNextDay} onChange={event => setOutNextDay(event.target.checked)} /> เวลาออกเป็นวันถัดไป
+                  </label>}
+                  <button type="button" disabled={!editTime} onClick={saveManualTime}>บันทึกทดลอง</button>
+                </div>}
+              </div>
+            )}
+            {editError && <p className="history-edit-preview__feedback" role="status">{editError}</p>}
             <button className="history-popup__done" type="button" onClick={() => setSelectedDay(null)}>
               ปิดรายละเอียด
             </button>
