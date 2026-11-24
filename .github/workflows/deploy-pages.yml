@@ -15,12 +15,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
-    name: Build and publish test website
+  build:
+    name: Build website and upload Pages artifact
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout project
         uses: actions/checkout@v4
@@ -44,6 +41,14 @@ jobs:
         with:
           path: ./dist
 
+  deploy:
+    name: Publish website to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Publish website
         id: deployment
         uses: actions/deploy-pages@v4
