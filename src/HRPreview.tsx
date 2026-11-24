@@ -1,7 +1,8 @@
-import { useMemo, useState, type FormEvent, type MouseEvent } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 import {
-  ArrowLeft, CalendarDays, CheckCircle2, ClipboardList, Clock3, FileSpreadsheet,
-  Info, MapPin, Navigation, Plus, RefreshCcw, ShieldCheck, Users, XCircle,
+  ArrowLeft, BarChart3, CalendarDays, CalendarOff, CheckCircle2, ChevronDown,
+  ChevronRight, ClipboardList, Clock3, FileSpreadsheet, Info, LayoutDashboard,
+  MapPin, Navigation, Plus, RefreshCcw, ShieldCheck, Users, XCircle,
 } from 'lucide-react';
 import {
   type AttendanceRecord, type DayShift, type Employee, type LeaveRequest,
@@ -12,12 +13,26 @@ import {
 } from './domain/attendanceRules';
 import './hr-preview.css';
 import { exportLeaveA5 } from './exportLeaveExcel';
+import SiteMap from './SiteMap';
 
 type Tab = 'overview' | 'employees' | 'schedules' | 'sites' | 'holidays' | 'leave' | 'reports';
 type DemoLeave = LeaveRequest & { id: string; reviewedAt?: string };
 const tabNames: Record<Tab, string> = {
   overview: 'ภาพรวม', employees: 'พนักงาน', schedules: 'ตารางงาน', sites: 'สถานที่',
   holidays: 'วันหยุด', leave: 'การลา', reports: 'รายงาน',
+};
+const tabIcons = {
+  overview: LayoutDashboard, employees: Users, schedules: CalendarDays,
+  sites: MapPin, holidays: CalendarOff, leave: ClipboardList, reports: BarChart3,
+} as const;
+const tabDescriptions: Record<Tab, string> = {
+  overview: 'สรุปสิ่งที่ต้องดูและรายการสำคัญในที่เดียว',
+  employees: 'ข้อมูลพนักงาน แผนก และสถานะการทำงาน',
+  schedules: 'กำหนดเวลางานตามบุคคลและแต่ละวัน',
+  sites: 'ปักหมุด กำหนดรัศมี และตรวจพื้นที่ตอกบัตร',
+  holidays: 'วันหยุดบริษัทสำหรับการคำนวณตารางงานและการลา',
+  leave: 'ตรวจสอบคำขอ อนุมัติ และส่งออกเอกสาร',
+  reports: 'ตรวจเวลางาน การมาสาย และรอบสรุป OT',
 };
 const today = toThaiDate(new Date());
 const sampleLeaveTypes = [
@@ -36,76 +51,6 @@ function showShift(shift: DayShift): string {
     ? shift.startTime + '–' + shift.endTime + (shift.endTime <= shift.startTime ? ' (ข้ามวัน)' : '')
     : 'ยังไม่กำหนดเวลา';
 }
-function toWorld(lat: number, lon: number, zoom: number) {
-  const size = 256 * (2 ** zoom);
-  const safeLat = Math.max(-85, Math.min(85, lat));
-  const y = Math.log(Math.tan(Math.PI / 4 + (safeLat * Math.PI / 180) / 2));
-  return { x: (lon + 180) / 360 * size, y: (1 - y / Math.PI) / 2 * size };
-}
-function fromWorld(x: number, y: number, zoom: number) {
-  const size = 256 * (2 ** zoom);
-  const lat = Math.atan(Math.sinh(Math.PI * (1 - 2 * y / size))) * 180 / Math.PI;
-  return { latitude: Math.max(-85, Math.min(85, lat)), longitude: (x / size * 360 + 540) % 360 - 180 };
-}
-/** Interactive real map tiles for placing a DEMO pin. Tiles: OpenStreetMap contributors. */
-function SiteMap({ sites, pin, onPin }: {
-  sites: Worksite[];
-  pin: { latitude: number; longitude: number };
-  onPin: (latitude: number, longitude: number) => void;
-}) {
-  const [view, setView] = useState({ latitude: 13.7563, longitude: 100.5018, zoom: 13 });
-  const center = toWorld(view.latitude, view.longitude, view.zoom);
-  const tiles: { x: number; y: number; dx: number; dy: number; key: string }[] = [];
-  for (let iy = -2; iy <= 2; iy++) for (let ix = -2; ix <= 2; ix++) {
-    const x = Math.floor(center.x / 256) + ix, y = Math.floor(center.y / 256) + iy;
-    const n = 2 ** view.zoom;
-    if (y >= 0 && y < n) tiles.push({
-      x: ((x % n) + n) % n, y, dx: x * 256 - center.x, dy: y * 256 - center.y,
-      key: x + ':' + y,
-    });
-  }
-  const setAtClick = (event: MouseEvent<HTMLDivElement>) => {
-    if ((event.target as HTMLElement).closest('button, a')) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const px = event.clientX - rect.left - rect.width / 2;
-    const py = event.clientY - rect.top - rect.height / 2;
-    const coord = fromWorld(center.x + px, center.y + py, view.zoom);
-    onPin(Number(coord.latitude.toFixed(6)), Number(coord.longitude.toFixed(6)));
-  };
-  const adjustZoom = (diff: number) => setView(prev => ({ ...prev, zoom: Math.min(18, Math.max(5, prev.zoom + diff)) }));
-  const nudge = (dy: number, dx: number) => {
-    const p = fromWorld(center.x + dx * 160, center.y + dy * 160, view.zoom);
-    setView(prev => ({ ...prev, latitude: p.latitude, longitude: p.longitude }));
-  };
-  const markers = [{ id: 'pin', latitude: pin.latitude, longitude: pin.longitude, name: 'หมุดที่กำลังเลือก', selected: true },
-    ...sites.map(site => ({ id: site.id, latitude: site.latitude, longitude: site.longitude, name: site.name, selected: false }))];
-  return (
-    <div className="hr-map" onClick={setAtClick} role="group" aria-label="แผนที่สำหรับปักหมุดสถานที่ คลิกบนแผนที่เพื่อเลือกพิกัด">
-      {tiles.map(tile => <img key={tile.key}
-        src={`https://tile.openstreetmap.org/${view.zoom}/${tile.x}/${tile.y}.png`}
-        alt="" draggable={false}
-        style={{ left: `calc(50% + ${tile.dx}px)`, top: `calc(50% + ${tile.dy}px)` }} />)}
-      {markers.map(marker => {
-        const pos = toWorld(marker.latitude, marker.longitude, view.zoom);
-        const dx = pos.x - center.x, dy = pos.y - center.y;
-        if (Math.abs(dx) > 600 || Math.abs(dy) > 600) return null;
-        return <span key={marker.id} className={'hr-map__pin' + (marker.selected ? ' selected' : '')}
-          style={{ left: `calc(50% + ${dx}px)`, top: `calc(50% + ${dy}px)` }}
-          title={marker.name}><MapPin size={24} fill={marker.selected ? 'currentColor' : 'none'} /></span>;
-      })}
-      <div className="hr-map__tools" onClick={event => event.stopPropagation()}>
-        <button type="button" aria-label="เลื่อนแผนที่ขึ้น" onClick={() => nudge(-1, 0)}>↑</button>
-        <button type="button" aria-label="เลื่อนแผนที่ลง" onClick={() => nudge(1, 0)}>↓</button>
-        <button type="button" aria-label="เลื่อนแผนที่ซ้าย" onClick={() => nudge(0, -1)}>←</button>
-        <button type="button" aria-label="เลื่อนแผนที่ขวา" onClick={() => nudge(0, 1)}>→</button>
-        <button type="button" aria-label="ซูมเข้า" onClick={() => adjustZoom(1)}>+</button>
-        <button type="button" aria-label="ซูมออก" onClick={() => adjustZoom(-1)}>−</button>
-        <button type="button" onClick={() => setView(v => ({ ...v, latitude: pin.latitude, longitude: pin.longitude }))}>ไปที่หมุด</button>
-      </div>
-      <span className="hr-map__credit">© OpenStreetMap contributors</span>
-    </div>
-  );
-}
 export default function HRPreview() {
   const [tab, setTab] = useState<Tab>('overview');
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -121,6 +66,25 @@ export default function HRPreview() {
   const [workday, setWorkday] = useState(today);
   const [reportMonth, setReportMonth] = useState(today.slice(0, 7));
   const [pin, setPin] = useState({ latitude: 13.7563, longitude: 100.5018 });
+  const [coordinateText, setCoordinateText] = useState({ latitude: '13.756300', longitude: '100.501800' });
+  const [draftRadius, setDraftRadius] = useState(100);
+  const [mapFocusSignal, setMapFocusSignal] = useState(0);
+  const selectPin = (latitude: number, longitude: number) => {
+    setPin({ latitude, longitude });
+    setCoordinateText({ latitude: latitude.toFixed(6), longitude: longitude.toFixed(6) });
+  };
+  const applyCoordinates = () => {
+    if (!coordinateText.latitude.trim() || !coordinateText.longitude.trim()) {
+      setNotice('กรุณากรอกพิกัดทั้งสองช่อง'); return;
+    }
+    const latitude = Number(coordinateText.latitude), longitude = Number(coordinateText.longitude);
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || Math.abs(latitude) > 85 || Math.abs(longitude) > 180) {
+      setNotice('พิกัดไม่ถูกต้อง: ละติจูดไม่เกิน ±85 และลองจิจูดไม่เกิน ±180'); return;
+    }
+    selectPin(latitude, longitude);
+    setMapFocusSignal(v => v + 1);
+    setNotice('');
+  };
   const [geoResult, setGeoResult] = useState<LocationDecision | null>(null);
   const [geoError, setGeoError] = useState('');
   const [notice, setNotice] = useState('');
@@ -170,7 +134,7 @@ export default function HRPreview() {
     const data = new FormData(event.currentTarget);
     const site: Worksite = {
       id: nextId(), name: formString(data, 'name'), latitude: pin.latitude, longitude: pin.longitude,
-      radiusMeters: Number(data.get('radius')), enabled: true,
+      radiusMeters: draftRadius, enabled: true,
     };
     if (!site.name || !Number.isFinite(site.radiusMeters) || site.radiusMeters <= 0 ||
       !Number.isFinite(site.latitude) || Math.abs(site.latitude) > 90 ||
