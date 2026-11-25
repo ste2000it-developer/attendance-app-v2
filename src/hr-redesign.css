@@ -512,3 +512,11 @@ body.hr-admin-active, body.hr-admin-active #root { background: #f7faf8 !importan
   .hr-place-search__import-row { flex-direction: column; }
   .hr-page .hr-place-search__import-row > .hr-secondary { width: 100%; }
 }
+
+/* Three task shortcuts and three summary cards after removing the Sites page. */
+@media (min-width: 1201px) {
+  .hr-task-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 1051px) {
+  .hr-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
