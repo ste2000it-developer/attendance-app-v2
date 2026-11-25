@@ -87,7 +87,9 @@ export function parseMapCoordinates(input: string): {latitude: number; longitude
   if (url.protocol !== 'https:' && url.protocol !== 'http:') return null;
   if (!(/(^|\.)google\.[a-z.]+$/i.test(url.hostname) ||
     ['maps.app.goo.gl', 'goo.gl'].includes(url.hostname))) return null;
-  const urlText = decodeURIComponent(url.href.replace(/%(?![0-9a-f]{2})/gi, '%25'));
+  let urlText: string;
+  try { urlText = decodeURIComponent(url.href.replace(/%(?![0-9a-f]{2})/gi, '%25')); }
+  catch { urlText = url.href; }
   const exact = urlText.match(/!3d(-?\d{1,3}(?:\.\d+)?)!4d(-?\d{1,3}(?:\.\d+)?)/);
   if (exact) return pointFromNumbers(exact[1], exact[2]);
   // Some Google Maps URLs encode longitude before latitude.
