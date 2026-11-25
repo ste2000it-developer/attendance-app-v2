@@ -1,0 +1,21 @@
+{
+  "name": "Attendance — ระบบบันทึกเวลาทำงาน",
+  "short_name": "Attendance",
+  "description": "ระบบบันทึกเวลาทำงานของพนักงาน",
+  "lang": "th",
+  "id": "/attendance-app-v2/",
+  "start_url": "/attendance-app-v2/",
+  "scope": "/attendance-app-v2/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/attendance-app-v2/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
