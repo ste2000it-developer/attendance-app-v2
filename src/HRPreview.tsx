@@ -13,6 +13,7 @@ import {
 } from './domain/attendanceRules';
 import './hr-preview.css';
 import './hr-redesign.css';
+import './hr-sites-clean.css';
 import { exportLeaveA5 } from './exportLeaveExcel';
 import SiteMap from './SiteMap';
 import PlaceSearch from './PlaceSearch';
