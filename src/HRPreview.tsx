@@ -644,9 +644,7 @@ export default function HRPreview() {
               <span className="hr-sites-blank__icon"><MapPin size={29} /></span>
               <strong>ยังไม่มีสถานที่ทำงาน</strong>
               <p>กดเพิ่มสถานที่ แล้วค้นหาชื่อหรือเลือกตำแหน่งบนแผนที่</p>
-              <button type="button" className="hr-secondary" onClick={addSiteDialog}>
-                <Plus size={18} /> เพิ่มสถานที่แรก
-              </button>
+
             </div> : <div className="hr-site-list">
               {sites.map(site => <div className="hr-site-row" key={site.id}>
                 <span className="hr-site-row__symbol"><MapPin size={21} /></span>
@@ -724,8 +722,8 @@ export default function HRPreview() {
                     </div>}
                     <SiteMap
                       sites={sites.filter(site => site.id !== viewingSiteId)}
-                      pin={pin} radiusMeters={draftRadius} readOnly={Boolean(viewingSiteId)}
-                      focusSignal={mapFocusSignal} focusPoint={mapFocusPoint}
+                      pin={pin} radiusMeters={draftRadius} showDraft={sitePinReady}
+                      readOnly={Boolean(viewingSiteId)} focusSignal={mapFocusSignal} focusPoint={mapFocusPoint}
                       onPin={selectPin} />
                   </section>
                   {viewingSiteId ? <section className="hr-site-confirm__details">
