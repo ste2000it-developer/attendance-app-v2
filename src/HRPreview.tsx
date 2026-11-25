@@ -606,7 +606,7 @@ export default function HRPreview() {
                 </td>
               </tr>)}</tbody>
             </table></div>}
-          </section>
+          </section>}
           {showSiteForm && <section className="hr-site-create">
             <div className="hr-flow-header">
               <div><span>เพิ่มสถานที่ทำงาน</span>
@@ -704,7 +704,7 @@ export default function HRPreview() {
                   setHolidays(current => current.filter(item => item !== date))}>ลบวันหยุด</button>
               </div>)}
             </div>}
-          </section>
+          </section>}
           {showHolidayForm && <section className="hr-card hr-edit-panel">
             <div className="hr-card-heading hr-card-heading--actions">
               <div><h3>เพิ่มวันหยุด</h3><p>เลือกวันที่ต้องการเพิ่มในปฏิทินบริษัทตัวอย่าง</p></div>
@@ -779,7 +779,7 @@ export default function HRPreview() {
                 </tr>)}</tbody>
               </table>
             </div>}
-          </section>
+          </section>}
           {showLeaveForm && <section className="hr-card hr-edit-panel">
             <div className="hr-card-heading hr-card-heading--actions">
               <div><h3>สร้างใบลาทดลอง</h3><p>ใช้สำหรับตรวจหน้าจอการอนุมัติ — ไม่ส่งคำขอจริง</p></div>
