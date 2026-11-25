@@ -772,3 +772,14 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 .app-shell {
   touch-action: pan-x pan-y;
 }
+
+/* iPhone Safari auto-zooms focused form fields whose text is below 16px.
+   Set a legible input size across Leave, History and other employee dialogs;
+   the Home clock/date design remains unchanged. */
+@media (max-width: 539px) and (pointer: coarse) {
+  .app-shell input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  .app-shell select,
+  .app-shell textarea {
+    font-size: 16px;
+  }
+}
