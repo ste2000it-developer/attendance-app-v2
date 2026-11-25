@@ -64,6 +64,7 @@ export default function HRPreview() {
   const [tab, setTab] = useState<Tab>('overview');
   const [showEmployeeForm, setShowEmployeeForm] = useState(false);
   const [employeeQuery, setEmployeeQuery] = useState('');
+  const [openEmployeeId, setOpenEmployeeId] = useState<string | null>(null);
   const [showShiftForm, setShowShiftForm] = useState(false);
   const [showSiteForm, setShowSiteForm] = useState(false);
   const [showHolidayForm, setShowHolidayForm] = useState(false);
@@ -123,6 +124,7 @@ export default function HRPreview() {
   const [notice, setNotice] = useState('');
   const holidaySet = useMemo(() => new Set(holidays), [holidays]);
   const selected = employees.find(employee => employee.id === selectedEmployee) ?? null;
+  const focusedEmployee = employees.find(employee => employee.id === openEmployeeId) ?? null;
   const filteredEmployees = employees.filter(employee =>
     [employee.firstName, employee.lastName, employee.nickname, employee.code, employee.department]
       .join(' ').toLocaleLowerCase('th').includes(employeeQuery.trim().toLocaleLowerCase('th')));
@@ -154,6 +156,7 @@ export default function HRPreview() {
     form.reset();
     setShowEmployeeForm(false);
     setEmployeeQuery('');
+    setOpenEmployeeId(employee.id);
   };
   const createShift = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -399,33 +402,98 @@ export default function HRPreview() {
           </details>
         </>}
         {tab === 'employees' && <>
-          <details className="hr-card hr-disclosure"><summary><span><Plus size={19} /> เพิ่มพนักงาน</span><ChevronDown size={20} /></summary>
-            <form className="hr-form hr-disclosure__form" onSubmit={createEmployee}>
-            <div className="hr-form-grid">
-              <label>รหัสพนักงาน<input name="code" required placeholder="เช่น EMP001" /></label>
-              <label>ชื่อ<input name="firstName" required /></label>
-              <label>นามสกุล<input name="lastName" required /></label>
-              <label>ชื่อเล่น<input name="nickname" /></label>
-              <label>แผนก<input name="department" required /></label>
-              <label>ตำแหน่ง<input name="position" required /></label>
-              <label>วันที่เริ่มงาน<input name="startDate" type="date" required defaultValue={today} /></label>
-              <label>ลักษณะงาน<select name="workPattern" defaultValue="office">
-                <option value="office">ออฟฟิศ (จ.–ศ.)</option><option value="field">ช่าง/ภาคสนาม (จ.–ส.)</option>
-              </select></label>
-              <label>ตารางงาน<select name="scheduleType" defaultValue="byJob">
-                <option value="morning">เช้า</option><option value="afternoon">บ่าย</option>
-                <option value="night">กลางคืน</option><option value="byJob">ตามงาน</option>
-              </select></label>
-            </div><button className="hr-primary" type="submit"><Plus size={18} /> เพิ่มพนักงานทดลอง</button></form>
-          </details>
-          <section className="hr-card"><h3>รายชื่อพนักงาน ({employees.length})</h3>
-            {!employees.length ? <p>ยังไม่ได้เพิ่มพนักงานทดลอง</p> :
-              <div className="hr-table-wrap"><table><thead><tr><th>รหัส</th><th>ชื่อ</th><th>แผนก/ตำแหน่ง</th><th>ตาราง</th><th>สถานะ</th></tr></thead>
-                <tbody>{employees.map(e => <tr key={e.id}><td>{e.code}</td><td>{e.firstName} {e.lastName}<small>{e.nickname}</small></td>
-                  <td>{e.department}<small>{e.position}</small></td><td>{e.workPattern === 'office' ? 'ออฟฟิศ' : 'ภาคสนาม'}</td>
-                  <td><button type="button" className="hr-text-button" onClick={() => setEmployees(prev => prev.map(item => item.id === e.id ? { ...item, active: !item.active } : item))}>
-                    {e.active ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}</button></td></tr>)}</tbody>
-              </table></div>}</section>
+          <section className="hr-card hr-list-card">
+            <div className="hr-card-heading hr-card-heading--actions">
+              <div><h3>รายชื่อพนักงาน</h3><p>ค้นหาชื่อหรือแผนก แล้วเลือกคนที่ต้องการจัดการ</p></div>
+              <button type="button" className="hr-primary" onClick={() => setShowEmployeeForm(true)}>
+                <Plus size={18} /> เพิ่มพนักงาน
+              </button>
+            </div>
+            {employees.length > 0 && <label className="hr-list-search">
+              <Search size={19} />
+              <input type="search" aria-label="ค้นหาพนักงาน" value={employeeQuery}
+                placeholder="ค้นหาชื่อ ชื่อเล่น รหัส หรือแผนก"
+                onChange={event => setEmployeeQuery(event.target.value)} />
+            </label>}
+            {!employees.length ? <div className="hr-empty-state hr-empty-state--large">
+              <Users size={30} />
+              <strong>ยังไม่มีพนักงานในตัวอย่าง</strong>
+              <p>เริ่มจากเพิ่มพนักงานคนแรก แล้วจึงกำหนดตารางงานให้ได้</p>
+              <button type="button" className="hr-secondary" onClick={() => setShowEmployeeForm(true)}>
+                <Plus size={17} /> เพิ่มพนักงานคนแรก
+              </button>
+            </div> : !filteredEmployees.length ? <div className="hr-empty-state">
+              <Search size={25} /><strong>ไม่พบพนักงานที่ค้นหา</strong>
+              <button type="button" className="hr-secondary" onClick={() => setEmployeeQuery('')}>ล้างคำค้นหา</button>
+            </div> : <div className="hr-table-wrap">
+              <table><thead><tr><th>พนักงาน</th><th>แผนก / ตำแหน่ง</th><th>เวลาทำงาน</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+                <tbody>{filteredEmployees.map(employee => <tr key={employee.id}>
+                  <td><strong className="hr-table-main">{employee.firstName} {employee.lastName}</strong>
+                    <small>{employee.code}{employee.nickname ? ' · ' + employee.nickname : ''}</small></td>
+                  <td>{employee.department}<small>{employee.position}</small></td>
+                  <td>{employee.workPattern === 'office' ? 'สำนักงาน' : 'ภาคสนาม'}</td>
+                  <td><span className={'hr-inline-status ' + (employee.active ? 'hr-inline-status--on' : 'hr-inline-status--off')}>
+                    <span className="hr-inline-status__dot" />{employee.active ? 'ใช้งาน' : 'ปิดใช้งาน'}</span></td>
+                  <td className="hr-table-actions">
+                    <button type="button" className="hr-text-button" onClick={() =>
+                      setOpenEmployeeId(employee.id === openEmployeeId ? null : employee.id)}>ดูข้อมูล</button>
+                  </td></tr>)}</tbody>
+              </table>
+            </div>}
+            {employees.length > 0 && <p className="hr-list-count">แสดง {filteredEmployees.length} จาก {employees.length} คน</p>}
+          </section>
+          {focusedEmployee && <section className="hr-card hr-detail-card">
+            <div className="hr-card-heading hr-card-heading--actions">
+              <div><h3>{focusedEmployee.firstName} {focusedEmployee.lastName}</h3>
+                <p>รหัส {focusedEmployee.code}{focusedEmployee.nickname ? ' · ' + focusedEmployee.nickname : ''}</p></div>
+              <button type="button" className="hr-icon-button" aria-label="ปิดรายละเอียด" onClick={() => setOpenEmployeeId(null)}>
+                <X size={20} /></button>
+            </div>
+            <div className="hr-detail-grid">
+              <div><span>แผนก</span><strong>{focusedEmployee.department}</strong></div>
+              <div><span>ตำแหน่ง</span><strong>{focusedEmployee.position}</strong></div>
+              <div><span>วันเริ่มงาน</span><strong>{prettyDate(focusedEmployee.startDate)}</strong></div>
+              <div><span>ลักษณะงาน</span><strong>{focusedEmployee.workPattern === 'office' ? 'สำนักงาน · จันทร์–ศุกร์' : 'ภาคสนาม · จันทร์–เสาร์'}</strong></div>
+            </div>
+            <div className="hr-inline-actions">
+              <button type="button" className="hr-primary" onClick={() => {
+                setSelectedEmployee(focusedEmployee.id); navigate('schedules');
+              }}><CalendarDays size={18} /> จัดตารางงาน</button>
+              <button type="button" className="hr-secondary" onClick={() => {
+                setEmployees(prev => prev.map(item => item.id === focusedEmployee.id
+                  ? { ...item, active: !item.active } : item));
+              }}>{focusedEmployee.active ? 'ปิดใช้งานพนักงาน' : 'เปิดใช้งานพนักงาน'}</button>
+            </div>
+          </section>}
+          {showEmployeeForm && <section className="hr-card hr-edit-panel">
+            <div className="hr-card-heading hr-card-heading--actions">
+              <div><h3>เพิ่มพนักงานใหม่</h3><p>กรอกเฉพาะข้อมูลที่จำเป็นสำหรับการจัดตารางงาน</p></div>
+              <button type="button" className="hr-icon-button" onClick={() => setShowEmployeeForm(false)} aria-label="ปิดฟอร์มเพิ่มพนักงาน">
+                <X size={20} /></button>
+            </div>
+            <form className="hr-form" onSubmit={createEmployee}>
+              <div className="hr-form-grid">
+                <label>รหัสพนักงาน<input name="code" required placeholder="เช่น EMP001" /></label>
+                <label>ชื่อ<input name="firstName" required /></label>
+                <label>นามสกุล<input name="lastName" required /></label>
+                <label>ชื่อเล่น<input name="nickname" /></label>
+                <label>แผนก<input name="department" required /></label>
+                <label>ตำแหน่ง<input name="position" required /></label>
+                <label>วันที่เริ่มงาน<input name="startDate" type="date" required defaultValue={today} /></label>
+                <label>ลักษณะงาน<select name="workPattern" defaultValue="office">
+                  <option value="office">สำนักงาน (จ.–ศ.)</option><option value="field">ช่าง / ภาคสนาม (จ.–ส.)</option>
+                </select></label>
+                <label>ตารางงาน<select name="scheduleType" defaultValue="byJob">
+                  <option value="morning">เช้า</option><option value="afternoon">บ่าย</option>
+                  <option value="night">กลางคืน</option><option value="byJob">ตามงาน</option>
+                </select></label>
+              </div>
+              <div className="hr-inline-actions">
+                <button type="button" className="hr-secondary" onClick={() => setShowEmployeeForm(false)}>ยกเลิก</button>
+                <button className="hr-primary" type="submit"><Plus size={18} /> เพิ่มพนักงาน</button>
+              </div>
+            </form>
+          </section>}
         </>}
         {tab === 'schedules' && <>
           <div className="hr-card">
