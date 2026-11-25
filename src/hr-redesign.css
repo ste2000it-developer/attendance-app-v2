@@ -449,3 +449,66 @@ body.hr-admin-active, body.hr-admin-active #root { background: #f7faf8 !importan
 @media (prefers-reduced-motion: reduce) {
   .hr-page button { transition: none; }
 }
+
+/* Location search rescue path: Google Maps URL + coordinate handoff (no API key). */
+.hr-place-search__backup {
+  margin-top: 15px;
+  padding: 14px;
+  border: 1px solid #d8e9df;
+  border-radius: 12px;
+  background: #f7fcf9;
+}
+.hr-place-search__backup-head {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px;
+}
+.hr-place-search__backup-head > div { flex: 1 1 195px; min-width: 0; }
+.hr-place-search__backup-head strong {
+  display: block; color: #244a4b; font-size: 13px; font-weight: 850;
+}
+.hr-place-search__backup-head small {
+  display: block; color: #708784; font-size: 11px; line-height: 1.5; margin-top: 2px;
+}
+.hr-place-search__google {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  min-height: 41px; padding: 9px 12px; border-radius: 9px;
+  border: 1px solid #b8ddc7; color: #0c7764; background: #fff;
+  text-decoration: none; white-space: nowrap; font-size: 12px; font-weight: 850;
+}
+.hr-place-search__google:hover { background: #e5f6ec; border-color: #82c9a8; }
+.hr-place-search__import {
+  display: flex; flex-direction: column; gap: 7px;
+  margin-top: 13px;
+  border-top: 1px solid #e2ece5; padding-top: 12px;
+}
+.hr-place-search__import > label {
+  display: flex; align-items: center; flex-direction: row; gap: 7px;
+  color: #486760; font-size: 12px; font-weight: 850;
+}
+.hr-place-search__import-row {
+  display: flex; align-items: stretch; gap: 8px; min-width: 0;
+}
+.hr-place-search__import-row > input {
+  flex: 1 1 auto; min-width: 0; min-height: 43px;
+  padding: 9px 11px; border: 1px solid #ceded5;
+  border-radius: 10px; background: #fff; color: #284c54; font-size: 13px;
+}
+.hr-page .hr-place-search__import-row > .hr-secondary {
+  flex: 0 0 auto; min-height: 43px; padding: 8px 12px;
+  white-space: nowrap; font-size: 12px;
+}
+.hr-place-search__tip {
+  color: #82918c !important; line-height: 1.55 !important;
+  margin: 0 !important; font-size: 11px !important;
+}
+.hr-place-search__success {
+  display: flex; align-items: center; gap: 7px;
+  color: #0d795e !important; font-size: 12px !important;
+  font-weight: 750; margin: 2px 0 0 !important;
+}
+@media (max-width: 540px) {
+  .hr-place-search__backup { padding: 12px; }
+  .hr-place-search__google { width: 100%; }
+  .hr-place-search__import-row { flex-direction: column; }
+  .hr-page .hr-place-search__import-row > .hr-secondary { width: 100%; }
+}
