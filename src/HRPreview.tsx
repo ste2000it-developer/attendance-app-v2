@@ -180,6 +180,7 @@ export default function HRPreview() {
   useEffect(() => {
     if (!showSiteForm) return;
     const oldOverflow = document.body.style.overflow;
+    const oldFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     document.body.style.overflow = 'hidden';
     const focusId = window.requestAnimationFrame(() => siteDialogRef.current?.focus());
     const handleKey = (event: KeyboardEvent) => {
@@ -205,6 +206,7 @@ export default function HRPreview() {
       window.cancelAnimationFrame(focusId);
       document.body.style.overflow = oldOverflow;
       document.removeEventListener('keydown', handleKey);
+      if (oldFocus?.isConnected) oldFocus.focus();
     };
   }, [showSiteForm]);
     const [locating, setLocating] = useState(false);
@@ -713,7 +715,7 @@ export default function HRPreview() {
                   </div>
                 </div>}
                 {siteStage === 'confirm' && <div className="hr-site-confirm">
-                  <section className="hr-site-confirm__map">
+                  <section className={'hr-site-confirm__map' + (!sitePinReady ? ' is-unselected' : '')}>
                     {!viewingSiteId && <div className="hr-site-confirm__bar">
                       <button type="button" className="hr-site-back" onClick={() => setSiteStage('find')}>
                         <ArrowLeft size={16} /> กลับไปค้นหา
