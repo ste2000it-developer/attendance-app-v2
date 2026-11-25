@@ -453,7 +453,7 @@ export default function HRPreview() {
             </div>}
             {employees.length > 0 && <p className="hr-list-count">แสดง {filteredEmployees.length} จาก {employees.length} คน</p>}
           </section>}
-          {focusedEmployee && <section className="hr-card hr-detail-card">
+          {!showEmployeeForm && focusedEmployee && <section className="hr-card hr-detail-card">
             <div className="hr-card-heading hr-card-heading--actions">
               <div><h3>{focusedEmployee.firstName} {focusedEmployee.lastName}</h3>
                 <p>รหัส {focusedEmployee.code}{focusedEmployee.nickname ? ' · ' + focusedEmployee.nickname : ''}</p></div>
@@ -829,11 +829,11 @@ export default function HRPreview() {
             </div>
             <div className="hr-report-breadcrumb" aria-label="ระดับรายงาน">
               <button type="button" aria-current={reportLevel === 'year' ? 'step' : undefined}
-                onClick={() => setReportLevel('year')}>รายปี {year}</button>
+                onClick={() => { setShowPunchForm(false); setReportLevel('year'); }}>รายปี {year}</button>
               {reportLevel !== 'year' && <>
                 <ChevronRight size={16} />
                 <button type="button" aria-current={reportLevel === 'month' ? 'step' : undefined}
-                  onClick={() => setReportLevel('month')}>เดือน {month}</button>
+                  onClick={() => { setShowPunchForm(false); setReportLevel('month'); }}>เดือน {month}</button>
               </>}
               {reportLevel === 'day' && <>
                 <ChevronRight size={16} />
