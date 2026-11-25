@@ -115,7 +115,7 @@ export default function SiteMap({
 
   refreshRingsRef.current = () => {
     const map = mapRef.current;
-    if (!map || !map.getStyle()) return;
+    if (!map || !map.isStyleLoaded()) return;
     const { sites: currentSites, pin: currentPin, radiusMeters: currentRadius } = latestRef.current;
     const data = radiusPolygons(currentSites, currentPin, currentRadius);
     if (!map.getSource(MAP_SOURCE)) {
@@ -168,6 +168,7 @@ export default function SiteMap({
     map.on('style.load', () => {
       setMapError('');
       refreshRingsRef.current();
+      map.once('idle', () => refreshRingsRef.current());
       map.resize();
     });
     map.on('error', () => setMapError('แผนที่โหลดบางส่วนไม่สำเร็จ ลองเปลี่ยนรูปแบบแผนที่'));
