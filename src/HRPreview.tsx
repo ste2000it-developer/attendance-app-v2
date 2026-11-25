@@ -67,6 +67,7 @@ export default function HRPreview() {
   const [openEmployeeId, setOpenEmployeeId] = useState<string | null>(null);
   const [showShiftForm, setShowShiftForm] = useState(false);
   const [showSiteForm, setShowSiteForm] = useState(false);
+  const [draftSiteName, setDraftSiteName] = useState('');
   const [showHolidayForm, setShowHolidayForm] = useState(false);
   const [showLeaveForm, setShowLeaveForm] = useState(false);
   const [showPunchForm, setShowPunchForm] = useState(false);
@@ -102,6 +103,7 @@ export default function HRPreview() {
   const choosePlace = (place: PlaceSearchResult) => {
     const point = { latitude: place.latitude, longitude: place.longitude };
     selectPin(point.latitude, point.longitude);
+    setDraftSiteName(place.title);
     setMapFocusPoint(point);
     setMapFocusSignal(value => value + 1);
     setNotice('');
@@ -190,6 +192,7 @@ export default function HRPreview() {
     setNotice('ปักหมุดตัวอย่างแล้ว สามารถเปิด–ปิดไซต์นี้ได้');
     event.currentTarget.reset();
     setShowSiteForm(false);
+    setDraftSiteName('');
   };
   const checkGps = () => {
     if (!navigator.geolocation) { setGeoError('เบราว์เซอร์นี้ไม่รองรับ GPS'); return; }
@@ -496,36 +499,68 @@ export default function HRPreview() {
           </section>}
         </>}
         {tab === 'schedules' && <>
-          <div className="hr-card">
-            <div className="hr-form-grid">
-              <label>พนักงาน<select value={selectedEmployee} onChange={e => setSelectedEmployee(e.target.value)}>
-                <option value="">เลือกพนักงาน</option>{employees.filter(e => e.active).map(e => <option key={e.id} value={e.id}>{e.code} — {e.firstName}</option>)}
+          <section className="hr-card hr-step-card">
+            <div className="hr-card-heading">
+              <div><h3>เลือกคนและวันที่ต้องการจัดการ</h3>
+                <p>เลือกพนักงานก่อน แล้วดูตารางที่ใช้ในวันนั้นได้ทันที</p></div>
+            </div>
+            <div className="hr-form-grid hr-form-grid--two">
+              <label>พนักงาน<select value={selectedEmployee} onChange={event => setSelectedEmployee(event.target.value)}>
+                <option value="">เลือกพนักงาน</option>
+                {employees.filter(e => e.active).map(e => <option key={e.id} value={e.id}>{e.code} — {e.firstName}</option>)}
               </select></label>
-              <label>วันที่<input type="date" value={workday} onChange={e => setWorkday(e.target.value)} /></label>
+              <label>วันที่<input type="date" value={workday} onChange={event => setWorkday(event.target.value)} /></label>
             </div>
             {chosenShift ? <div className="hr-status-info"><CalendarDays size={19} />
-              ตารางที่ใช้: <strong>{showShift(chosenShift)}</strong></div> : <p>เพิ่มพนักงานทดลองก่อน</p>}
-          </div>
-          <details className="hr-card hr-disclosure" key={selectedEmployee + ':' + workday}>
-            <summary><span><Plus size={19} /> กำหนดตารางงานรายวัน</span><ChevronDown size={20} /></summary>
-            <form className="hr-form hr-disclosure__form" onSubmit={createShift}>
-            <div className="hr-form-grid">
-              <label>วันที่<input type="date" name="date" required value={workday} onChange={e => setWorkday(e.target.value)} /></label>
-              <label>ประเภทวัน<select name="kind" defaultValue="work">
-                <option value="work">วันทำงาน</option><option value="off">วันหยุดตามตาราง</option><option value="holiday">วันหยุดบริษัท</option>
-              </select></label>
-              <label>เวลาเข้า<input type="time" name="startTime" defaultValue="08:00" /></label>
-              <label>เวลาออก<input type="time" name="endTime" defaultValue="17:00" /></label>
-              <label>งานที่ได้รับ<input name="title" placeholder="เช่น งานติดตั้ง" /></label>
-            </div><button type="submit" className="hr-primary" disabled={!selected}><Plus size={18} /> บันทึกตารางทดลอง</button></form>
-          </details>
-          <div className="hr-card"><h3>ตารางที่กำหนด ({shifts.length})</h3>
-            {!shifts.length ? <p>ยังไม่ได้กำหนดตารางรายวัน</p> :
-              <div className="hr-table-wrap"><table><thead><tr><th>พนักงาน</th><th>วันที่</th><th>ตาราง</th><th>จัดการ</th></tr></thead>
-                <tbody>{shifts.map(item => <tr key={item.employeeId + item.shift.date}><td>{selectedName(item.employeeId)}</td>
-                  <td>{prettyDate(item.shift.date)}</td><td>{showShift(item.shift)}</td>
-                  <td><button className="hr-text-button" onClick={() => setShifts(prev => prev.filter(x => x !== item))}>ลบ</button></td></tr>)}</tbody>
-              </table></div>}</div>
+              ตารางปัจจุบัน: <strong>{showShift(chosenShift)}</strong></div> :
+              <div className="hr-inline-tip"><Info size={18} /> ยังไม่มีพนักงานให้เลือก
+                <button type="button" className="hr-text-button" onClick={() => navigate('employees')}>ไปเพิ่มพนักงาน</button>
+              </div>}
+            <div className="hr-inline-actions">
+              <button type="button" className="hr-primary" disabled={!selected}
+                onClick={() => setShowShiftForm(true)}><Plus size={18} /> กำหนดตารางวันนี้</button>
+            </div>
+          </section>
+          {showShiftForm && <section className="hr-card hr-edit-panel">
+            <div className="hr-card-heading hr-card-heading--actions">
+              <div><h3>กำหนดตารางรายวัน</h3><p>สำหรับ {selected ? selected.firstName : 'พนักงานที่เลือก'} · {prettyDate(workday)}</p></div>
+              <button type="button" className="hr-icon-button" aria-label="ปิดฟอร์มตารางงาน"
+                onClick={() => setShowShiftForm(false)}><X size={20} /></button>
+            </div>
+            <form className="hr-form" onSubmit={createShift}>
+              <div className="hr-form-grid">
+                <label>วันที่<input type="date" name="date" required value={workday}
+                  onChange={event => setWorkday(event.target.value)} /></label>
+                <label>ประเภทวัน<select name="kind" defaultValue="work">
+                  <option value="work">วันทำงาน</option><option value="off">วันหยุดตามตาราง</option>
+                  <option value="holiday">วันหยุดบริษัท</option>
+                </select></label>
+                <label>เวลาเข้า<input name="startTime" type="time" defaultValue="08:00" /></label>
+                <label>เวลาออก<input name="endTime" type="time" defaultValue="17:00" /></label>
+                <label>งานที่ได้รับ<input name="title" placeholder="เช่น ติดตั้งอุปกรณ์" /></label>
+              </div>
+              <div className="hr-inline-actions">
+                <button type="button" className="hr-secondary" onClick={() => setShowShiftForm(false)}>ยกเลิก</button>
+                <button type="submit" className="hr-primary" disabled={!selected}>บันทึกตาราง</button>
+              </div>
+            </form>
+          </section>}
+          <section className="hr-card hr-list-card">
+            <div className="hr-card-heading"><div><h3>ตารางที่กำหนดไว้</h3>
+              <p>รายการที่กำหนดเองในตัวอย่าง ({shifts.length} รายการ)</p></div></div>
+            {!shifts.length ? <div className="hr-empty-state"><CalendarDays size={26} />
+              <strong>ยังไม่ได้กำหนดตารางเพิ่มเติม</strong>
+              <p>เลือกพนักงานด้านบน แล้วกดกำหนดตารางวันนี้</p></div> :
+              <div className="hr-table-wrap"><table>
+                <thead><tr><th>พนักงาน</th><th>วันที่</th><th>ตาราง</th><th>จัดการ</th></tr></thead>
+                <tbody>{shifts.map(item => <tr key={item.employeeId + item.shift.date}>
+                  <td>{selectedName(item.employeeId)}</td><td>{prettyDate(item.shift.date)}</td>
+                  <td>{showShift(item.shift)}</td>
+                  <td><button type="button" className="hr-text-button" onClick={() =>
+                    setShifts(prev => prev.filter(x => x !== item))}>ลบรายการ</button></td>
+                </tr>)}</tbody>
+              </table></div>}
+          </section>
         </>}
         {tab === 'sites' && <>
           <div className="hr-site-workspace">
