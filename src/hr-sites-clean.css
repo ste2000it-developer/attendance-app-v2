@@ -309,6 +309,7 @@
 .hr-site-dialog .hr-map-actions { margin-top: 9px; gap: 6px; }
 .hr-site-dialog .hr-map-actions button { min-height: 34px; font-size: 11px; }
 .hr-site-dialog .hr-map-actions button:nth-child(n+2) { display: none; }
+.hr-site-confirm__map.is-unselected .hr-map-actions { display: none; }
 .hr-site-dialog .hr-map-helper {
   margin-top: 7px !important;
   font-size: 11px !important;
