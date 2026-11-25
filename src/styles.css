@@ -765,3 +765,10 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
     color: #617b80;
   }
 }
+
+/* Stop the browser from interpreting two-finger gestures as page zoom.
+   Unlike touch-action:none, pan-x pan-y still permits native scrolling,
+   taps and the existing calendar/leave swipe-down interactions. */
+.app-shell {
+  touch-action: pan-x pan-y;
+}
