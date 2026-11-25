@@ -9,7 +9,7 @@ import {
   type GeoReading, type LocationDecision, type Worksite,
   bangkokInstant, effectiveShift, latenessMinutes, leaveDays, monthlyTimecard,
   overtimeCycleBounds, sumOvertimeCycle, toThaiDate,
-  validateCheckIn, validateCheckOut,
+  validateCheckIn,
 } from './domain/attendanceRules';
 import './hr-preview.css';
 import './hr-redesign.css';
