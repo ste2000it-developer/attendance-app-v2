@@ -151,7 +151,6 @@ export default function SiteMap({
         dragRotate: false,
         pitchWithRotate: false,
         scrollZoom: false,
-        attributionControl: true,
       });
     } catch {
       setMapError('เปิดแผนที่ไม่ได้ กรุณาตรวจการรองรับ WebGL บนอุปกรณ์');
