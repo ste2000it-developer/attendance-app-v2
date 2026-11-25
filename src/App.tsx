@@ -25,6 +25,7 @@ import SkyScene from './SkyScene';
 import HistoryPage from './HistoryPage';
 import CalendarPage from './CalendarPage';
 import { useSheetSwipe } from './useSheetSwipe';
+import { installEmployeeZoomGuard } from './domain/employeeZoomGuard';
 import LeavePage from './LeavePage';
 import ProfilePage from './ProfilePage';
 import {
@@ -182,6 +183,12 @@ function App() {
       : 'ยังไม่ได้เชื่อมข้อมูลการลงเวลา';
   const clockText = timeFormatter.format(now);
   const [clockHours, clockMinutes] = clockText.split(':');
+
+  useEffect(() => {
+    // Apply to every employee screen and popup, not just the Home scroller.
+    // The old Home touch-action:manipulation still allowed browser pinch zoom.
+    return installEmployeeZoomGuard(document);
+  }, []);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0 });
