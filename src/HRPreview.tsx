@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import {
   ArrowLeft, BarChart3, CalendarDays, CalendarOff, CheckCircle2, ChevronDown,
   ChevronRight, ClipboardList, Clock3, FileSpreadsheet, Info, LayoutDashboard,
-  MapPin, Navigation, Plus, RefreshCcw, ShieldCheck, Users, XCircle,
+  MapPin, Navigation, Plus, RefreshCcw, Search, ShieldCheck, Users, X, XCircle,
 } from 'lucide-react';
 import {
   type AttendanceRecord, type DayShift, type Employee, type LeaveRequest,
@@ -12,6 +12,7 @@ import {
   validateCheckIn, validateCheckOut,
 } from './domain/attendanceRules';
 import './hr-preview.css';
+import './hr-redesign.css';
 import { exportLeaveA5 } from './exportLeaveExcel';
 import SiteMap from './SiteMap';
 import PlaceSearch from './PlaceSearch';
@@ -19,6 +20,8 @@ import type { PlaceSearchResult } from './domain/placeSearch';
 
 type Tab = 'overview' | 'employees' | 'schedules' | 'sites' | 'holidays' | 'leave' | 'reports';
 type DemoLeave = LeaveRequest & { id: string; reviewedAt?: string };
+const primaryTabs: Tab[] = ['overview', 'leave', 'schedules', 'reports'];
+const setupTabs: Tab[] = ['employees', 'sites', 'holidays'];
 const tabNames: Record<Tab, string> = {
   overview: 'ภาพรวม', employees: 'พนักงาน', schedules: 'ตารางงาน', sites: 'สถานที่',
   holidays: 'วันหยุด', leave: 'การลา', reports: 'รายงาน',
@@ -59,6 +62,21 @@ export default function HRPreview() {
     return () => document.body.classList.remove('hr-admin-active');
   }, []);
   const [tab, setTab] = useState<Tab>('overview');
+  const [showEmployeeForm, setShowEmployeeForm] = useState(false);
+  const [employeeQuery, setEmployeeQuery] = useState('');
+  const [showShiftForm, setShowShiftForm] = useState(false);
+  const [showSiteForm, setShowSiteForm] = useState(false);
+  const [showHolidayForm, setShowHolidayForm] = useState(false);
+  const [showLeaveForm, setShowLeaveForm] = useState(false);
+  const [showPunchForm, setShowPunchForm] = useState(false);
+  const [leaveFilter, setLeaveFilter] = useState<'pending' | 'all'>('pending');
+  const [reportLevel, setReportLevel] = useState<'year' | 'month' | 'day'>('year');
+  const [reportDay, setReportDay] = useState(today);
+  const navigate = (next: Tab) => {
+    setTab(next);
+    setNotice('');
+    window.scrollTo({ top: 0 });
+  };
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [sites, setSites] = useState<Worksite[]>([]);
   const [shifts, setShifts] = useState<{ employeeId: string; shift: DayShift }[]>([]);
@@ -105,6 +123,12 @@ export default function HRPreview() {
   const [notice, setNotice] = useState('');
   const holidaySet = useMemo(() => new Set(holidays), [holidays]);
   const selected = employees.find(employee => employee.id === selectedEmployee) ?? null;
+  const filteredEmployees = employees.filter(employee =>
+    [employee.firstName, employee.lastName, employee.nickname, employee.code, employee.department]
+      .join(' ').toLocaleLowerCase('th').includes(employeeQuery.trim().toLocaleLowerCase('th')));
+  const filteredLeaves = leaves.filter(request => leaveFilter === 'all' || request.status === 'pending')
+    .sort((a, b) => (a.status === 'pending' ? 0 : 1) - (b.status === 'pending' ? 0 : 1));
+  const pendingCount = leaves.filter(request => request.status === 'pending').length;
   const chosenShift = selected ? effectiveShift(workday, selected.workPattern, holidaySet,
     shifts.find(item => item.employeeId === selected.id && item.shift.date === workday)?.shift) : null;
   const [year, month] = reportMonth.split('-').map(Number);
@@ -128,6 +152,8 @@ export default function HRPreview() {
     if (!selectedEmployee) setSelectedEmployee(employee.id);
     setNotice('เพิ่มพนักงานในตัวอย่างแล้ว ไม่ได้บันทึกเข้าบริษัท');
     form.reset();
+    setShowEmployeeForm(false);
+    setEmployeeQuery('');
   };
   const createShift = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -143,6 +169,7 @@ export default function HRPreview() {
     setShifts(prev => [...prev.filter(x => x.employeeId !== selected.id || x.shift.date !== date),
       { employeeId: selected.id, shift }]);
     setNotice('บันทึกตารางงานในโหมดทดลองแล้ว');
+    setShowShiftForm(false);
   };
   const createSite = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -159,6 +186,7 @@ export default function HRPreview() {
     setSites(prev => [...prev, site]); setGeoResult(null);
     setNotice('ปักหมุดตัวอย่างแล้ว สามารถเปิด–ปิดไซต์นี้ได้');
     event.currentTarget.reset();
+    setShowSiteForm(false);
   };
   const checkGps = () => {
     if (!navigator.geolocation) { setGeoError('เบราว์เซอร์นี้ไม่รองรับ GPS'); return; }
@@ -178,7 +206,11 @@ export default function HRPreview() {
   const addHoliday = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const date = formString(new FormData(event.currentTarget), 'holiday');
-    if (date) setHolidays(prev => [...new Set([...prev, date])].sort());
+    if (date) {
+      setHolidays(prev => [...new Set([...prev, date])].sort());
+      setShowHolidayForm(false);
+      setNotice('เพิ่มวันหยุดในตัวอย่างแล้ว');
+    }
   };
   const createLeave = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -196,6 +228,8 @@ export default function HRPreview() {
         new Map(shifts.filter(s => s.employeeId === id).map(s => [s.shift.date, s.shift])));
       if (days <= 0) { setNotice('วันที่เลือกไม่มีวันทำงาน'); return; }
       setLeaves(prev => [req, ...prev]); setNotice('สร้างคำขอลาตัวอย่าง ' + days + ' วัน');
+      setShowLeaveForm(false);
+      setLeaveFilter('pending');
     } catch (error) { setNotice(error instanceof Error ? error.message : 'ข้อมูลวันลาไม่ถูกต้อง'); }
   };
   const addPunch = (event: FormEvent<HTMLFormElement>) => {
@@ -216,6 +250,7 @@ export default function HRPreview() {
     }
     setPunches(prev => [...prev.filter(p => p.employeeId !== selected.id || p.date !== date), record]);
     setNotice('เพิ่มข้อมูลตอกบัตรเพื่อทดสอบรายงานเท่านั้น');
+    setShowPunchForm(false);
   };
   const downloadLeave = async (request: DemoLeave) => {
     const employee = employees.find(x => x.id === request.employeeId);
