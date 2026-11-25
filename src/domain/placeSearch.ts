@@ -29,6 +29,9 @@ export function parsePlaceResults(raw: unknown): PlaceSearchResult[] {
   for (const value of raw.slice(0, 10)) {
     if (!value || typeof value !== 'object') continue;
     const record = value as Record<string, unknown>;
+    if ((typeof record.lat !== 'number' && typeof record.lat !== 'string') ||
+      (typeof record.lon !== 'number' && typeof record.lon !== 'string') ||
+      String(record.lat).trim() === '' || String(record.lon).trim() === '') continue;
     const latitude = Number(record.lat);
     const longitude = Number(record.lon);
     const address = typeof record.display_name === 'string' ? record.display_name.trim() : '';
