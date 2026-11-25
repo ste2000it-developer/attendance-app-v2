@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import {
   ArrowLeft, BarChart3, CalendarDays, CalendarOff, CheckCircle2, ChevronDown,
   ChevronRight, ClipboardList, Clock3, FileSpreadsheet, Info, LayoutDashboard,
@@ -67,6 +67,10 @@ export default function HRPreview() {
   const [openEmployeeId, setOpenEmployeeId] = useState<string | null>(null);
   const [showShiftForm, setShowShiftForm] = useState(false);
   const [showSiteForm, setShowSiteForm] = useState(false);
+  const [siteStage, setSiteStage] = useState<'find' | 'confirm'>('find');
+  const [sitePinReady, setSitePinReady] = useState(false);
+  const [viewingSiteId, setViewingSiteId] = useState<string | null>(null);
+  const siteDialogRef = useRef<HTMLDivElement>(null);
   const [draftSiteName, setDraftSiteName] = useState('');
   const [showHolidayForm, setShowHolidayForm] = useState(false);
   const [showLeaveForm, setShowLeaveForm] = useState(false);
@@ -102,14 +106,41 @@ export default function HRPreview() {
   const [draftRadius, setDraftRadius] = useState(100);
   const [mapFocusSignal, setMapFocusSignal] = useState(0);
   const [mapFocusPoint, setMapFocusPoint] = useState({ latitude: 13.7563, longitude: 100.5018 });
+  const closeSiteDialog = () => {
+    setShowSiteForm(false);
+    setViewingSiteId(null);
+    setSiteStage('find');
+    setSitePinReady(false);
+  };
+  const addSiteDialog = () => {
+    setViewingSiteId(null);
+    setDraftSiteName('');
+    setDraftRadius(100);
+    setSitePinReady(false);
+    setSiteStage('find');
+    setShowSiteForm(true);
+  };
+  const viewSiteDialog = (site: Worksite) => {
+    setViewingSiteId(site.id);
+    setDraftSiteName(site.name);
+    setDraftRadius(site.radiusMeters);
+    selectPin(site.latitude, site.longitude);
+    setMapFocusPoint({ latitude: site.latitude, longitude: site.longitude });
+    setMapFocusSignal(value => value + 1);
+    setSitePinReady(true);
+    setSiteStage('confirm');
+    setShowSiteForm(true);
+  };
   const selectPin = (latitude: number, longitude: number) => {
     setPin({ latitude, longitude });
     setCoordinateText({ latitude: latitude.toFixed(6), longitude: longitude.toFixed(6) });
+    setSitePinReady(true);
   };
   const choosePlace = (place: PlaceSearchResult) => {
     const point = { latitude: place.latitude, longitude: place.longitude };
     selectPin(point.latitude, point.longitude);
-    setDraftSiteName(place.title);
+    if (place.title.trim()) setDraftSiteName(place.title);
+    setSiteStage('confirm');
     setMapFocusPoint(point);
     setMapFocusSignal(value => value + 1);
     setNotice('');
@@ -145,7 +176,37 @@ export default function HRPreview() {
   const filteredPunches = selected ? punches.filter(p => p.employeeId === selected.id) : [];
   const overrides = new Map(shifts.filter(s => s.employeeId === selected?.id).map(s => [s.shift.date, s.shift] as const));
   const overtime = sumOvertimeCycle(filteredPunches, year, month, holidaySet, selected?.workPattern, overrides);
-  const [locating, setLocating] = useState(false);
+  useEffect(() => {
+    if (!showSiteForm) return;
+    const oldOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const focusId = window.requestAnimationFrame(() => siteDialogRef.current?.focus());
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeSiteDialog();
+      }
+      if (event.key !== 'Tab' || !siteDialogRef.current) return;
+      const focusable = Array.from(siteDialogRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), summary, [tabindex="0"]'
+      )).filter(item => item.getClientRects().length > 0 && item.getAttribute('aria-hidden') !== 'true');
+      if (!focusable.length) return;
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (event.shiftKey && (document.activeElement === first ||
+        document.activeElement === siteDialogRef.current)) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault(); first.focus();
+      }
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      window.cancelAnimationFrame(focusId);
+      document.body.style.overflow = oldOverflow;
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [showSiteForm]);
+    const [locating, setLocating] = useState(false);
   const createEmployee = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget, data = new FormData(form);
@@ -189,7 +250,7 @@ export default function HRPreview() {
       id: nextId(), name: formString(data, 'name'), latitude: pin.latitude, longitude: pin.longitude,
       radiusMeters: draftRadius, enabled: true,
     };
-    if (!site.name || !Number.isFinite(site.radiusMeters) || site.radiusMeters <= 0 ||
+    if (!sitePinReady || !site.name || !Number.isFinite(site.radiusMeters) || site.radiusMeters <= 0 ||
       !Number.isFinite(site.latitude) || Math.abs(site.latitude) > 90 ||
       !Number.isFinite(site.longitude) || Math.abs(site.longitude) > 180) {
       setNotice('กรุณากรอกชื่อและรัศมีที่ถูกต้อง'); return;
@@ -197,7 +258,7 @@ export default function HRPreview() {
     setSites(prev => [...prev, site]); setGeoResult(null);
     setNotice('ปักหมุดตัวอย่างแล้ว สามารถเปิด–ปิดไซต์นี้ได้');
     event.currentTarget.reset();
-    setShowSiteForm(false);
+    closeSiteDialog();
     setDraftSiteName('');
   };
   const checkGps = () => {
