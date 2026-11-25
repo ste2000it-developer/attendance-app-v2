@@ -273,37 +273,52 @@ export default function HRPreview() {
       <aside className="hr-sidebar" aria-label="เมนูจัดการ HR">
         <div className="hr-brand">
           <span className="hr-brand__icon"><Clock3 size={23} strokeWidth={2.2} /></span>
-          <div><strong>Attendance</strong><small>ADMIN WORKSPACE</small></div>
+          <div><strong>Attendance</strong><small>ระบบลงเวลาพนักงาน</small></div>
         </div>
-        <div className="hr-sidebar__label">เมนูจัดการ</div>
-        <nav className="hr-tabs" aria-label="เมนูแอดมิน">
-          {(Object.keys(tabNames) as Tab[]).map(key => {
+        <div className="hr-sidebar__label">งานประจำวัน</div>
+        <nav className="hr-tabs" aria-label="งานประจำวัน">
+          {primaryTabs.map(key => {
             const Icon = tabIcons[key];
             return <button type="button" key={key}
               className={tab === key ? 'active' : ''}
               aria-current={tab === key ? 'page' : undefined}
-              onClick={() => { setTab(key); setNotice(''); }}>
-              <Icon size={20} strokeWidth={1.8} />
+              onClick={() => navigate(key)}>
+              <Icon size={20} strokeWidth={1.9} />
+              <span>{tabNames[key]}</span>
+              {key === 'leave' && pendingCount > 0 && <b className="hr-nav-count">{pendingCount}</b>}
+              <ChevronRight className="hr-tab-chevron" size={16} />
+            </button>;
+          })}
+        </nav>
+        <div className="hr-sidebar__label">ข้อมูลและการตั้งค่า</div>
+        <nav className="hr-tabs" aria-label="ข้อมูลและการตั้งค่า">
+          {setupTabs.map(key => {
+            const Icon = tabIcons[key];
+            return <button type="button" key={key}
+              className={tab === key ? 'active' : ''}
+              aria-current={tab === key ? 'page' : undefined}
+              onClick={() => navigate(key)}>
+              <Icon size={20} strokeWidth={1.9} />
               <span>{tabNames[key]}</span>
               <ChevronRight className="hr-tab-chevron" size={16} />
             </button>;
           })}
         </nav>
         <div className="hr-sidebar__bottom">
-          <div className="hr-sidebar__demo"><span /> พื้นที่ทดลองระบบ</div>
-          <a className="hr-back" href="./"><ArrowLeft size={16} /> กลับหน้าพนักงาน</a>
+          <div className="hr-sidebar__demo"><span /> โหมดทดลอง</div>
+          <a className="hr-back" href="./"><ArrowLeft size={16} /> กลับหน้าตอกบัตร</a>
         </div>
       </aside>
       <div className="hr-workspace">
         <header className="hr-header">
           <div>
-            <span className="hr-eyebrow">ATTENDANCE V2 <span>/</span> ADMIN WORKSPACE</span>
-            <h1>{tabNames[tab]}</h1>
+            <span className="hr-eyebrow">Attendance / ผู้ดูแลระบบ</span>
+            <h1>{tab === 'overview' ? 'จัดการงานวันนี้' : tabNames[tab]}</h1>
             <p>{tabDescriptions[tab]}</p>
           </div>
           <div className="hr-header__actions">
             <span className="hr-preview-pill"><span /> โหมดทดลอง</span>
-            <a className="hr-header__back" href="./"><ArrowLeft size={16} /> หน้าพนักงาน</a>
+            <a className="hr-header__back" href="./"><ArrowLeft size={16} /> หน้าตอกบัตร</a>
           </div>
         </header>
         <div className="hr-demo-banner" role="status">
@@ -311,13 +326,14 @@ export default function HRPreview() {
           <span>พื้นที่ทดลองเท่านั้น — ข้อมูลที่กรอกจะหายเมื่อรีเฟรช ไม่มีการบันทึกเข้าระบบบริษัท</span>
         </div>
         <nav className="hr-mobile-tabs" aria-label="เมนูจัดการ">
-          {(Object.keys(tabNames) as Tab[]).map(key => {
+          {[...primaryTabs, ...setupTabs].map(key => {
             const Icon = tabIcons[key];
             return <button type="button" key={key}
               className={tab === key ? 'active' : ''}
               aria-current={tab === key ? 'page' : undefined}
-              onClick={() => { setTab(key); setNotice(''); }}>
-              <Icon size={17} strokeWidth={1.9} />{tabNames[key]}
+              onClick={() => navigate(key)}>
+              <Icon size={18} strokeWidth={1.9} />{tabNames[key]}
+              {key === 'leave' && pendingCount > 0 && <b className="hr-nav-count">{pendingCount}</b>}
             </button>;
           })}
         </nav>
@@ -328,24 +344,59 @@ export default function HRPreview() {
           </div>}
           <main className="hr-content">
         {tab === 'overview' && <>
+          <section className="hr-today">
+            <div>
+              <span className="hr-today__eyebrow">ภาพรวมระบบ</span>
+              <h2>วันนี้จัดการอะไรดี?</h2>
+              <p>งานสำคัญอยู่ตรงนี้ เริ่มจัดการได้ทันที ไม่ต้องไล่หาเมนู</p>
+            </div>
+            <div className="hr-today__date"><CalendarDays size={20} />
+              {new Intl.DateTimeFormat('th-TH', { timeZone: 'Asia/Bangkok',
+                day: 'numeric', month: 'long', year: 'numeric' }).format(new Date())}
+            </div>
+          </section>
+          <section className="hr-task-board" aria-label="ทางลัดไปยังงานสำคัญ">
+            <div className="hr-section-head">
+              <div><h3>เริ่มจากงานที่ต้องทำ</h3><p>เลือกงาน แล้วไปจัดการต่อได้เลย</p></div>
+            </div>
+            <div className="hr-task-grid">
+              <button type="button" onClick={() => { setLeaveFilter('pending'); navigate('leave'); }}>
+                <span className="hr-task-icon hr-task-icon--warm"><ClipboardList size={22} /></span>
+                <span><strong>ตรวจคำขอลา</strong>
+                  <small>{pendingCount > 0 ? pendingCount + ' คำขอรออนุมัติ' : 'ยังไม่มีคำขอรออนุมัติ'}</small></span>
+                <ChevronRight size={19} />
+              </button>
+              <button type="button" onClick={() => navigate('schedules')}>
+                <span className="hr-task-icon"><CalendarDays size={22} /></span>
+                <span><strong>จัดตารางงาน</strong><small>เลือกพนักงานและวันทำงาน</small></span>
+                <ChevronRight size={19} />
+              </button>
+              <button type="button" onClick={() => navigate('employees')}>
+                <span className="hr-task-icon"><Users size={22} /></span>
+                <span><strong>รายชื่อพนักงาน</strong><small>ดูข้อมูลและเพิ่มพนักงาน</small></span>
+                <ChevronRight size={19} />
+              </button>
+              <button type="button" onClick={() => navigate('sites')}>
+                <span className="hr-task-icon"><MapPin size={22} /></span>
+                <span><strong>สถานที่ทำงาน</strong><small>ดูไซต์งานและกำหนดจุดตอกบัตร</small></span>
+                <ChevronRight size={19} />
+              </button>
+            </div>
+          </section>
+          <div className="hr-section-head hr-section-head--overview">
+            <div><h3>ข้อมูลในระบบทดลอง</h3><p>สรุปรายการที่เพิ่มในหน้านี้เท่านั้น</p></div>
+          </div>
           <div className="hr-stats">
-            <article><Users /><strong>{employees.length}</strong><span>พนักงานทดลอง</span></article>
-            <article><MapPin /><strong>{sites.filter(s => s.enabled).length}</strong><span>ไซต์งานเปิดใช้งาน</span></article>
-            <article><ClipboardList /><strong>{leaves.filter(l => l.status === 'pending').length}</strong><span>ใบลารออนุมัติ</span></article>
-            <article><Clock3 /><strong>{punches.length}</strong><span>รายการเวลาทดลอง</span></article>
+            <article><Users /><strong>{employees.length}</strong><span>พนักงาน</span></article>
+            <article><MapPin /><strong>{sites.filter(site => site.enabled).length}</strong><span>ไซต์งานที่เปิด</span></article>
+            <article><ClipboardList /><strong>{pendingCount}</strong><span>คำขอลารอตรวจ</span></article>
+            <article><Clock3 /><strong>{punches.length}</strong><span>รายการเวลา</span></article>
           </div>
-          <div className="hr-quick-actions" role="group" aria-label="ไปยังงานที่ใช้บ่อย">
-            <button type="button" onClick={() => setTab('employees')}><Users size={21}/><span><strong>จัดการพนักงาน</strong><small>เพิ่มและดูรายชื่อ</small></span><ChevronRight size={18}/></button>
-            <button type="button" onClick={() => setTab('schedules')}><CalendarDays size={21}/><span><strong>กำหนดตารางงาน</strong><small>รายวันและรายบุคคล</small></span><ChevronRight size={18}/></button>
-            <button type="button" onClick={() => setTab('sites')}><MapPin size={21}/><span><strong>สถานที่ทำงาน</strong><small>ปักหมุดและตั้งรัศมี</small></span><ChevronRight size={18}/></button>
-          </div>
-          <div className="hr-card hr-overview-note">
-            <h3>สถานะระบบทดลอง</h3>
-            <p>จัดการพนักงานและตารางงานรายวัน ปักหมุดและเปิด–ปิด GPS Geofence ตรวจ GPS ปัจจุบัน
-              ทดลองอนุมัติลา ตรวจชั่วโมง OT ข้ามวันและรอบ 25–24</p>
-            <p>การลงเวลาจริง การส่ง Push Notification การอ่าน Google Calendar และการเชื่อมฐานข้อมูลยังไม่เปิดใช้
-              เพราะต้องตั้งค่าระบบฝั่งเซิร์ฟเวอร์และสิทธิ์ผู้ใช้ให้ปลอดภัยก่อน</p>
-          </div>
+          <details className="hr-card hr-system-details">
+            <summary><Info size={17} /> รายละเอียดระบบทดลอง <ChevronDown size={17} /></summary>
+            <p>การบันทึกเวลาจริง การส่งแจ้งเตือน การเชื่อม Google Calendar และฐานข้อมูลบริษัท
+              ยังไม่เปิดใช้ ข้อมูลที่เพิ่มในหน้าผู้ดูแลจะหายเมื่อรีเฟรช</p>
+          </details>
         </>}
         {tab === 'employees' && <>
           <details className="hr-card hr-disclosure"><summary><span><Plus size={19} /> เพิ่มพนักงาน</span><ChevronDown size={20} /></summary>
