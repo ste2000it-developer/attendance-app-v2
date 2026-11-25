@@ -14,6 +14,8 @@ import {
 import './hr-preview.css';
 import { exportLeaveA5 } from './exportLeaveExcel';
 import SiteMap from './SiteMap';
+import PlaceSearch from './PlaceSearch';
+import type { PlaceSearchResult } from './domain/placeSearch';
 
 type Tab = 'overview' | 'employees' | 'schedules' | 'sites' | 'holidays' | 'leave' | 'reports';
 type DemoLeave = LeaveRequest & { id: string; reviewedAt?: string };
@@ -77,6 +79,13 @@ export default function HRPreview() {
   const selectPin = (latitude: number, longitude: number) => {
     setPin({ latitude, longitude });
     setCoordinateText({ latitude: latitude.toFixed(6), longitude: longitude.toFixed(6) });
+  };
+  const choosePlace = (place: PlaceSearchResult) => {
+    const point = { latitude: place.latitude, longitude: place.longitude };
+    selectPin(point.latitude, point.longitude);
+    setMapFocusPoint(point);
+    setMapFocusSignal(value => value + 1);
+    setNotice('');
   };
   const applyCoordinates = () => {
     if (!coordinateText.latitude.trim() || !coordinateText.longitude.trim()) {
@@ -371,6 +380,7 @@ export default function HRPreview() {
                 <div><h3>เลือกสถานที่บนแผนที่</h3><p>เลื่อน ซูม และลากหมุดใหม่ได้ตามต้องการ</p></div>
                 <span className="hr-count">{sites.filter(site => site.enabled).length} ไซต์ที่เปิด</span>
               </div>
+              <PlaceSearch onChoose={choosePlace} />
               <SiteMap sites={sites} pin={pin} radiusMeters={draftRadius}
                 focusSignal={mapFocusSignal} focusPoint={mapFocusPoint}
                 onPin={selectPin} />
