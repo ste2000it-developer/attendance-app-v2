@@ -77,6 +77,12 @@ export default function HRPreview() {
   const navigate = (next: Tab) => {
     setTab(next);
     setNotice('');
+    setShowEmployeeForm(false);
+    setShowShiftForm(false);
+    setShowSiteForm(false);
+    setShowHolidayForm(false);
+    setShowLeaveForm(false);
+    setShowPunchForm(false);
     window.scrollTo({ top: 0 });
   };
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -407,7 +413,7 @@ export default function HRPreview() {
           </details>
         </>}
         {tab === 'employees' && <>
-          <section className="hr-card hr-list-card">
+          {!showEmployeeForm && <section className="hr-card hr-list-card">
             <div className="hr-card-heading hr-card-heading--actions">
               <div><h3>รายชื่อพนักงาน</h3><p>ค้นหาชื่อหรือแผนก แล้วเลือกคนที่ต้องการจัดการ</p></div>
               <button type="button" className="hr-primary" onClick={() => setShowEmployeeForm(true)}>
@@ -446,7 +452,7 @@ export default function HRPreview() {
               </table>
             </div>}
             {employees.length > 0 && <p className="hr-list-count">แสดง {filteredEmployees.length} จาก {employees.length} คน</p>}
-          </section>
+          </section>}
           {focusedEmployee && <section className="hr-card hr-detail-card">
             <div className="hr-card-heading hr-card-heading--actions">
               <div><h3>{focusedEmployee.firstName} {focusedEmployee.lastName}</h3>
@@ -565,7 +571,7 @@ export default function HRPreview() {
           </section>
         </>}
         {tab === 'sites' && <>
-          <section className="hr-card hr-list-card">
+          {!showSiteForm && <section className="hr-card hr-list-card">
             <div className="hr-card-heading hr-card-heading--actions">
               <div><h3>สถานที่ทำงาน</h3><p>ดูจุดตอกบัตรที่มีอยู่ก่อน แล้วค่อยเพิ่มจุดใหม่</p></div>
               <button type="button" className="hr-primary" onClick={() => setShowSiteForm(true)}>
@@ -681,7 +687,7 @@ export default function HRPreview() {
           </details>
         </>}
         {tab === 'holidays' && <>
-          <section className="hr-card hr-list-card">
+          {!showHolidayForm && <section className="hr-card hr-list-card">
             <div className="hr-card-heading hr-card-heading--actions">
               <div><h3>วันหยุดบริษัท</h3><p>ตรวจสอบวันหยุดที่ใช้กับตารางงานและการลา</p></div>
               <button type="button" className="hr-primary" onClick={() => setShowHolidayForm(true)}>
@@ -718,7 +724,7 @@ export default function HRPreview() {
           <p className="hr-helper-note">ปฏิทินบริษัทจาก Google Calendar ยังไม่ได้เชื่อมต่อ — รายการนี้เป็นข้อมูลทดลองเท่านั้น</p>
         </>}
         {tab === 'leave' && <>
-          <section className="hr-card hr-list-card">
+          {!showLeaveForm && <section className="hr-card hr-list-card">
             <div className="hr-card-heading hr-card-heading--actions">
               <div><h3>จัดการคำขอลา</h3><p>ตรวจใบลาที่รออนุมัติก่อน แล้วค่อยดูรายการย้อนหลัง</p></div>
               <button type="button" className="hr-secondary" onClick={() => setShowLeaveForm(true)}>
@@ -883,7 +889,7 @@ export default function HRPreview() {
                 <article><ShieldCheck /><strong>{overtime.pendingHrReviewCount}</strong><span>รอ HR ตรวจ</span></article>
               </div>
             </section>
-            <section className="hr-card hr-list-card">
+            {!showPunchForm && <section className="hr-card hr-list-card">
               <div className="hr-card-heading hr-card-heading--actions">
                 <div><h3>บัตรตอกเวลารายวัน</h3><p>กดวันที่เพื่อดูรายละเอียด · แสดงทุกวันรวมวันหยุด</p></div>
                 <button type="button" className="hr-secondary" disabled={!selected}
@@ -906,8 +912,8 @@ export default function HRPreview() {
                       setReportDay(row.date);
                       setReportLevel('day');
                     }}>{prettyDate(row.date)} <ChevronRight size={15} /></button></td>
-                    <td>{row.checkIn ? new Date(row.checkIn).toLocaleTimeString('en-GB', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit' }) : '✎'}</td>
-                    <td>{row.checkOut ? new Date(row.checkOut).toLocaleTimeString('en-GB', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit' }) : '✎'}</td>
+                    <td>{row.checkIn ? new Date(row.checkIn).toLocaleTimeString('en-GB', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit' }) : '—'}</td>
+                    <td>{row.checkOut ? new Date(row.checkOut).toLocaleTimeString('en-GB', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit' }) : '—'}</td>
                     <td>{late ?? '—'}
                       {row.record && originalLate !== null && originalLate > 0 && (
                         lateExemptions[row.record.id]
@@ -940,7 +946,7 @@ export default function HRPreview() {
                 })}</tbody>
                 </table>
               </div>}
-            </section>
+            </section>}
             {showPunchForm && <section className="hr-card hr-edit-panel">
               <div className="hr-card-heading hr-card-heading--actions">
                 <div><h3>เพิ่มข้อมูลเวลาเพื่อทดสอบ</h3><p>ข้อมูลตัวอย่าง ไม่บันทึกการตอกบัตรจริง</p></div>
