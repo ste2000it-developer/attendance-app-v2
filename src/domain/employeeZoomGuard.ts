@@ -21,6 +21,6 @@ export function installEmployeeZoomGuard(target: Document): () => void {
   return () => {
     target.removeEventListener('gesturestart', stopZoom);
     target.removeEventListener('gesturechange', stopZoom);
-    target.removeEventListener('touchmove', stopPinch, true);
+    target.removeEventListener('touchmove', stopPinch, { capture: true });
   };
 }
