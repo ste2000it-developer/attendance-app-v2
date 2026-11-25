@@ -14,6 +14,7 @@ import {
   LogOut,
   Moon,
   Palette,
+  RotateCcw,
   Sun,
   Sunrise,
   Sunset,
@@ -187,39 +188,53 @@ function App() {
   }, [activeTab]);
 
   useEffect(() => {
-    // iOS standalone PWA can rubber-band the page even when an inner scroller
-    // has overscroll-behavior:none. Stop only attempts to drag past the FIRST
-    // or LAST item; all ordinary content scrolling remains native and smooth.
+    // The Home screen is intentionally not scrollable. Blocking every touchmove
+    // there used to cancel genuine taps when a finger moved a few pixels.
+    // On the other screens, prevent iOS rubber-banding only for deliberate
+    // edge swipes on plain content. Never interfere with controls or dialogs.
     const scroller = scrollRef.current;
-    if (!scroller) return;
+    if (!scroller || activeTab === 'home') return;
+    let startTouchY: number | null = null;
     let lastTouchY: number | null = null;
 
+    const clearGesture = () => {
+      startTouchY = null;
+      lastTouchY = null;
+    };
     const onTouchStart = (event: TouchEvent) => {
-      lastTouchY = event.touches.length === 1 ? event.touches[0].clientY : null;
+      clearGesture();
+      if (event.touches.length !== 1 || scroller.scrollHeight <= scroller.clientHeight + 1) return;
+      const target = event.target;
+      if (!(target instanceof Element) || target.closest(
+        'button, a, input, textarea, select, summary, [role="button"], [role="dialog"], [data-sheet-drag]',
+      )) return;
+      startTouchY = event.touches[0].clientY;
+      lastTouchY = startTouchY;
     };
     const onTouchMove = (event: TouchEvent) => {
-      if (event.touches.length !== 1 || lastTouchY === null) return;
+      if (event.touches.length !== 1 || startTouchY === null || lastTouchY === null) return;
       const touchY = event.touches[0].clientY;
       const deltaY = touchY - lastTouchY;
       lastTouchY = touchY;
+      // iOS can send tiny movements for a normal tap. Preserve its click.
+      if (Math.abs(touchY - startTouchY) < 10) return;
       const atTop = scroller.scrollTop <= 0;
       const atBottom = scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 1;
-      if ((deltaY > 0 && atTop) || (deltaY < 0 && atBottom)) {
+      if (event.cancelable && ((deltaY > 0 && atTop) || (deltaY < 0 && atBottom))) {
         event.preventDefault();
       }
     };
-    const onTouchEnd = () => { lastTouchY = null; };
     scroller.addEventListener('touchstart', onTouchStart, { passive: true });
     scroller.addEventListener('touchmove', onTouchMove, { passive: false });
-    scroller.addEventListener('touchend', onTouchEnd);
-    scroller.addEventListener('touchcancel', onTouchEnd);
+    scroller.addEventListener('touchend', clearGesture);
+    scroller.addEventListener('touchcancel', clearGesture);
     return () => {
       scroller.removeEventListener('touchstart', onTouchStart);
       scroller.removeEventListener('touchmove', onTouchMove);
-      scroller.removeEventListener('touchend', onTouchEnd);
-      scroller.removeEventListener('touchcancel', onTouchEnd);
+      scroller.removeEventListener('touchend', clearGesture);
+      scroller.removeEventListener('touchcancel', clearGesture);
     };
-  }, []);
+  }, [activeTab]);
 
   useEffect(() => {
     const tick = () => setNow(new Date());
@@ -548,6 +563,16 @@ function App() {
           </section>
         </div>
       )}
+      {/* Browser tabs cannot reliably lock iPhone rotation. The web-app
+          manifest requests portrait mode when installed; this unobtrusive
+          fallback prevents unusable landscape layouts on phones only. */}
+      <div className="portrait-orientation-notice" role="status">
+        <span className="portrait-orientation-notice__icon" aria-hidden="true">
+          <RotateCcw size={36} strokeWidth={2} />
+        </span>
+        <strong>กรุณาหมุนโทรศัพท์เป็นแนวตั้ง</strong>
+        <p>แอปตอกบัตรใช้งานได้ดีที่สุดในแนวตั้ง</p>
+      </div>
     </div>
   );
 }
