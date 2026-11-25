@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { Check, ExternalLink, LoaderCircle, MapPin, Navigation, Search } from 'lucide-react';
+import { Check, ChevronDown, ExternalLink, LoaderCircle, MapPin, Navigation, Search } from 'lucide-react';
 import {
   googleMapsSearchUrl, parseMapCoordinates, parsePlaceResults,
   placeSearchUrl, type PlaceSearchResult,
@@ -117,7 +117,7 @@ export default function PlaceSearch({ onChoose }: PlaceSearchProps) {
     <div className="hr-place-search">
       <div className="hr-place-search__heading">
         <label htmlFor="hr-place-search-input"><Search size={17} /> ค้นหาชื่อสถานที่</label>
-        <span>ค้นหาได้หลายวิธี</span>
+        <span>ชื่อสถานที่หรือถนน</span>
       </div>
       <form className="hr-place-search__form" onSubmit={event => { void search(event); }}>
         <div className="hr-place-search__input">
@@ -161,10 +161,11 @@ export default function PlaceSearch({ onChoose }: PlaceSearchProps) {
           </p>}
         </div>
       )}
-      <div className="hr-place-search__backup">
+      <details className="hr-place-search__backup hr-place-search__backup--compact">
+        <summary><span>ค้นหาไม่เจอ? ใช้พิกัดจาก Google Maps</span><ChevronDown size={17} /></summary>
         <div className="hr-place-search__backup-head">
-          <div><strong>หาไม่เจอ? ใช้ Google Maps ได้</strong>
-            <small>เปิดค้นหาใน Google Maps แล้วนำพิกัดกลับมาปักบนแผนที่นี้</small></div>
+          <div><strong>ค้นหาใน Google Maps</strong>
+            <small>เลือกจุดที่ต้องการแล้วคัดลอกพิกัดกลับมา</small></div>
           <a href={googleMapsSearchUrl(query)} target="_blank" rel="noopener noreferrer"
             className="hr-place-search__google">
             เปิด Google Maps <ExternalLink size={16} />
@@ -194,9 +195,9 @@ export default function PlaceSearch({ onChoose }: PlaceSearchProps) {
             <Check size={16} /> นำพิกัดมาปักหมุดแล้ว ตรวจตำแหน่งและใส่ชื่อไซต์ก่อนบันทึก
           </p>}
         </form>
-      </div>
+      </details>
       <p className="hr-place-search__credit">
-        ค้นหาชื่อผ่าน Photon / <a href="https://www.openstreetmap.org/copyright"
+        ข้อมูลค้นหาจาก Photon / <a href="https://www.openstreetmap.org/copyright"
           target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a>
         {' '}· บริการฟรีอาจมีข้อมูลไม่ครบหรือหยุดให้บริการได้ · ไม่ควรค้นหาข้อมูลส่วนบุคคล
       </p>
