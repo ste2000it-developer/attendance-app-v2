@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import maplibregl, { setWorkerUrl } from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { Crosshair, LocateFixed, MapPin, RefreshCcw } from 'lucide-react';
 import type { Worksite } from './domain/attendanceRules';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 // OpenFreeMap's recommended Vite worker setup: no API key or billing.
-setWorkerUrl(workerUrl);
+maplibregl.setWorkerUrl(workerUrl);
 
 type Point = { latitude: number; longitude: number };
 type StyleName = 'liberty' | 'positron';
