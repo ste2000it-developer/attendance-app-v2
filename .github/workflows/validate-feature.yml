@@ -2,7 +2,7 @@ name: Validate Attendance V2 feature branch
 
 on:
   push:
-    branches: [feat/v2-approved-systems-2026-11-24, feat/admin-ui-map-polish-2026-11-24]
+    branches: [feat/v2-approved-systems-2026-11-24, feat/admin-ui-map-polish-2026-11-24, feat/openfreemap-maplibre-2026-11-25]
   workflow_dispatch:
 
 permissions:
