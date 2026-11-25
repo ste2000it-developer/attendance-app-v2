@@ -14,6 +14,7 @@ type SiteMapProps = {
   sites: readonly Worksite[];
   pin: Point;
   radiusMeters: number;
+  showDraft?: boolean;
   onPin: (latitude: number, longitude: number) => void;
   readOnly?: boolean;
   focusSignal: number;
@@ -56,7 +57,7 @@ function ringCoordinates(point: Point, radiusMeters: number): number[][] {
   return coords;
 }
 
-function radiusPolygons(sites: readonly Worksite[], pin: Point, radiusMeters: number) {
+function radiusPolygons(sites: readonly Worksite[], pin: Point, radiusMeters: number, showDraft: boolean) {
   const validSites = sites.filter(site => validPoint(site) &&
     Number.isFinite(site.radiusMeters) && site.radiusMeters > 0);
   const validRadius = Number.isFinite(radiusMeters) && radiusMeters > 0 ? radiusMeters : 100;
@@ -67,7 +68,7 @@ function radiusPolygons(sites: readonly Worksite[], pin: Point, radiusMeters: nu
       stroke: site.enabled ? '#008a80' : '#89959c',
       opacity: site.enabled ? 0.13 : 0.06,
     })),
-    ...(validPoint(pin) ? [{
+    ...(showDraft && validPoint(pin) ? [{
       location: pin, radius: validRadius, fill: '#ffad65', stroke: '#f38942', opacity: 0.21,
     }] : []),
   ];
@@ -99,7 +100,7 @@ function markerElement(type: 'draft' | 'active' | 'inactive', label: string) {
  * All maps use OpenFreeMap's keyless vector styles.
  */
 export default function SiteMap({
-  sites, pin, radiusMeters, onPin, readOnly = false, focusSignal, focusPoint,
+  sites, pin, radiusMeters, showDraft = true, onPin, readOnly = false, focusSignal, focusPoint,
 }: SiteMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -109,8 +110,8 @@ export default function SiteMap({
   onPinRef.current = onPin;
   const readOnlyRef = useRef(readOnly);
   readOnlyRef.current = readOnly;
-  const latestRef = useRef({ sites, pin, radiusMeters });
-  latestRef.current = { sites, pin, radiusMeters };
+  const latestRef = useRef({ sites, pin, radiusMeters, showDraft });
+  latestRef.current = { sites, pin, radiusMeters, showDraft };
   const refreshRingsRef = useRef<() => void>(() => {});
   const [styleName, setStyleName] = useState<StyleName>('positron');
   const previousStyleRef = useRef<StyleName>('positron');
@@ -119,8 +120,9 @@ export default function SiteMap({
   refreshRingsRef.current = () => {
     const map = mapRef.current;
     if (!map || !map.isStyleLoaded()) return;
-    const { sites: currentSites, pin: currentPin, radiusMeters: currentRadius } = latestRef.current;
-    const data = radiusPolygons(currentSites, currentPin, currentRadius);
+    const { sites: currentSites, pin: currentPin, radiusMeters: currentRadius,
+      showDraft: currentShowDraft } = latestRef.current;
+    const data = radiusPolygons(currentSites, currentPin, currentRadius, currentShowDraft);
     if (!map.getSource(MAP_SOURCE)) {
       map.addSource(MAP_SOURCE, { type: 'geojson', data });
       map.addLayer({
@@ -230,7 +232,13 @@ export default function SiteMap({
   // Draft marker is persistent even when dragging; only its position changes.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !validPoint(pin)) return;
+    if (!map) return;
+    if (!showDraft || !validPoint(pin)) {
+      draftMarkerRef.current?.remove();
+      draftMarkerRef.current = null;
+      refreshRingsRef.current();
+      return;
+    }
     if (!draftMarkerRef.current) {
       const marker = new maplibregl.Marker({
         element: markerElement('draft', 'ลากหมุดสีส้มเพื่อเลือกตำแหน่งใหม่'),
@@ -247,7 +255,7 @@ export default function SiteMap({
       draftMarkerRef.current.setDraggable(!readOnly);
     }
     refreshRingsRef.current();
-  }, [pin, radiusMeters, readOnly]);
+  }, [pin, radiusMeters, readOnly, showDraft]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -266,7 +274,7 @@ export default function SiteMap({
   const showAll = () => {
     const map = mapRef.current;
     if (!map) return;
-    const points = [...sites.filter(validPoint), pin].filter(validPoint);
+    const points = [...sites.filter(validPoint), ...(showDraft ? [pin] : [])].filter(validPoint);
     if (points.length < 2) { focusDraft(); return; }
     const bounds = new maplibregl.LngLatBounds();
     points.forEach(point => bounds.extend([point.longitude, point.latitude]));
@@ -284,7 +292,7 @@ export default function SiteMap({
           'แผนที่ไซต์งาน แตะเพื่อปักหมุด เลื่อนและซูมด้วยนิ้ว'} />
       {mapError && <p className="hr-map-error" role="status">{mapError}</p>}
       <div className="hr-map-actions" aria-label="เครื่องมือแผนที่">
-        <button type="button" onClick={focusDraft}><LocateFixed size={16} /> ไปที่หมุด</button>
+        {showDraft && <button type="button" onClick={focusDraft}><LocateFixed size={16} /> ไปที่หมุด</button>}
         <button type="button" onClick={showAll}><Crosshair size={16} /> ดูทั้งหมด</button>
         <button type="button" onClick={() => setStyleName(current => current === 'liberty' ? 'positron' : 'liberty')}>
           <RefreshCcw size={15} /> {styleName === 'positron' ? 'แผนที่สี' : 'แผนที่เรียบ'}
@@ -292,6 +300,7 @@ export default function SiteMap({
       </div>
       <p className="hr-map-helper">
         {readOnly ? 'วงสีส้มแสดงรัศมีที่ตั้งไว้' :
+          !showDraft ? 'แตะจุดบนแผนที่เพื่อวางหมุด' :
           'แตะแผนที่หรือลากหมุดสีส้มเพื่อเปลี่ยนตำแหน่ง • วงสีส้มแสดงรัศมีเป็นเมตร'}
       </p>
       <p className="hr-map-attribution-note">ข้อมูลแผนที่จาก OpenFreeMap / OpenStreetMap · ฟรี ไม่ต้องใช้ API Key</p>
