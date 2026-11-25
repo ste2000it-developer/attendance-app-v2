@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import * as L from 'leaflet';
+import maplibregl, { setWorkerUrl } from 'maplibre-gl';
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { Crosshair, LocateFixed, MapPin, RefreshCcw } from 'lucide-react';
 import type { Worksite } from './domain/attendanceRules';
-import 'leaflet/dist/leaflet.css';
+import 'maplibre-gl/dist/maplibre-gl.css';
+
+// OpenFreeMap's recommended Vite worker setup: no API key or billing.
+setWorkerUrl(workerUrl);
 
 type Point = { latitude: number; longitude: number };
-
+type StyleName = 'liberty' | 'positron';
 type SiteMapProps = {
   sites: readonly Worksite[];
   pin: Point;
@@ -15,187 +19,253 @@ type SiteMapProps = {
   focusPoint: Point;
 };
 
-const pointIsValid = (p: Point) =>
-  Number.isFinite(p.latitude) && Math.abs(p.latitude) <= 85 &&
-  Number.isFinite(p.longitude) && Math.abs(p.longitude) <= 180;
+const OPENFREEMAP = 'https://tiles.openfreemap.org/styles/';
+const EARTH_RADIUS_M = 6_371_008.8;
+const DEG = Math.PI / 180;
+const MAP_SOURCE = 'hr-site-radius-polygons';
+const MAP_FILL = 'hr-site-radius-fill';
+const MAP_OUTLINE = 'hr-site-radius-outline';
 
-const roundLocation = (p: L.LatLng): Point => ({
-  latitude: Number(p.lat.toFixed(6)),
-  longitude: Number(p.lng.toFixed(6)),
-});
+function validPoint(p: Point): boolean {
+  return Number.isFinite(p.latitude) && Math.abs(p.latitude) <= 85 &&
+    Number.isFinite(p.longitude) && Math.abs(p.longitude) <= 180;
+}
+function roundCoordinates(p: { lat: number; lng: number }): Point {
+  return { latitude: Number(p.lat.toFixed(6)), longitude: Number(p.lng.toFixed(6)) };
+}
 
-const markerIcon = (variant: 'draft' | 'active' | 'inactive') => L.divIcon({
-  className: 'hr-leaflet-pin hr-leaflet-pin--' + variant,
-  html: '<span class="hr-leaflet-pin__head"></span><span class="hr-leaflet-pin__tail"></span>',
-  iconSize: [32, 43],
-  iconAnchor: [16, 41],
-  popupAnchor: [0, -36],
-});
+/** Geodesic circle, measured in metres rather than CSS pixels. */
+function ringCoordinates(point: Point, radiusMeters: number): number[][] {
+  const lat = point.latitude * DEG;
+  const lon = point.longitude * DEG;
+  const distance = radiusMeters / EARTH_RADIUS_M;
+  const coords: number[][] = [];
+  for (let i = 0; i <= 96; i++) {
+    const direction = 2 * Math.PI * i / 96;
+    const nextLat = Math.asin(
+      Math.sin(lat) * Math.cos(distance) +
+      Math.cos(lat) * Math.sin(distance) * Math.cos(direction),
+    );
+    const nextLon = lon + Math.atan2(
+      Math.sin(direction) * Math.sin(distance) * Math.cos(lat),
+      Math.cos(distance) - Math.sin(lat) * Math.sin(nextLat),
+    );
+    coords.push([nextLon / DEG, nextLat / DEG]);
+  }
+  return coords;
+}
 
-function textTooltip(text: string) {
-  const span = document.createElement('span');
-  span.textContent = text;
-  return span;
+function radiusPolygons(sites: readonly Worksite[], pin: Point, radiusMeters: number) {
+  const validSites = sites.filter(site => validPoint(site) &&
+    Number.isFinite(site.radiusMeters) && site.radiusMeters > 0);
+  const validRadius = Number.isFinite(radiusMeters) && radiusMeters > 0 ? radiusMeters : 100;
+  const circles = [
+    ...validSites.map(site => ({
+      location: site as Point, radius: site.radiusMeters,
+      fill: site.enabled ? '#10b6a1' : '#9baab0',
+      stroke: site.enabled ? '#008a80' : '#89959c',
+      opacity: site.enabled ? 0.13 : 0.06,
+    })),
+    ...(validPoint(pin) ? [{
+      location: pin, radius: validRadius, fill: '#ffad65', stroke: '#f38942', opacity: 0.21,
+    }] : []),
+  ];
+  return {
+    type: 'FeatureCollection' as const,
+    features: circles.map(circle => ({
+      type: 'Feature' as const,
+      properties: { fill: circle.fill, stroke: circle.stroke, opacity: circle.opacity },
+      geometry: { type: 'Polygon' as const, coordinates: [ringCoordinates(circle.location, circle.radius)] },
+    })),
+  };
+}
+
+function markerElement(type: 'draft' | 'active' | 'inactive', label: string) {
+  const el = document.createElement('button');
+  el.type = 'button';
+  el.className = 'hr-maplibre-pin hr-maplibre-pin--' + type;
+  el.setAttribute('aria-label', label);
+  el.title = label;
+  el.innerHTML = '<span class="hr-maplibre-pin__head"></span><span class="hr-maplibre-pin__center"></span>';
+  // Clicking an existing pin should not unintentionally move the draft pin beneath it.
+  el.addEventListener('click', event => event.stopPropagation());
+  return el;
 }
 
 /**
- * Leaflet manages pan/zoom/coordinates. React only manages the selected pin
- * and circles, so editing a form never recreates the map or resets its zoom.
+ * MapLibre handles tile rendering, panning, zooming and drag coordinates.
+ * The map stays mounted when React forms change, preserving the user's viewport.
+ * All maps use OpenFreeMap's keyless vector styles.
  */
-export default function SiteMap({ sites, pin, radiusMeters, onPin, focusSignal, focusPoint }: SiteMapProps) {
+export default function SiteMap({
+  sites, pin, radiusMeters, onPin, focusSignal, focusPoint,
+}: SiteMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<L.Map | null>(null);
-  const tileRef = useRef<L.TileLayer | null>(null);
-  const siteLayerRef = useRef<L.LayerGroup | null>(null);
-  const draftLayerRef = useRef<L.LayerGroup | null>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
+  const draftMarkerRef = useRef<maplibregl.Marker | null>(null);
+  const savedMarkersRef = useRef<maplibregl.Marker[]>([]);
   const onPinRef = useRef(onPin);
   onPinRef.current = onPin;
-  const pinRef = useRef(pin);
-  pinRef.current = pin;
-  const [tileIssue, setTileIssue] = useState(false);
-  const [alternateTiles, setAlternateTiles] = useState(false);
+  const latestRef = useRef({ sites, pin, radiusMeters });
+  latestRef.current = { sites, pin, radiusMeters };
+  const refreshRingsRef = useRef<() => void>(() => {});
+  const [styleName, setStyleName] = useState<StyleName>('positron');
+  const previousStyleRef = useRef<StyleName>('positron');
+  const [mapError, setMapError] = useState('');
 
+  refreshRingsRef.current = () => {
+    const map = mapRef.current;
+    if (!map || !map.getStyle()) return;
+    const { sites: currentSites, pin: currentPin, radiusMeters: currentRadius } = latestRef.current;
+    const data = radiusPolygons(currentSites, currentPin, currentRadius);
+    if (!map.getSource(MAP_SOURCE)) {
+      map.addSource(MAP_SOURCE, { type: 'geojson', data });
+      map.addLayer({
+        id: MAP_FILL, type: 'fill', source: MAP_SOURCE,
+        paint: { 'fill-color': ['get', 'fill'], 'fill-opacity': ['get', 'opacity'] },
+      });
+      map.addLayer({
+        id: MAP_OUTLINE, type: 'line', source: MAP_SOURCE,
+        paint: { 'line-color': ['get', 'stroke'], 'line-width': 2.1 },
+      });
+    } else {
+      (map.getSource(MAP_SOURCE) as maplibregl.GeoJSONSource).setData(data);
+    }
+  };
+
+  // Create and dispose the map exactly once. Changes to inputs never rebuild it.
   useEffect(() => {
     const container = containerRef.current;
     if (!container || mapRef.current) return;
-    const center = pointIsValid(pinRef.current) ? pinRef.current : { latitude: 13.7563, longitude: 100.5018 };
-    const map = L.map(container, {
-      center: [center.latitude, center.longitude],
-      zoom: 15,
-      minZoom: 4,
-      maxZoom: 19,
-      zoomControl: false,
-      scrollWheelZoom: false,
-      doubleClickZoom: true,
-      keyboard: true,
-      touchZoom: true,
-      zoomSnap: 0.5,
-    });
+    const initial = validPoint(latestRef.current.pin)
+      ? latestRef.current.pin : { latitude: 13.7563, longitude: 100.5018 };
+    let map: maplibregl.Map;
+    try {
+      map = new maplibregl.Map({
+        container,
+        style: OPENFREEMAP + previousStyleRef.current,
+        center: [initial.longitude, initial.latitude],
+        zoom: 15,
+        minZoom: 4,
+        maxZoom: 19,
+        dragRotate: false,
+        pitchWithRotate: false,
+        scrollZoom: false,
+        attributionControl: true,
+      });
+    } catch {
+      setMapError('เปิดแผนที่ไม่ได้ กรุณาตรวจการรองรับ WebGL บนอุปกรณ์');
+      return;
+    }
     mapRef.current = map;
-    L.control.zoom({ position: 'topright' }).addTo(map);
-    L.control.scale({ position: 'bottomleft', imperial: false, maxWidth: 130 }).addTo(map);
+    map.touchZoomRotate.disableRotation();
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    map.addControl(new maplibregl.ScaleControl({ maxWidth: 130, unit: 'metric' }), 'bottom-left');
 
-    const sitesLayer = L.layerGroup().addTo(map);
-    const draftLayer = L.layerGroup().addTo(map);
-    siteLayerRef.current = sitesLayer;
-    draftLayerRef.current = draftLayer;
-    map.on('click', (event: L.LeafletMouseEvent) => {
-      const location = roundLocation(event.latlng);
-      onPinRef.current(location.latitude, location.longitude);
+    map.on('click', event => {
+      const next = roundCoordinates(event.lngLat);
+      if (validPoint(next)) onPinRef.current(next.latitude, next.longitude);
     });
+    map.on('style.load', () => {
+      setMapError('');
+      refreshRingsRef.current();
+      map.resize();
+    });
+    map.on('error', () => setMapError('แผนที่โหลดบางส่วนไม่สำเร็จ ลองเปลี่ยนรูปแบบแผนที่'));
+    map.on('load', () => map.resize());
 
-    const frame = requestAnimationFrame(() => map.invalidateSize({ pan: false, debounceMoveend: true }));
+    const frame = window.requestAnimationFrame(() => map.resize());
     const observer = typeof ResizeObserver !== 'undefined'
-      ? new ResizeObserver(() => map.invalidateSize({ pan: false, debounceMoveend: true }))
+      ? new ResizeObserver(() => {
+        if (mapRef.current === map) map.resize();
+      })
       : null;
     observer?.observe(container);
-    const onResize = () => map.invalidateSize({ pan: false, debounceMoveend: true });
+    const onResize = () => map.resize();
     window.addEventListener('resize', onResize);
     return () => {
-      cancelAnimationFrame(frame);
+      window.cancelAnimationFrame(frame);
       observer?.disconnect();
       window.removeEventListener('resize', onResize);
-      map.off();
+      savedMarkersRef.current.forEach(marker => marker.remove());
+      savedMarkersRef.current = [];
+      draftMarkerRef.current?.remove();
+      draftMarkerRef.current = null;
       map.remove();
       mapRef.current = null;
-      tileRef.current = null;
-      siteLayerRef.current = null;
-      draftLayerRef.current = null;
     };
   }, []);
 
+  // Switch between two freely hosted OpenFreeMap basemap styles.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || previousStyleRef.current === styleName) return;
+    previousStyleRef.current = styleName;
+    setMapError('');
+    map.setStyle(OPENFREEMAP + styleName);
+  }, [styleName]);
+
+  // Keep saved site markers synchronized without disturbing the camera.
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    tileRef.current?.remove();
-    setTileIssue(false);
-    const options: L.TileLayerOptions = {
-      minZoom: 4,
-      maxZoom: 19,
-      maxNativeZoom: 19,
-      attribution: alternateTiles
-        ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    };
-    const url = alternateTiles
-      ? 'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
-      : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-    const layer = L.tileLayer(url, options);
-    layer.on('tileerror', () => setTileIssue(true));
-    layer.on('load', () => setTileIssue(false));
-    layer.addTo(map);
-    tileRef.current = layer;
-    return () => {
-      layer.off();
-      layer.remove();
-    };
-  }, [alternateTiles]);
-
-  useEffect(() => {
-    const layer = siteLayerRef.current;
-    if (!layer) return;
-    layer.clearLayers();
-    for (const site of sites) {
-      if (!pointIsValid(site) || !Number.isFinite(site.radiusMeters) || site.radiusMeters <= 0) continue;
-      const center: L.LatLngExpression = [site.latitude, site.longitude];
-      L.circle(center, {
-        radius: site.radiusMeters,
-        color: site.enabled ? '#008a82' : '#7a8990',
-        weight: 1.8,
-        fillColor: site.enabled ? '#19b5a5' : '#8e9ba1',
-        fillOpacity: site.enabled ? 0.12 : 0.05,
-        dashArray: site.enabled ? undefined : '5 5',
-        interactive: false,
-      }).addTo(layer);
-      L.marker(center, { icon: markerIcon(site.enabled ? 'active' : 'inactive') })
-        .bindTooltip(textTooltip(site.name + (site.enabled ? ' · เปิดใช้งาน' : ' · ปิดใช้งาน')), {
-          direction: 'top', offset: [0, -26],
-        }).addTo(layer);
-    }
+    savedMarkersRef.current.forEach(marker => marker.remove());
+    savedMarkersRef.current = sites.filter(validPoint).map(site => {
+      const label = site.name + (site.enabled ? ' · เปิดใช้งาน' : ' · ปิดใช้งาน');
+      return new maplibregl.Marker({
+        element: markerElement(site.enabled ? 'active' : 'inactive', label),
+        anchor: 'bottom',
+      })
+        .setLngLat([site.longitude, site.latitude])
+        .setPopup(new maplibregl.Popup({ offset: 30, closeButton: false }).setText(label))
+        .addTo(map);
+    });
+    refreshRingsRef.current();
   }, [sites]);
 
+  // Draft marker is persistent even when dragging; only its position changes.
   useEffect(() => {
-    const layer = draftLayerRef.current;
-    if (!layer) return;
-    layer.clearLayers();
-    if (!pointIsValid(pin)) return;
-    const center: L.LatLngExpression = [pin.latitude, pin.longitude];
-    const validRadius = Number.isFinite(radiusMeters) && radiusMeters > 0 ? radiusMeters : 100;
-    L.circle(center, {
-      radius: validRadius,
-      color: '#ff8748',
-      weight: 2.5,
-      fillColor: '#ffa36b',
-      fillOpacity: 0.17,
-      dashArray: '7 5',
-      interactive: false,
-    }).addTo(layer);
-    L.marker(center, { icon: markerIcon('draft'), draggable: true, autoPan: true })
-      .on('dragend', (event: L.DragEndEvent) => {
-        const marker = event.target as L.Marker;
-        const next = roundLocation(marker.getLatLng());
-        onPinRef.current(next.latitude, next.longitude);
-      })
-      .bindTooltip('ตำแหน่งใหม่ · ลากหมุดเพื่อปรับ', { direction: 'top', offset: [0, -24] })
-      .addTo(layer);
+    const map = mapRef.current;
+    if (!map || !validPoint(pin)) return;
+    if (!draftMarkerRef.current) {
+      const marker = new maplibregl.Marker({
+        element: markerElement('draft', 'ลากหมุดสีส้มเพื่อเลือกตำแหน่งใหม่'),
+        anchor: 'bottom',
+        draggable: true,
+      }).setLngLat([pin.longitude, pin.latitude]).addTo(map);
+      marker.on('dragend', () => {
+        const next = roundCoordinates(marker.getLngLat());
+        if (validPoint(next)) onPinRef.current(next.latitude, next.longitude);
+      });
+      draftMarkerRef.current = marker;
+    } else {
+      draftMarkerRef.current.setLngLat([pin.longitude, pin.latitude]);
+    }
+    refreshRingsRef.current();
   }, [pin, radiusMeters]);
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !pointIsValid(focusPoint) || focusSignal === 0) return;
-    map.flyTo([focusPoint.latitude, focusPoint.longitude], Math.max(map.getZoom(), 15), { duration: 0.42 });
-  }, [focusSignal]); // Focus only on the explicit action, never whenever a coordinate input changes.
+    if (!map || focusSignal === 0 || !validPoint(focusPoint)) return;
+    map.flyTo({ center: [focusPoint.longitude, focusPoint.latitude],
+      zoom: Math.max(map.getZoom(), 15), duration: 420 });
+  }, [focusSignal, focusPoint]);
 
-  const focusPin = () => {
-    if (!mapRef.current || !pointIsValid(pin)) return;
-    mapRef.current.flyTo([pin.latitude, pin.longitude], Math.max(mapRef.current.getZoom(), 15), { duration: 0.42 });
+  const focusDraft = () => {
+    const map = mapRef.current;
+    if (map && validPoint(pin)) {
+      map.flyTo({ center: [pin.longitude, pin.latitude],
+        zoom: Math.max(map.getZoom(), 15), duration: 420 });
+    }
   };
   const showAll = () => {
-    const coords = [...sites.filter(pointIsValid), pin].filter(pointIsValid);
     const map = mapRef.current;
-    if (!map || !coords.length) return;
-    if (coords.length === 1) { focusPin(); return; }
-    map.fitBounds(L.latLngBounds(coords.map(p => [p.latitude, p.longitude])), { padding: [50, 50], maxZoom: 16 });
+    if (!map) return;
+    const points = [...sites.filter(validPoint), pin].filter(validPoint);
+    if (points.length < 2) { focusDraft(); return; }
+    const bounds = new maplibregl.LngLatBounds();
+    points.forEach(point => bounds.extend([point.longitude, point.latitude]));
+    map.fitBounds(bounds, { padding: 50, maxZoom: 16, duration: 420 });
   };
 
   return (
@@ -204,17 +274,20 @@ export default function SiteMap({ sites, pin, radiusMeters, onPin, focusSignal, 
         <span><MapPin size={16} /> แผนที่ไซต์งาน</span>
         <span className="hr-map-legend"><i /> หมุดใหม่ <i /> ไซต์ที่บันทึกแล้ว</span>
       </div>
-      <div className="hr-leaflet-map" ref={containerRef} role="application"
-        aria-label="แผนที่ปักหมุดไซต์งาน เลื่อนด้วยนิ้วหรือเมาส์ และแตะเพื่อเลือกจุด" />
+      <div className="hr-leaflet-map hr-maplibre-map" ref={containerRef} role="application"
+        aria-label="แผนที่ไซต์งาน OpenFreeMap แตะเพื่อปักหมุด เลื่อนและซูมด้วยนิ้ว" />
+      {mapError && <p className="hr-map-error" role="status">{mapError}</p>}
       <div className="hr-map-actions" aria-label="เครื่องมือแผนที่">
-        <button type="button" onClick={focusPin}><LocateFixed size={16} /> ไปที่หมุด</button>
+        <button type="button" onClick={focusDraft}><LocateFixed size={16} /> ไปที่หมุด</button>
         <button type="button" onClick={showAll}><Crosshair size={16} /> ดูทั้งหมด</button>
-        <button type="button" onClick={() => { setTileIssue(false); setAlternateTiles(v => !v); }}>
-          <RefreshCcw size={15} /> {alternateTiles ? 'แผนที่มาตรฐาน' : tileIssue ? 'ลองแผนที่สำรอง' : 'เปลี่ยนแบบแผนที่'}</button>
+        <button type="button" onClick={() => setStyleName(current => current === 'liberty' ? 'positron' : 'liberty')}>
+          <RefreshCcw size={15} /> {styleName === 'positron' ? 'แผนที่สี' : 'แผนที่เรียบ'}
+        </button>
       </div>
       <p className="hr-map-helper">
-        แตะพื้นที่เพื่อปักหมุด หรือลากหมุดสีส้มเพื่อปรับตำแหน่ง • ใช้ปุ่ม +/− บนแผนที่เพื่อซูม
+        แตะแผนที่เพื่อปักหมุด หรือลากหมุดสีส้มเพื่อปรับตำแหน่ง • วงสีส้มแสดงรัศมีจริงเป็นเมตร
       </p>
+      <p className="hr-map-attribution-note">ข้อมูลแผนที่จาก OpenFreeMap / OpenStreetMap · ฟรี ไม่ต้องใช้ API Key</p>
     </div>
   );
 }
