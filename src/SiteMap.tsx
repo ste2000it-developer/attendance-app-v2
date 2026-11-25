@@ -15,6 +15,7 @@ type SiteMapProps = {
   pin: Point;
   radiusMeters: number;
   onPin: (latitude: number, longitude: number) => void;
+  readOnly?: boolean;
   focusSignal: number;
   focusPoint: Point;
 };
@@ -98,7 +99,7 @@ function markerElement(type: 'draft' | 'active' | 'inactive', label: string) {
  * All maps use OpenFreeMap's keyless vector styles.
  */
 export default function SiteMap({
-  sites, pin, radiusMeters, onPin, focusSignal, focusPoint,
+  sites, pin, radiusMeters, onPin, readOnly = false, focusSignal, focusPoint,
 }: SiteMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -106,6 +107,8 @@ export default function SiteMap({
   const savedMarkersRef = useRef<maplibregl.Marker[]>([]);
   const onPinRef = useRef(onPin);
   onPinRef.current = onPin;
+  const readOnlyRef = useRef(readOnly);
+  readOnlyRef.current = readOnly;
   const latestRef = useRef({ sites, pin, radiusMeters });
   latestRef.current = { sites, pin, radiusMeters };
   const refreshRingsRef = useRef<() => void>(() => {});
@@ -162,6 +165,7 @@ export default function SiteMap({
     map.addControl(new maplibregl.ScaleControl({ maxWidth: 130, unit: 'metric' }), 'bottom-left');
 
     map.on('click', event => {
+      if (readOnlyRef.current) return;
       const next = roundCoordinates(event.lngLat);
       if (validPoint(next)) onPinRef.current(next.latitude, next.longitude);
     });
@@ -231,18 +235,19 @@ export default function SiteMap({
       const marker = new maplibregl.Marker({
         element: markerElement('draft', 'ลากหมุดสีส้มเพื่อเลือกตำแหน่งใหม่'),
         anchor: 'bottom',
-        draggable: true,
+        draggable: !readOnly,
       }).setLngLat([pin.longitude, pin.latitude]).addTo(map);
       marker.on('dragend', () => {
         const next = roundCoordinates(marker.getLngLat());
-        if (validPoint(next)) onPinRef.current(next.latitude, next.longitude);
+        if (!readOnlyRef.current && validPoint(next)) onPinRef.current(next.latitude, next.longitude);
       });
       draftMarkerRef.current = marker;
     } else {
       draftMarkerRef.current.setLngLat([pin.longitude, pin.latitude]);
+      draftMarkerRef.current.setDraggable(!readOnly);
     }
     refreshRingsRef.current();
-  }, [pin, radiusMeters]);
+  }, [pin, radiusMeters, readOnly]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -275,7 +280,8 @@ export default function SiteMap({
         <span className="hr-map-legend"><i /> หมุดใหม่ <i /> ไซต์ที่บันทึกแล้ว</span>
       </div>
       <div className="hr-leaflet-map hr-maplibre-map" ref={containerRef} role="application"
-        aria-label="แผนที่ไซต์งาน OpenFreeMap แตะเพื่อปักหมุด เลื่อนและซูมด้วยนิ้ว" />
+        aria-label={readOnly ? 'แผนที่แสดงตำแหน่งไซต์งาน' :
+          'แผนที่ไซต์งาน แตะเพื่อปักหมุด เลื่อนและซูมด้วยนิ้ว'} />
       {mapError && <p className="hr-map-error" role="status">{mapError}</p>}
       <div className="hr-map-actions" aria-label="เครื่องมือแผนที่">
         <button type="button" onClick={focusDraft}><LocateFixed size={16} /> ไปที่หมุด</button>
@@ -285,7 +291,8 @@ export default function SiteMap({
         </button>
       </div>
       <p className="hr-map-helper">
-        แตะแผนที่เพื่อปักหมุด หรือลากหมุดสีส้มเพื่อปรับตำแหน่ง • วงสีส้มแสดงรัศมีจริงเป็นเมตร
+        {readOnly ? 'วงสีส้มแสดงรัศมีที่ตั้งไว้' :
+          'แตะแผนที่หรือลากหมุดสีส้มเพื่อเปลี่ยนตำแหน่ง • วงสีส้มแสดงรัศมีเป็นเมตร'}
       </p>
       <p className="hr-map-attribution-note">ข้อมูลแผนที่จาก OpenFreeMap / OpenStreetMap · ฟรี ไม่ต้องใช้ API Key</p>
     </div>
