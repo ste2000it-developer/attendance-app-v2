@@ -563,103 +563,120 @@ export default function HRPreview() {
           </section>
         </>}
         {tab === 'sites' && <>
-          <div className="hr-site-workspace">
-            <section className="hr-card hr-site-map-card" aria-label="แผนที่ไซต์งาน">
-              <div className="hr-card-heading">
-                <div><h3>เลือกสถานที่บนแผนที่</h3><p>เลื่อน ซูม และลากหมุดใหม่ได้ตามต้องการ</p></div>
-                <span className="hr-count">{sites.filter(site => site.enabled).length} ไซต์ที่เปิด</span>
-              </div>
-              <PlaceSearch onChoose={choosePlace} />
-              <SiteMap sites={sites} pin={pin} radiusMeters={draftRadius}
-                focusSignal={mapFocusSignal} focusPoint={mapFocusPoint}
-                onPin={selectPin} />
-            </section>
-            <form className="hr-card hr-site-form" onSubmit={createSite}>
-              <div className="hr-card-heading">
-                <div><h3>เพิ่มไซต์งาน</h3><p>ตั้งชื่อ พิกัด และรัศมีที่อนุญาตให้ตอกบัตรเข้า</p></div>
-              </div>
-              <label>ชื่อสถานที่
-                <input name="name" required placeholder="เช่น สำนักงานใหญ่" autoComplete="off" />
-              </label>
-              <label>รัศมีที่อนุญาต (เมตร)
-                <input name="radius" type="number" value={draftRadius} min="1" max="100000"
-                  onChange={event => setDraftRadius(Number(event.target.value))} required />
-              </label>
-              <div className="hr-radius-presets" role="group" aria-label="เลือกรัศมีอย่างรวดเร็ว">
-                {[50, 100, 200, 500].map(radius => <button type="button" key={radius}
-                  className={draftRadius === radius ? 'selected' : ''}
-                  aria-pressed={draftRadius === radius}
-                  onClick={() => setDraftRadius(radius)}>{radius} ม.</button>)}
-              </div>
-              <div className="hr-site-form__divider" />
-              <div className="hr-card-heading">
-                <div><h3>พิกัดหมุดใหม่</h3><p>แตะที่แผนที่หรือกรอกพิกัดเอง</p></div>
-              </div>
-              <div className="hr-form-grid hr-coordinates">
-                <label>ละติจูด
-                  <input inputMode="decimal" value={coordinateText.latitude}
-                    onChange={event => setCoordinateText(prev => ({ ...prev, latitude: event.target.value }))} />
-                </label>
-                <label>ลองจิจูด
-                  <input inputMode="decimal" value={coordinateText.longitude}
-                    onChange={event => setCoordinateText(prev => ({ ...prev, longitude: event.target.value }))} />
-                </label>
-              </div>
-              <button type="button" className="hr-secondary" onClick={applyCoordinates}>
-                <Navigation size={16} /> ไปยังพิกัดที่กรอก
+          <section className="hr-card hr-list-card">
+            <div className="hr-card-heading hr-card-heading--actions">
+              <div><h3>สถานที่ทำงาน</h3><p>ดูจุดตอกบัตรที่มีอยู่ก่อน แล้วค่อยเพิ่มจุดใหม่</p></div>
+              <button type="button" className="hr-primary" onClick={() => setShowSiteForm(true)}>
+                <Plus size={18} /> เพิ่มไซต์งาน
               </button>
-              <button className="hr-primary" type="submit"><Plus size={18} /> เพิ่มไซต์งานทดลอง</button>
-              <p className="hr-site-form__help">ไซต์ที่เพิ่มจะอยู่ในรายการด้านล่างเท่านั้น และหายเมื่อรีเฟรช</p>
-            </form>
-          </div>
-          <section className="hr-card">
-            <div className="hr-card-heading">
-              <div><h3>ไซต์งานทั้งหมด</h3><p>เปิด–ปิดการอนุญาตใช้พิกัดแต่ละไซต์ได้</p></div>
-              <span className="hr-count">{sites.length} แห่ง</span>
             </div>
-            {!sites.length ? <div className="hr-empty-state">
-              <MapPin size={29} />
+            {!sites.length ? <div className="hr-empty-state hr-empty-state--large">
+              <MapPin size={30} />
               <strong>ยังไม่มีไซต์งาน</strong>
-              <p>เลือกตำแหน่งบนแผนที่ด้านบน แล้วกดเพิ่มไซต์งานทดลอง</p>
-            </div> :
-              <div className="hr-table-wrap"><table><thead><tr><th>ชื่อไซต์</th><th>พิกัด</th><th>รัศมี</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
-                <tbody>{sites.map(site => <tr key={site.id}>
-                  <td><strong className="hr-table-main">{site.name}</strong></td>
-                  <td className="hr-coord-value">{site.latitude.toFixed(5)}, {site.longitude.toFixed(5)}</td>
-                  <td>{site.radiusMeters} เมตร</td>
-                  <td><span className={'hr-inline-status ' + (site.enabled ? 'hr-inline-status--on' : 'hr-inline-status--off')}>
-                    <span className="hr-inline-status__dot" />{site.enabled ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}</span></td>
-                  <td className="hr-table-actions">
-                    <button className="hr-text-button" type="button" onClick={() => {
-                      setMapFocusPoint({ latitude: site.latitude, longitude: site.longitude });
-                      setMapFocusSignal(v => v + 1);
-                    }}>ดูบนแผนที่</button>
-                    <button className="hr-text-button" type="button" onClick={() => setSites(prev => prev.map(x =>
-                      x.id === site.id ? { ...x, enabled: !x.enabled } : x
-                    ))}>{site.enabled ? 'ปิด' : 'เปิด'}ไซต์</button>
-                  </td>
-                </tr>)}</tbody></table></div>}
+              <p>เพิ่มไซต์แรกด้วยการค้นหาชื่อสถานที่บนแผนที่</p>
+              <button type="button" className="hr-secondary" onClick={() => setShowSiteForm(true)}>
+                <Plus size={17} /> เพิ่มไซต์แรก
+              </button>
+            </div> : <div className="hr-table-wrap"><table>
+              <thead><tr><th>ไซต์งาน</th><th>ตำแหน่ง</th><th>รัศมี</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+              <tbody>{sites.map(site => <tr key={site.id}>
+                <td><strong className="hr-table-main">{site.name}</strong></td>
+                <td className="hr-coord-value">{site.latitude.toFixed(5)}, {site.longitude.toFixed(5)}</td>
+                <td>{site.radiusMeters} ม.</td>
+                <td><span className={'hr-inline-status ' + (site.enabled ? 'hr-inline-status--on' : 'hr-inline-status--off')}>
+                  <span className="hr-inline-status__dot" />{site.enabled ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}</span></td>
+                <td className="hr-table-actions">
+                  <button type="button" className="hr-text-button" onClick={() => {
+                    setShowSiteForm(true);
+                    setMapFocusPoint({ latitude: site.latitude, longitude: site.longitude });
+                    setMapFocusSignal(value => value + 1);
+                  }}>ดูบนแผนที่</button>
+                  <button type="button" className="hr-text-button" onClick={() =>
+                    setSites(prev => prev.map(item =>
+                      item.id === site.id ? { ...item, enabled: !item.enabled } : item
+                    ))}>{site.enabled ? 'ปิดไซต์' : 'เปิดไซต์'}</button>
+                </td>
+              </tr>)}</tbody>
+            </table></div>}
           </section>
-          <section className="hr-card hr-gps-check">
-            <div className="hr-card-heading">
-              <div><h3>ตรวจสอบ GPS ของอุปกรณ์</h3>
-                <p>ทดลองตรวจว่าตำแหน่งปัจจุบันอยู่ในไซต์ที่เปิดใช้งานหรือไม่ ไม่บันทึกเวลา</p></div>
-              <MapPin size={22} />
+          {showSiteForm && <section className="hr-site-create">
+            <div className="hr-flow-header">
+              <div><span>เพิ่มสถานที่ทำงาน</span>
+                <h3>ค้นหาสถานที่ → ปรับหมุด → บันทึก</h3>
+                <p>เลือกตำแหน่งจากชื่อสถานที่หรือปักหมุดเอง แล้วกำหนดระยะที่อนุญาต</p></div>
+              <button type="button" className="hr-icon-button" aria-label="ปิดการเพิ่มไซต์งาน"
+                onClick={() => setShowSiteForm(false)}><X size={20} /></button>
             </div>
-            <div className="hr-gps-check__controls">
-              <button className="hr-secondary" type="button" disabled={locating || !sites.some(site => site.enabled)}
-                onClick={checkGps}><Navigation size={17} /> {locating ? 'กำลังรับพิกัด...' : 'ตรวจ GPS ตอนนี้'}</button>
-              {geoResult && <p role="status" className={'hr-status-info hr-status-info--' + geoResult.status}>
-                {geoResult.status === 'allowed' ? <CheckCircle2 size={19} /> : <XCircle size={19} />}
-                {geoResult.note} {geoResult.site ? ' · ' + geoResult.site.name : ''}
-                {geoResult.accuracyMeters !== null ? ' · คลาดเคลื่อน ±' + Math.round(geoResult.accuracyMeters) + ' ม.' : ''}
-              </p>}
+            <div className="hr-site-workspace">
+              <section className="hr-card hr-site-map-card" aria-label="แผนที่ไซต์งาน">
+                <div className="hr-card-heading">
+                  <div><h3><span className="hr-step-number">1</span> เลือกตำแหน่ง</h3>
+                    <p>พิมพ์ชื่อสถานที่แล้วเลือกผลลัพธ์ หรือแตะแผนที่เพื่อปรับหมุด</p></div>
+                </div>
+                <PlaceSearch onChoose={choosePlace} />
+                <SiteMap sites={sites} pin={pin} radiusMeters={draftRadius}
+                  focusSignal={mapFocusSignal} focusPoint={mapFocusPoint}
+                  onPin={selectPin} />
+              </section>
+              <form className="hr-card hr-site-form" onSubmit={createSite}>
+                <div className="hr-card-heading">
+                  <div><h3><span className="hr-step-number">2</span> รายละเอียดไซต์งาน</h3>
+                    <p>ระบุชื่อและรัศมีที่อนุญาตให้ตอกบัตรเข้า</p></div>
+                </div>
+                <label>ชื่อสถานที่
+                  <input name="name" required value={draftSiteName}
+                    onChange={event => setDraftSiteName(event.target.value)}
+                    placeholder="เช่น สำนักงานใหญ่" autoComplete="off" />
+                </label>
+                <label>รัศมีที่อนุญาต (เมตร)
+                  <input name="radius" type="number" value={draftRadius} min="1" max="100000"
+                    onChange={event => setDraftRadius(Number(event.target.value))} required />
+                </label>
+                <div className="hr-radius-presets" role="group" aria-label="เลือกรัศมีอย่างรวดเร็ว">
+                  {[50, 100, 200, 500].map(radius => <button type="button" key={radius}
+                    className={draftRadius === radius ? 'selected' : ''}
+                    aria-pressed={draftRadius === radius}
+                    onClick={() => setDraftRadius(radius)}>{radius} ม.</button>)}
+                </div>
+                <details className="hr-coordinate-details">
+                  <summary><Navigation size={15} /> ปรับพิกัดเอง <ChevronDown size={15} /></summary>
+                  <div className="hr-form-grid hr-coordinates">
+                    <label>ละติจูด<input inputMode="decimal" value={coordinateText.latitude}
+                      onChange={event => setCoordinateText(prev => ({ ...prev, latitude: event.target.value }))} /></label>
+                    <label>ลองจิจูด<input inputMode="decimal" value={coordinateText.longitude}
+                      onChange={event => setCoordinateText(prev => ({ ...prev, longitude: event.target.value }))} /></label>
+                  </div>
+                  <button type="button" className="hr-secondary" onClick={applyCoordinates}>
+                    <Navigation size={16} /> ใช้พิกัดนี้
+                  </button>
+                </details>
+                <div className="hr-inline-actions hr-site-submit">
+                  <button type="button" className="hr-secondary" onClick={() => setShowSiteForm(false)}>ยกเลิก</button>
+                  <button className="hr-primary" type="submit"><Plus size={18} /> บันทึกไซต์งาน</button>
+                </div>
+                <p className="hr-site-form__help">ข้อมูลจะอยู่เฉพาะระหว่างทดลองหน้านี้และหายเมื่อรีเฟรช</p>
+              </form>
             </div>
-            {geoError && <p role="alert" className="hr-error">{geoError}</p>}
-            <p className="hr-muted">การตอกออกไม่จำกัดไซต์ แต่ต้องได้รับพิกัด GPS ก่อนบันทึก:
-              {' '}{validateCheckOut({ latitude: pin.latitude, longitude: pin.longitude, accuracyMeters: 10 }).note}
-            </p>
-          </section>
+          </section>}
+          <details className="hr-card hr-disclosure hr-tool-disclosure">
+            <summary><span><Navigation size={19} /> ทดสอบ GPS ของอุปกรณ์</span><ChevronDown size={20} /></summary>
+            <div className="hr-gps-check hr-disclosure__form">
+              <p className="hr-muted">ตรวจว่า GPS ปัจจุบันอยู่ในรัศมีไซต์ที่เปิดใช้งานหรือไม่ — ไม่บันทึกเวลา</p>
+              <div className="hr-gps-check__controls">
+                <button className="hr-secondary" type="button" disabled={locating || !sites.some(site => site.enabled)}
+                  onClick={checkGps}><Navigation size={17} /> {locating ? 'กำลังตรวจ GPS...' : 'ตรวจ GPS ตอนนี้'}</button>
+                {geoResult && <p role="status" className={'hr-status-info hr-status-info--' + geoResult.status}>
+                  {geoResult.status === 'allowed' ? <CheckCircle2 size={19} /> : <XCircle size={19} />}
+                  {geoResult.note}{geoResult.site ? ' · ' + geoResult.site.name : ''}
+                  {geoResult.accuracyMeters !== null ? ' · คลาดเคลื่อน ±' + Math.round(geoResult.accuracyMeters) + ' ม.' : ''}
+                </p>}
+              </div>
+              {geoError && <p role="alert" className="hr-error">{geoError}</p>}
+              <p className="hr-muted">การตอกออกไม่จำกัดไซต์ แต่ต้องได้รับพิกัด GPS ก่อนบันทึก:
+                {' '}{validateCheckOut({ latitude: pin.latitude, longitude: pin.longitude, accuracyMeters: 10 }).note}
+              </p>
+            </div>
+          </details>
         </>}
         {tab === 'holidays' && <>
           <form className="hr-card hr-form" onSubmit={addHoliday}>
