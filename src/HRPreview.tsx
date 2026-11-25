@@ -1,41 +1,34 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import {
   ArrowLeft, BarChart3, CalendarDays, CalendarOff, CheckCircle2, ChevronDown,
   ChevronRight, ClipboardList, Clock3, FileSpreadsheet, Info, LayoutDashboard,
-  MapPin, Navigation, Plus, RefreshCcw, Search, ShieldCheck, Users, X, XCircle,
+  Plus, RefreshCcw, Search, ShieldCheck, Users, X,
 } from 'lucide-react';
 import {
   type AttendanceRecord, type DayShift, type Employee, type LeaveRequest,
-  type GeoReading, type LocationDecision, type Worksite,
   bangkokInstant, effectiveShift, latenessMinutes, leaveDays, monthlyTimecard,
   overtimeCycleBounds, sumOvertimeCycle, toThaiDate,
-  validateCheckIn,
 } from './domain/attendanceRules';
 import './hr-preview.css';
 import './hr-redesign.css';
-import './hr-sites-clean.css';
 import { exportLeaveA5 } from './exportLeaveExcel';
-import SiteMap from './SiteMap';
-import PlaceSearch from './PlaceSearch';
-import type { PlaceSearchResult } from './domain/placeSearch';
 
-type Tab = 'overview' | 'employees' | 'schedules' | 'sites' | 'holidays' | 'leave' | 'reports';
+type Tab = 'overview' | 'employees' | 'schedules' | 'holidays' | 'leave' | 'reports';
 type DemoLeave = LeaveRequest & { id: string; reviewedAt?: string };
 const primaryTabs: Tab[] = ['overview', 'leave', 'schedules', 'reports'];
-const setupTabs: Tab[] = ['employees', 'sites', 'holidays'];
+const setupTabs: Tab[] = ['employees', 'holidays'];
 const tabNames: Record<Tab, string> = {
-  overview: 'ภาพรวม', employees: 'พนักงาน', schedules: 'ตารางงาน', sites: 'สถานที่',
+  overview: 'ภาพรวม', employees: 'พนักงาน', schedules: 'ตารางงาน',
   holidays: 'วันหยุด', leave: 'การลา', reports: 'รายงาน',
 };
 const tabIcons = {
   overview: LayoutDashboard, employees: Users, schedules: CalendarDays,
-  sites: MapPin, holidays: CalendarOff, leave: ClipboardList, reports: BarChart3,
+  holidays: CalendarOff, leave: ClipboardList, reports: BarChart3,
 } as const;
 const tabDescriptions: Record<Tab, string> = {
   overview: 'สรุปสิ่งที่ต้องดูและรายการสำคัญในที่เดียว',
   employees: 'ข้อมูลพนักงาน แผนก และสถานะการทำงาน',
   schedules: 'กำหนดเวลางานตามบุคคลและแต่ละวัน',
-  sites: 'ปักหมุด กำหนดรัศมี และตรวจพื้นที่ตอกบัตร',
   holidays: 'วันหยุดบริษัทสำหรับการคำนวณตารางงานและการลา',
   leave: 'ตรวจสอบคำขอ อนุมัติ และส่งออกเอกสาร',
   reports: 'ตรวจเวลางาน การมาสาย และรอบสรุป OT',
@@ -67,12 +60,6 @@ export default function HRPreview() {
   const [employeeQuery, setEmployeeQuery] = useState('');
   const [openEmployeeId, setOpenEmployeeId] = useState<string | null>(null);
   const [showShiftForm, setShowShiftForm] = useState(false);
-  const [showSiteForm, setShowSiteForm] = useState(false);
-  const [siteStage, setSiteStage] = useState<'find' | 'confirm'>('find');
-  const [sitePinReady, setSitePinReady] = useState(false);
-  const [viewingSiteId, setViewingSiteId] = useState<string | null>(null);
-  const siteDialogRef = useRef<HTMLDivElement>(null);
-  const [draftSiteName, setDraftSiteName] = useState('');
   const [showHolidayForm, setShowHolidayForm] = useState(false);
   const [showLeaveForm, setShowLeaveForm] = useState(false);
   const [showPunchForm, setShowPunchForm] = useState(false);
@@ -84,14 +71,12 @@ export default function HRPreview() {
     setNotice('');
     setShowEmployeeForm(false);
     setShowShiftForm(false);
-    setShowSiteForm(false);
     setShowHolidayForm(false);
     setShowLeaveForm(false);
     setShowPunchForm(false);
     window.scrollTo({ top: 0 });
   };
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [sites, setSites] = useState<Worksite[]>([]);
   const [shifts, setShifts] = useState<{ employeeId: string; shift: DayShift }[]>([]);
   const [holidays, setHolidays] = useState<string[]>([]);
   const [leaves, setLeaves] = useState<DemoLeave[]>([]);
@@ -102,65 +87,6 @@ export default function HRPreview() {
   const [selectedEmployee, setSelectedEmployee] = useState('');
   const [workday, setWorkday] = useState(today);
   const [reportMonth, setReportMonth] = useState(today.slice(0, 7));
-  const [pin, setPin] = useState({ latitude: 13.7563, longitude: 100.5018 });
-  const [coordinateText, setCoordinateText] = useState({ latitude: '13.756300', longitude: '100.501800' });
-  const [draftRadius, setDraftRadius] = useState(100);
-  const [mapFocusSignal, setMapFocusSignal] = useState(0);
-  const [mapFocusPoint, setMapFocusPoint] = useState({ latitude: 13.7563, longitude: 100.5018 });
-  const closeSiteDialog = () => {
-    setShowSiteForm(false);
-    setViewingSiteId(null);
-    setSiteStage('find');
-    setSitePinReady(false);
-  };
-  const addSiteDialog = () => {
-    setViewingSiteId(null);
-    setDraftSiteName('');
-    setDraftRadius(100);
-    setSitePinReady(false);
-    setSiteStage('find');
-    setShowSiteForm(true);
-  };
-  const viewSiteDialog = (site: Worksite) => {
-    setViewingSiteId(site.id);
-    setDraftSiteName(site.name);
-    setDraftRadius(site.radiusMeters);
-    selectPin(site.latitude, site.longitude);
-    setMapFocusPoint({ latitude: site.latitude, longitude: site.longitude });
-    setMapFocusSignal(value => value + 1);
-    setSitePinReady(true);
-    setSiteStage('confirm');
-    setShowSiteForm(true);
-  };
-  const selectPin = (latitude: number, longitude: number) => {
-    setPin({ latitude, longitude });
-    setCoordinateText({ latitude: latitude.toFixed(6), longitude: longitude.toFixed(6) });
-    setSitePinReady(true);
-  };
-  const choosePlace = (place: PlaceSearchResult) => {
-    const point = { latitude: place.latitude, longitude: place.longitude };
-    selectPin(point.latitude, point.longitude);
-    if (place.title.trim()) setDraftSiteName(place.title);
-    setSiteStage('confirm');
-    setMapFocusPoint(point);
-    setMapFocusSignal(value => value + 1);
-    setNotice('');
-  };
-  const applyCoordinates = () => {
-    if (!coordinateText.latitude.trim() || !coordinateText.longitude.trim()) {
-      setNotice('กรุณากรอกพิกัดทั้งสองช่อง'); return;
-    }
-    const latitude = Number(coordinateText.latitude), longitude = Number(coordinateText.longitude);
-    if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || Math.abs(latitude) > 85 || Math.abs(longitude) > 180) {
-      setNotice('พิกัดไม่ถูกต้อง: ละติจูดไม่เกิน ±85 และลองจิจูดไม่เกิน ±180'); return;
-    }
-    selectPin(latitude, longitude);
-    setMapFocusPoint({ latitude, longitude });
-    setMapFocusSignal(v => v + 1);
-    setNotice('');
-  };
-  const [geoResult, setGeoResult] = useState<LocationDecision | null>(null);
-  const [geoError, setGeoError] = useState('');
   const [notice, setNotice] = useState('');
   const holidaySet = useMemo(() => new Set(holidays), [holidays]);
   const selected = employees.find(employee => employee.id === selectedEmployee) ?? null;
@@ -177,39 +103,6 @@ export default function HRPreview() {
   const filteredPunches = selected ? punches.filter(p => p.employeeId === selected.id) : [];
   const overrides = new Map(shifts.filter(s => s.employeeId === selected?.id).map(s => [s.shift.date, s.shift] as const));
   const overtime = sumOvertimeCycle(filteredPunches, year, month, holidaySet, selected?.workPattern, overrides);
-  useEffect(() => {
-    if (!showSiteForm) return;
-    const oldOverflow = document.body.style.overflow;
-    const oldFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    document.body.style.overflow = 'hidden';
-    const focusId = window.requestAnimationFrame(() => siteDialogRef.current?.focus());
-    const handleKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        closeSiteDialog();
-      }
-      if (event.key !== 'Tab' || !siteDialogRef.current) return;
-      const focusable = Array.from(siteDialogRef.current.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), summary, [tabindex="0"]'
-      )).filter(item => item.getClientRects().length > 0 && item.getAttribute('aria-hidden') !== 'true');
-      if (!focusable.length) return;
-      const first = focusable[0], last = focusable[focusable.length - 1];
-      if (event.shiftKey && (document.activeElement === first ||
-        document.activeElement === siteDialogRef.current)) {
-        event.preventDefault(); last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault(); first.focus();
-      }
-    };
-    document.addEventListener('keydown', handleKey);
-    return () => {
-      window.cancelAnimationFrame(focusId);
-      document.body.style.overflow = oldOverflow;
-      document.removeEventListener('keydown', handleKey);
-      if (oldFocus?.isConnected) oldFocus.focus();
-    };
-  }, [showSiteForm]);
-    const [locating, setLocating] = useState(false);
   const createEmployee = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget, data = new FormData(form);
@@ -245,39 +138,6 @@ export default function HRPreview() {
       { employeeId: selected.id, shift }]);
     setNotice('บันทึกตารางงานในโหมดทดลองแล้ว');
     setShowShiftForm(false);
-  };
-  const createSite = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const site: Worksite = {
-      id: nextId(), name: formString(data, 'name'), latitude: pin.latitude, longitude: pin.longitude,
-      radiusMeters: draftRadius, enabled: true,
-    };
-    if (!sitePinReady || !site.name || !Number.isFinite(site.radiusMeters) || site.radiusMeters <= 0 ||
-      !Number.isFinite(site.latitude) || Math.abs(site.latitude) > 90 ||
-      !Number.isFinite(site.longitude) || Math.abs(site.longitude) > 180) {
-      setNotice('กรุณากรอกชื่อและรัศมีที่ถูกต้อง'); return;
-    }
-    setSites(prev => [...prev, site]); setGeoResult(null);
-    setNotice('ปักหมุดตัวอย่างแล้ว สามารถเปิด–ปิดไซต์นี้ได้');
-    event.currentTarget.reset();
-    closeSiteDialog();
-    setDraftSiteName('');
-  };
-  const checkGps = () => {
-    if (!navigator.geolocation) { setGeoError('เบราว์เซอร์นี้ไม่รองรับ GPS'); return; }
-    setLocating(true); setGeoError(''); setGeoResult(null);
-    navigator.geolocation.getCurrentPosition(position => {
-      const geo: GeoReading = {
-        latitude: position.coords.latitude, longitude: position.coords.longitude,
-        accuracyMeters: position.coords.accuracy,
-      };
-      setGeoResult(validateCheckIn(geo, sites));
-      setLocating(false);
-    }, error => {
-      setGeoError(error.code === 1 ? 'ไม่ได้รับอนุญาตให้ใช้ตำแหน่ง' : 'ตรวจตำแหน่งไม่ได้ กรุณาลองใหม่');
-      setLocating(false);
-    }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 });
   };
   const addHoliday = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -454,11 +314,6 @@ export default function HRPreview() {
                 <span><strong>รายชื่อพนักงาน</strong><small>ดูข้อมูลและเพิ่มพนักงาน</small></span>
                 <ChevronRight size={19} />
               </button>
-              <button type="button" onClick={() => navigate('sites')}>
-                <span className="hr-task-icon"><MapPin size={22} /></span>
-                <span><strong>สถานที่ทำงาน</strong><small>ดูไซต์งานและกำหนดจุดตอกบัตร</small></span>
-                <ChevronRight size={19} />
-              </button>
             </div>
           </section>
           <div className="hr-section-head hr-section-head--overview">
@@ -466,7 +321,7 @@ export default function HRPreview() {
           </div>
           <div className="hr-stats">
             <article><Users /><strong>{employees.length}</strong><span>พนักงาน</span></article>
-            <article><MapPin /><strong>{sites.filter(site => site.enabled).length}</strong><span>ไซต์งานที่เปิด</span></article>
+            
             <article><ClipboardList /><strong>{pendingCount}</strong><span>คำขอลารอตรวจ</span></article>
             <article><Clock3 /><strong>{punches.length}</strong><span>รายการเวลา</span></article>
           </div>
@@ -633,157 +488,6 @@ export default function HRPreview() {
                 </tr>)}</tbody>
               </table></div>}
           </section>
-        </>}
-        {tab === 'sites' && <>
-          <section className="hr-card hr-sites-home">
-            <div className="hr-card-heading hr-card-heading--actions">
-              <div><h3>สถานที่ทำงาน</h3><p>ไซต์ที่อนุญาตให้พนักงานตอกบัตรเข้า</p></div>
-              <button type="button" className="hr-primary" onClick={addSiteDialog}>
-                <Plus size={18} /> เพิ่มสถานที่
-              </button>
-            </div>
-            {!sites.length ? <div className="hr-sites-blank">
-              <span className="hr-sites-blank__icon"><MapPin size={29} /></span>
-              <strong>ยังไม่มีสถานที่ทำงาน</strong>
-              <p>กดเพิ่มสถานที่ แล้วค้นหาชื่อหรือเลือกตำแหน่งบนแผนที่</p>
-
-            </div> : <div className="hr-site-list">
-              {sites.map(site => <div className="hr-site-row" key={site.id}>
-                <span className="hr-site-row__symbol"><MapPin size={21} /></span>
-                <div className="hr-site-row__main">
-                  <strong>{site.name}</strong>
-                  <span>รัศมี {site.radiusMeters} เมตร</span>
-                </div>
-                <span className={'hr-site-row__status ' + (site.enabled ? 'is-enabled' : 'is-disabled')}>
-                  <span />{site.enabled ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}
-                </span>
-                <div className="hr-site-row__actions">
-                  <button type="button" className="hr-secondary" onClick={() => viewSiteDialog(site)}>
-                    ดูตำแหน่ง
-                  </button>
-                  <button type="button" className="hr-site-row__toggle" onClick={() =>
-                    setSites(current => current.map(entry => entry.id === site.id
-                      ? { ...entry, enabled: !entry.enabled } : entry))
-                  }>{site.enabled ? 'ปิดไซต์' : 'เปิดไซต์'}</button>
-                </div>
-              </div>)}
-            </div>}
-            <details className="hr-site-tools">
-              <summary>ตรวจสอบ GPS (สำหรับทดสอบ) <ChevronDown size={16} /></summary>
-              <div className="hr-site-tools__body">
-                <p>ตรวจสอบว่าอุปกรณ์อยู่ในรัศมีไซต์งานที่เปิดใช้งานหรือไม่ — ไม่บันทึกเวลาจริง</p>
-                <button type="button" className="hr-secondary" disabled={locating || !sites.some(site => site.enabled)}
-                  onClick={checkGps}><Navigation size={17} /> {locating ? 'กำลังตรวจ GPS...' : 'ตรวจ GPS'}</button>
-                {geoResult && <p role="status" className={'hr-status-info hr-status-info--' + geoResult.status}>
-                  {geoResult.status === 'allowed' ? <CheckCircle2 size={19} /> : <XCircle size={19} />}
-                  {geoResult.note}{geoResult.site ? ' · ' + geoResult.site.name : ''}
-                  {geoResult.accuracyMeters !== null ? ' · คลาดเคลื่อน ±' + Math.round(geoResult.accuracyMeters) + ' ม.' : ''}
-                </p>}
-                {geoError && <p role="alert" className="hr-error">{geoError}</p>}
-              </div>
-            </details>
-          </section>
-          {showSiteForm && <div className="hr-site-dialog-layer">
-            <div className="hr-site-dialog" role="dialog" aria-modal="true"
-              aria-labelledby="hr-site-dialog-title" ref={siteDialogRef} tabIndex={-1}>
-              <div className="hr-site-dialog__header">
-                <div>
-                  <span className="hr-site-dialog__eyebrow">{viewingSiteId ? 'รายละเอียดสถานที่' : 'เพิ่มสถานที่ทำงาน'}</span>
-                  <h2 id="hr-site-dialog-title">{viewingSiteId
-                    ? draftSiteName : siteStage === 'find' ? 'ค้นหาสถานที่' : 'ตรวจสอบตำแหน่ง'}</h2>
-                  {!viewingSiteId && <p>{siteStage === 'find'
-                    ? 'พิมพ์ชื่อสถานที่ หรือเลือกตำแหน่งบนแผนที่เอง'
-                    : 'ตรวจสอบหมุด ตั้งชื่อ และเลือกระยะที่อนุญาต'}</p>}
-                </div>
-                <button type="button" className="hr-icon-button" aria-label="ปิดหน้าต่างสถานที่"
-                  onClick={closeSiteDialog}><X size={21} /></button>
-              </div>
-              {!viewingSiteId && <div className="hr-site-dialog__steps" aria-label="ขั้นตอนเพิ่มสถานที่">
-                <span className={siteStage === 'find' ? 'active' : 'complete'}>1. เลือกสถานที่</span>
-                <ChevronRight size={15} />
-                <span className={siteStage === 'confirm' ? 'active' : ''}>2. ตรวจสอบและบันทึก</span>
-              </div>}
-              <div className="hr-site-dialog__body">
-                {siteStage === 'find' && !viewingSiteId && <div className="hr-site-find">
-                  <PlaceSearch onChoose={choosePlace} />
-                  <div className="hr-site-find__manual">
-                    <span>หรือเลือกตำแหน่งด้วยตัวเอง</span>
-                    <button type="button" className="hr-secondary" onClick={() => {
-                      setSitePinReady(false);
-                      setSiteStage('confirm');
-                    }}><MapPin size={18} /> เปิดแผนที่เพื่อปักหมุด</button>
-                  </div>
-                </div>}
-                {siteStage === 'confirm' && <div className="hr-site-confirm">
-                  <section className={'hr-site-confirm__map' + (!sitePinReady ? ' is-unselected' : '')}>
-                    {!viewingSiteId && <div className="hr-site-confirm__bar">
-                      <button type="button" className="hr-site-back" onClick={() => setSiteStage('find')}>
-                        <ArrowLeft size={16} /> กลับไปค้นหา
-                      </button>
-                      <span>แตะหรือลากหมุดเพื่อปรับตำแหน่ง</span>
-                    </div>}
-                    <SiteMap
-                      sites={sites.filter(site => site.id !== viewingSiteId)}
-                      pin={pin} radiusMeters={draftRadius} showDraft={sitePinReady}
-                      readOnly={Boolean(viewingSiteId)} focusSignal={mapFocusSignal} focusPoint={mapFocusPoint}
-                      onPin={selectPin} />
-                  </section>
-                  {viewingSiteId ? <section className="hr-site-confirm__details">
-                    <h3>ข้อมูลสถานที่</h3>
-                    <div className="hr-site-view-fact"><span>ชื่อสถานที่</span><strong>{draftSiteName}</strong></div>
-                    <div className="hr-site-view-fact"><span>รัศมี</span><strong>{draftRadius} เมตร</strong></div>
-                    <div className="hr-site-view-fact"><span>พิกัด</span>
-                      <strong>{pin.latitude.toFixed(6)}, {pin.longitude.toFixed(6)}</strong></div>
-                    <p className="hr-site-muted">การดูแผนที่ไม่เปลี่ยนตำแหน่งหรือข้อมูลที่บันทึกไว้</p>
-                    <button type="button" className="hr-primary" onClick={closeSiteDialog}>เสร็จสิ้น</button>
-                  </section> : <form className="hr-site-confirm__details" onSubmit={createSite}>
-                    <h3>รายละเอียดสถานที่</h3>
-                    <label>ชื่อสถานที่
-                      <input name="name" required value={draftSiteName} autoComplete="off"
-                        onChange={event => setDraftSiteName(event.target.value)}
-                        placeholder="เช่น สำนักงานใหญ่" />
-                    </label>
-                    <label>รัศมีตอกบัตรเข้า
-                      <input name="radius" type="number" value={draftRadius}
-                        min="1" max="100000" required
-                        onChange={event => setDraftRadius(Number(event.target.value))} />
-                    </label>
-                    <div className="hr-site-radius-picks" role="group" aria-label="เลือกรัศมี">
-                      {[50, 100, 200, 500].map(meters => <button type="button" key={meters}
-                        className={draftRadius === meters ? 'active' : ''}
-                        aria-pressed={draftRadius === meters}
-                        onClick={() => setDraftRadius(meters)}>{meters} ม.</button>)}
-                    </div>
-                    <details className="hr-site-precise">
-                      <summary>กำหนดพิกัดเอง <ChevronDown size={16} /></summary>
-                      <div className="hr-form-grid hr-coordinates">
-                        <label>ละติจูด<input inputMode="decimal" value={coordinateText.latitude}
-                          onChange={event => setCoordinateText(prev =>
-                            ({ ...prev, latitude: event.target.value }))} /></label>
-                        <label>ลองจิจูด<input inputMode="decimal" value={coordinateText.longitude}
-                          onChange={event => setCoordinateText(prev =>
-                            ({ ...prev, longitude: event.target.value }))} /></label>
-                      </div>
-                      <button type="button" className="hr-secondary" onClick={applyCoordinates}>
-                        <Navigation size={16} /> ใช้พิกัดนี้
-                      </button>
-                    </details>
-                    {!sitePinReady && <p className="hr-site-required">
-                      <Info size={16} /> แตะแผนที่เพื่อเลือกจุดตอกบัตรก่อนบันทึก
-                    </p>}
-                    <div className="hr-site-dialog__footer">
-                      <button type="button" className="hr-secondary" onClick={closeSiteDialog}>ยกเลิก</button>
-                      <button type="submit" className="hr-primary"
-                        disabled={!sitePinReady || !draftSiteName.trim() || !Number.isFinite(draftRadius) || draftRadius <= 0}>
-                        บันทึกสถานที่
-                      </button>
-                    </div>
-                    <p className="hr-site-muted">ข้อมูลทดลองจะหายเมื่อรีเฟรชหน้าเว็บ</p>
-                  </form>}
-                </div>}
-              </div>
-            </div>
-          </div>}
         </>}
         {tab === 'holidays' && <>
           {!showHolidayForm && <section className="hr-card hr-list-card">
