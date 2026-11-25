@@ -716,35 +716,93 @@ export default function HRPreview() {
           <p className="hr-helper-note">ปฏิทินบริษัทจาก Google Calendar ยังไม่ได้เชื่อมต่อ — รายการนี้เป็นข้อมูลทดลองเท่านั้น</p>
         </>}
         {tab === 'leave' && <>
-          <details className="hr-card hr-disclosure"><summary><span><Plus size={19} /> สร้างใบลาทดลอง</span><ChevronDown size={20} /></summary>
-            <form className="hr-form hr-disclosure__form" onSubmit={createLeave}>
-            <div className="hr-form-grid">
-              <label>พนักงาน<select name="employeeId" required><option value="">เลือกพนักงาน</option>
-                {employees.map(e => <option key={e.id} value={e.id}>{e.code} — {e.firstName}</option>)}</select></label>
-              <label>ประเภทการลา<select name="type">{sampleLeaveTypes.map(t => <option key={t}>{t}</option>)}</select></label>
-              <label>เริ่มลา<input name="startDate" type="date" defaultValue={today} required /></label>
-              <label>สิ้นสุด<input name="endDate" type="date" defaultValue={today} required /></label>
-              <label>ระยะเวลา<select name="portion">
-                <option value="full">เต็มวัน</option><option value="morning">ครึ่งวันเช้า</option>
-                <option value="afternoon">ครึ่งวันบ่าย</option>
-              </select></label>
-              <label>หมายเหตุ<input name="reason" /></label>
-            </div><button type="submit" className="hr-primary" disabled={!employees.length}><Plus size={18} /> สร้างคำขอทดลอง</button></form>
-          </details>
-          <div className="hr-card"><h3>คำขอทั้งหมด ({leaves.length})</h3>
-            {!leaves.length ? <p>ยังไม่มีคำขอตัวอย่าง และยังไม่เชื่อมใบลาจริงจากหน้าพนักงาน</p> :
-              <div className="hr-table-wrap"><table><thead><tr><th>พนักงาน</th><th>ประเภท</th><th>ช่วงวันที่</th><th>สถานะ</th><th>อนุมัติ</th></tr></thead>
-                <tbody>{leaves.map(l => <tr key={l.id}>
-                  <td>{selectedName(l.employeeId)}</td><td>{l.type}</td>
-                  <td>{prettyDate(l.startDate)} – {prettyDate(l.endDate)}<small>{l.portion === 'full' ? 'เต็มวัน' : l.portion === 'morning' ? 'ครึ่งวันเช้า' : 'ครึ่งวันบ่าย'}</small></td>
-                  <td>{l.status === 'pending' ? 'รออนุมัติ' : l.status === 'approved' ? 'อนุมัติแล้ว' : 'ไม่อนุมัติ'}</td>
-                  <td>{l.status === 'pending' && <>
-                    <button type="button" className="hr-text-button" onClick={() => setLeaves(p => p.map(x => x.id === l.id ? { ...x, status: 'approved', reviewedAt: new Date().toISOString() } : x))}>อนุมัติ</button>
-                    <button type="button" className="hr-text-button" onClick={() => setLeaves(p => p.map(x => x.id === l.id ? { ...x, status: 'rejected', reviewedAt: new Date().toISOString() } : x))}>ไม่อนุมัติ</button>
-                  </>}
-                    <button type="button" className="hr-text-button" onClick={() => { void downloadLeave(l); }}>Excel A5</button>
+          <section className="hr-card hr-list-card">
+            <div className="hr-card-heading hr-card-heading--actions">
+              <div><h3>จัดการคำขอลา</h3><p>ตรวจใบลาที่รออนุมัติก่อน แล้วค่อยดูรายการย้อนหลัง</p></div>
+              <button type="button" className="hr-secondary" onClick={() => setShowLeaveForm(true)}>
+                <Plus size={18} /> สร้างใบลาทดลอง
+              </button>
+            </div>
+            <div className="hr-filter-tabs" role="group" aria-label="กรองสถานะใบลา">
+              <button type="button" className={leaveFilter === 'pending' ? 'active' : ''}
+                aria-pressed={leaveFilter === 'pending'} onClick={() => setLeaveFilter('pending')}>
+                รออนุมัติ <span>{pendingCount}</span>
+              </button>
+              <button type="button" className={leaveFilter === 'all' ? 'active' : ''}
+                aria-pressed={leaveFilter === 'all'} onClick={() => setLeaveFilter('all')}>
+                ทั้งหมด <span>{leaves.length}</span>
+              </button>
+            </div>
+            {!filteredLeaves.length ? <div className="hr-empty-state hr-empty-state--large">
+              <ClipboardList size={30} />
+              <strong>{leaveFilter === 'pending' ? 'ไม่มีใบลาที่รออนุมัติ' : 'ยังไม่มีคำขอลาทดลอง'}</strong>
+              <p>{leaveFilter === 'pending' ? 'คำขอที่อนุมัติแล้วอยู่ในแท็บทั้งหมด' :
+                'เมื่อมีคำขอลา รายการจะแสดงที่นี่เพื่อให้ตรวจสอบได้'}</p>
+              {leaveFilter === 'pending' && leaves.length > 0 &&
+                <button type="button" className="hr-secondary" onClick={() => setLeaveFilter('all')}>ดูใบลาทั้งหมด</button>}
+            </div> : <div className="hr-table-wrap">
+              <table><thead><tr><th>พนักงาน</th><th>ประเภท</th><th>ช่วงวันที่</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+                <tbody>{filteredLeaves.map(request => <tr key={request.id}>
+                  <td><strong className="hr-table-main">{selectedName(request.employeeId)}</strong></td>
+                  <td>{request.type}</td>
+                  <td>{prettyDate(request.startDate)} – {prettyDate(request.endDate)}
+                    <small>{request.portion === 'full' ? 'เต็มวัน' : request.portion === 'morning' ? 'ครึ่งวันเช้า' : 'ครึ่งวันบ่าย'}</small>
                   </td>
-                </tr>)}</tbody></table></div>}</div>
+                  <td><span className={'hr-leave-status hr-leave-status--' + request.status}>
+                    {request.status === 'pending' ? 'รออนุมัติ' :
+                      request.status === 'approved' ? 'อนุมัติแล้ว' : 'ไม่อนุมัติ'}</span></td>
+                  <td className="hr-table-actions">
+                    {request.status === 'pending' && <>
+                      <button type="button" className="hr-text-button hr-text-button--approve"
+                        onClick={() => setLeaves(prev => prev.map(item => item.id === request.id
+                          ? { ...item, status: 'approved', reviewedAt: new Date().toISOString() } : item))}>
+                        <CheckCircle2 size={15} /> อนุมัติ
+                      </button>
+                      <button type="button" className="hr-text-button hr-text-button--reject"
+                        onClick={() => setLeaves(prev => prev.map(item => item.id === request.id
+                          ? { ...item, status: 'rejected', reviewedAt: new Date().toISOString() } : item))}>
+                        ไม่อนุมัติ
+                      </button>
+                    </>}
+                    <button type="button" className="hr-text-button" onClick={() => { void downloadLeave(request); }}>
+                      <FileSpreadsheet size={15} /> Excel A5
+                    </button>
+                  </td>
+                </tr>)}</tbody>
+              </table>
+            </div>}
+          </section>
+          {showLeaveForm && <section className="hr-card hr-edit-panel">
+            <div className="hr-card-heading hr-card-heading--actions">
+              <div><h3>สร้างใบลาทดลอง</h3><p>ใช้สำหรับตรวจหน้าจอการอนุมัติ — ไม่ส่งคำขอจริง</p></div>
+              <button type="button" className="hr-icon-button" aria-label="ปิดฟอร์มสร้างใบลา"
+                onClick={() => setShowLeaveForm(false)}><X size={20} /></button>
+            </div>
+            <form className="hr-form" onSubmit={createLeave}>
+              <div className="hr-form-grid">
+                <label>พนักงาน<select name="employeeId" required>
+                  <option value="">เลือกพนักงาน</option>
+                  {employees.map(employee => <option key={employee.id} value={employee.id}>
+                    {employee.code} — {employee.firstName}</option>)}
+                </select></label>
+                <label>ประเภทการลา<select name="type">
+                  {sampleLeaveTypes.map(type => <option key={type}>{type}</option>)}
+                </select></label>
+                <label>เริ่มลา<input name="startDate" type="date" defaultValue={today} required /></label>
+                <label>สิ้นสุด<input name="endDate" type="date" defaultValue={today} required /></label>
+                <label>ระยะเวลา<select name="portion">
+                  <option value="full">เต็มวัน</option><option value="morning">ครึ่งวันเช้า</option>
+                  <option value="afternoon">ครึ่งวันบ่าย</option>
+                </select></label>
+                <label>หมายเหตุ<input name="reason" /></label>
+              </div>
+              <div className="hr-inline-actions">
+                <button type="button" className="hr-secondary" onClick={() => setShowLeaveForm(false)}>ยกเลิก</button>
+                <button type="submit" className="hr-primary" disabled={!employees.length}>สร้างใบลา</button>
+              </div>
+              {!employees.length && <p className="hr-muted">ต้องเพิ่มพนักงานในหน้าพนักงานก่อน</p>}
+            </form>
+          </section>}
         </>}
         {tab === 'reports' && <>
           <div className="hr-card">
