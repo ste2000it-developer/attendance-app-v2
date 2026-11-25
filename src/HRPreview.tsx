@@ -256,6 +256,8 @@ export default function HRPreview() {
     }
     setPunches(prev => [...prev.filter(p => p.employeeId !== selected.id || p.date !== date), record]);
     setNotice('เพิ่มข้อมูลตอกบัตรเพื่อทดสอบรายงานเท่านั้น');
+    setReportMonth(date.slice(0, 7));
+    setReportLevel('month');
     setShowPunchForm(false);
   };
   const downloadLeave = async (request: DemoLeave) => {
@@ -805,36 +807,92 @@ export default function HRPreview() {
           </section>}
         </>}
         {tab === 'reports' && <>
-          <div className="hr-card">
-            <div className="hr-form-grid">
-              <label>พนักงาน<select value={selectedEmployee} onChange={e => setSelectedEmployee(e.target.value)}>
-                <option value="">เลือกพนักงาน</option>{employees.map(e => <option key={e.id} value={e.id}>{e.code} — {e.firstName}</option>)}
+          <section className="hr-card hr-report-picker">
+            <div className="hr-card-heading">
+              <div><h3>รายงานเวลาเข้า–ออก</h3><p>เลือกพนักงาน แล้วดูจากรายปีไปยังรายเดือนและรายวัน</p></div>
+            </div>
+            <div className="hr-form-grid hr-form-grid--two">
+              <label>พนักงาน<select value={selectedEmployee} onChange={event => {
+                setSelectedEmployee(event.target.value);
+                setReportLevel('year');
+              }}>
+                <option value="">เลือกพนักงาน</option>
+                {employees.map(employee => <option key={employee.id} value={employee.id}>
+                  {employee.code} — {employee.firstName}</option>)}
               </select></label>
-              <label>รอบ OT เริ่มวันที่ 25<input type="month" value={reportMonth} onChange={e => { if (e.target.value) setReportMonth(e.target.value); }} /></label>
             </div>
-            <p>รอบ {prettyDate(overtimeCycleBounds(year, month).from)} – {prettyDate(overtime.through)}</p>
-            <div className="hr-stats">
-              <article><Clock3 /><strong>{formatMinutes(overtime.minutes)}</strong><span>OT ที่คำนวณได้</span></article>
-              <article><Info /><strong>{overtime.missingCheckoutCount}</strong><span>ยังไม่มีเวลาเข้า/ออกครบ</span></article>
-              <article><ShieldCheck /><strong>{overtime.pendingHrReviewCount}</strong><span>รอ HR ตรวจสอบ</span></article>
+            <div className="hr-report-breadcrumb" aria-label="ระดับรายงาน">
+              <button type="button" aria-current={reportLevel === 'year' ? 'step' : undefined}
+                onClick={() => setReportLevel('year')}>รายปี {year}</button>
+              {reportLevel !== 'year' && <>
+                <ChevronRight size={16} />
+                <button type="button" aria-current={reportLevel === 'month' ? 'step' : undefined}
+                  onClick={() => setReportLevel('month')}>เดือน {month}</button>
+              </>}
+              {reportLevel === 'day' && <>
+                <ChevronRight size={16} />
+                <span>วันที่ {prettyDate(reportDay)}</span>
+              </>}
             </div>
-          </div>
-          <details className="hr-card hr-disclosure"><summary><span><Plus size={19} /> เพิ่มเวลาตอกบัตรเพื่อทดสอบ</span><ChevronDown size={20} /></summary>
-            <form className="hr-form hr-disclosure__form" onSubmit={addPunch}>
-            <div className="hr-form-grid">
-              <label>วันทำงาน<input name="date" type="date" defaultValue={today} required /></label>
-              <label>เวลาเข้า<input name="inTime" type="time" /></label>
-              <label>เวลาออก<input name="outTime" type="time" /></label>
-              <label className="hr-check"><input name="nextDay" type="checkbox" /> เวลาออกเป็นวันถัดไป</label>
-              <label className="hr-check"><input name="manual" type="checkbox" /> พนักงานกรอกย้อนหลัง (รอ HR ตรวจ)</label>
+          </section>
+          {reportLevel === 'year' && <section className="hr-card hr-list-card">
+            <div className="hr-card-heading hr-card-heading--actions">
+              <div><h3>เลือกรายเดือน</h3><p>เลือกเดือนเพื่อดูบัตรตอกเวลาและรอบ OT</p></div>
+              <label className="hr-year-field">ปี (ค.ศ.)
+                <input type="number" min="2020" max="2100" value={year}
+                  aria-label="ปีของรายงาน" onChange={event => {
+                    const nextYear = Number(event.target.value);
+                    if (Number.isInteger(nextYear) && nextYear >= 2020 && nextYear <= 2100) {
+                      setReportMonth(String(nextYear) + '-01');
+                    }
+                  }} />
+              </label>
             </div>
-            <button className="hr-primary" type="submit" disabled={!selected}><Plus size={18} /> เพิ่มรายการเพื่อทดสอบ</button></form>
-          </details>
-          <div className="hr-card"><h3>บัตรตอกเวลารายเดือน (ตัวอย่าง)</h3>
-            <p className="hr-muted">แสดงทุกวันของเดือนรวมวันหยุด ไม่มีการเดาเวลาออก</p>
-            {!selected ? <p>เลือกพนักงานก่อน</p> : <div className="hr-table-wrap">
-              <table><thead><tr><th>วันที่</th><th>เข้า</th><th>ออก</th><th>สาย</th><th>OT</th></tr></thead>
-                <tbody>{monthlyTimecard(year, month, filteredPunches).map(row => {
+            {!selected && <p className="hr-muted">เลือกพนักงานด้านบนเพื่อดูข้อมูลรายปี</p>}
+            <div className="hr-year-months" role="group" aria-label="เลือกเดือนรายงาน">
+              {Array.from({ length: 12 }, (_, index) => {
+                const currentMonth = String(index + 1).padStart(2, '0');
+                const count = selected ? filteredPunches.filter(record =>
+                  record.date.startsWith(String(year) + '-' + currentMonth)).length : 0;
+                return <button type="button" key={currentMonth} onClick={() => {
+                  setReportMonth(String(year) + '-' + currentMonth);
+                  setReportLevel('month');
+                }}>
+                  <CalendarDays size={20} />
+                  <strong>{new Intl.DateTimeFormat('th-TH', { month: 'long', timeZone: 'Asia/Bangkok' })
+                    .format(new Date(Date.UTC(year, index, 1)))}</strong>
+                  <small>{count ? count + ' รายการเวลา' : 'ยังไม่มีข้อมูล'}</small>
+                  <ChevronRight size={16} />
+                </button>;
+              })}
+            </div>
+          </section>}
+          {reportLevel === 'month' && <>
+            <section className="hr-card hr-report-summary">
+              <div className="hr-card-heading hr-card-heading--actions">
+                <div><h3>รายงานประจำเดือน</h3><p>รอบ OT {prettyDate(overtimeCycleBounds(year, month).from)} – {prettyDate(overtime.through)}</p></div>
+                <label className="hr-month-field">เดือน
+                  <input type="month" value={reportMonth} onChange={event => {
+                    if (event.target.value) setReportMonth(event.target.value);
+                  }} />
+                </label>
+              </div>
+              <div className="hr-stats">
+                <article><Clock3 /><strong>{formatMinutes(overtime.minutes)}</strong><span>OT ทดลอง</span></article>
+                <article><Info /><strong>{overtime.missingCheckoutCount}</strong><span>ข้อมูลเข้า–ออกไม่ครบ</span></article>
+                <article><ShieldCheck /><strong>{overtime.pendingHrReviewCount}</strong><span>รอ HR ตรวจ</span></article>
+              </div>
+            </section>
+            <section className="hr-card hr-list-card">
+              <div className="hr-card-heading hr-card-heading--actions">
+                <div><h3>บัตรตอกเวลารายวัน</h3><p>กดวันที่เพื่อดูรายละเอียด · แสดงทุกวันรวมวันหยุด</p></div>
+                <button type="button" className="hr-secondary" disabled={!selected}
+                  onClick={() => setShowPunchForm(true)}><Plus size={17} /> เพิ่มเวลาทดลอง</button>
+              </div>
+              {!selected ? <div className="hr-empty-state"><Users size={25} />
+                <strong>เลือกพนักงานก่อน</strong></div> : <div className="hr-table-wrap">
+                <table><thead><tr><th>วันที่</th><th>เข้า</th><th>ออก</th><th>สาย (นาที)</th><th>OT</th></tr></thead>
+                  <tbody>{monthlyTimecard(year, month, filteredPunches).map(row => {
                   const shift = effectiveShift(row.date, selected.workPattern, holidaySet,
                     shifts.find(s => s.employeeId === selected.id && s.shift.date === row.date)?.shift);
                   const otResult = row.record && row.checkOut
@@ -844,7 +902,10 @@ export default function HRPreview() {
                   const originalLate = row.record ? latenessMinutes(row.record.checkIn, shift) : null;
                   const late = row.record ? latenessMinutes(row.record.checkIn, shift, Boolean(lateExemptions[row.record.id])) : null;
                   return <tr key={row.date}>
-                    <td>{prettyDate(row.date)}</td>
+                    <td><button type="button" className="hr-date-link" onClick={() => {
+                      setReportDay(row.date);
+                      setReportLevel('day');
+                    }}>{prettyDate(row.date)} <ChevronRight size={15} /></button></td>
                     <td>{row.checkIn ? new Date(row.checkIn).toLocaleTimeString('en-GB', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit' }) : '✎'}</td>
                     <td>{row.checkOut ? new Date(row.checkOut).toLocaleTimeString('en-GB', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit' }) : '✎'}</td>
                     <td>{late ?? '—'}
@@ -877,14 +938,53 @@ export default function HRPreview() {
                     </td>
                   </tr>;
                 })}</tbody>
-              </table>
-            </div>}
-          </div>
-          <div className="hr-card hr-status-info"><FileSpreadsheet size={20} />
-            ส่งออกใบลา Excel A5 ทดลองได้จากแท็บการลา ส่วน Excel รายงานจริงและสิทธิ์ HR รอการเชื่อมระบบจัดเก็บที่ปลอดภัย
-          </div>
+                </table>
+              </div>}
+            </section>
+            {showPunchForm && <section className="hr-card hr-edit-panel">
+              <div className="hr-card-heading hr-card-heading--actions">
+                <div><h3>เพิ่มข้อมูลเวลาเพื่อทดสอบ</h3><p>ข้อมูลตัวอย่าง ไม่บันทึกการตอกบัตรจริง</p></div>
+                <button type="button" className="hr-icon-button" aria-label="ปิดฟอร์มเพิ่มเวลา"
+                  onClick={() => setShowPunchForm(false)}><X size={20} /></button>
+              </div>
+              <form className="hr-form" onSubmit={addPunch}>
+                <div className="hr-form-grid">
+                  <label>วันทำงาน<input name="date" type="date" defaultValue={today} required /></label>
+                  <label>เวลาเข้า<input name="inTime" type="time" /></label>
+                  <label>เวลาออก<input name="outTime" type="time" /></label>
+                  <label className="hr-check"><input name="nextDay" type="checkbox" /> เวลาออกเป็นวันถัดไป</label>
+                  <label className="hr-check"><input name="manual" type="checkbox" /> พนักงานกรอกย้อนหลัง (รอ HR ตรวจ)</label>
+                </div>
+                <div className="hr-inline-actions">
+                  <button type="button" className="hr-secondary" onClick={() => setShowPunchForm(false)}>ยกเลิก</button>
+                  <button type="submit" className="hr-primary" disabled={!selected}>เพิ่มรายการทดสอบ</button>
+                </div>
+              </form>
+            </section>}
+          </>}
+          {reportLevel === 'day' && <section className="hr-card hr-day-details">
+            <div className="hr-card-heading hr-card-heading--actions">
+              <div><h3>รายละเอียดวันที่ {prettyDate(reportDay)}</h3>
+                <p>{selected ? selected.firstName + ' ' + selected.lastName : 'กรุณาเลือกพนักงาน'}</p></div>
+              <button type="button" className="hr-secondary" onClick={() => setReportLevel('month')}>
+                <ArrowLeft size={16} /> กลับรายเดือน
+              </button>
+            </div>
+            {(() => {
+              const record = filteredPunches.find(item => item.date === reportDay);
+              const time = (value: string | null | undefined) => value
+                ? new Date(value).toLocaleTimeString('en-GB', { timeZone: 'Asia/Bangkok',
+                  hour: '2-digit', minute: '2-digit' }) : '—';
+              return <div className="hr-day-grid">
+                <div><span>เวลาเข้า</span><strong>{time(record?.checkIn)}</strong></div>
+                <div><span>เวลาออก</span><strong>{time(record?.checkOut)}</strong></div>
+                <div><span>ข้อมูล</span><strong>{record ? 'มีรายการทดลอง' : 'ยังไม่มีรายการ'}</strong></div>
+              </div>;
+            })()}
+          </section>}
+          <p className="hr-helper-note">รายงานและเวลาที่แสดงเป็นข้อมูลทดลองจากหน้านี้ ยังไม่เชื่อมการลงเวลาจริงหรือระบบส่งออก Excel รายงาน</p>
         </>}
-          </main>
+                  </main>
           <footer className="hr-footer"><RefreshCcw size={15} /> ข้อมูลทดลองจะถูกล้างเมื่อรีเฟรชหน้าเว็บ</footer>
         </div>
       </div>
