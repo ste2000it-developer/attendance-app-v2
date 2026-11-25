@@ -679,15 +679,41 @@ export default function HRPreview() {
           </details>
         </>}
         {tab === 'holidays' && <>
-          <form className="hr-card hr-form" onSubmit={addHoliday}>
-            <label>เพิ่มวันหยุดทดลอง<input type="date" name="holiday" defaultValue={today} required /></label>
-            <button className="hr-primary" type="submit"><Plus size={18} /> เพิ่มวันหยุด</button>
-          </form>
-          <section className="hr-card"><h3>วันหยุด ({holidays.length})</h3>
-            {!holidays.length ? <p>ยังไม่มีวันหยุดทดลอง</p> :
-              <div className="hr-holidays">{holidays.map(date => <div key={date}><span>{prettyDate(date)}</span>
-                <button type="button" onClick={() => setHolidays(v => v.filter(x => x !== date))}>ลบ</button>
-              </div>)}</div>}</section>
+          <section className="hr-card hr-list-card">
+            <div className="hr-card-heading hr-card-heading--actions">
+              <div><h3>วันหยุดบริษัท</h3><p>ตรวจสอบวันหยุดที่ใช้กับตารางงานและการลา</p></div>
+              <button type="button" className="hr-primary" onClick={() => setShowHolidayForm(true)}>
+                <Plus size={18} /> เพิ่มวันหยุด
+              </button>
+            </div>
+            {!holidays.length ? <div className="hr-empty-state hr-empty-state--large">
+              <CalendarOff size={30} /><strong>ยังไม่มีวันหยุดบริษัทในตัวอย่าง</strong>
+              <p>เพิ่มวันที่ต้องการเพื่อใช้คำนวณตารางงานทดลอง</p>
+            </div> : <div className="hr-holiday-list">
+              {holidays.map(date => <div key={date}>
+                <span><CalendarDays size={18} /> {prettyDate(date)}</span>
+                <button type="button" className="hr-text-button" onClick={() =>
+                  setHolidays(current => current.filter(item => item !== date))}>ลบวันหยุด</button>
+              </div>)}
+            </div>}
+          </section>
+          {showHolidayForm && <section className="hr-card hr-edit-panel">
+            <div className="hr-card-heading hr-card-heading--actions">
+              <div><h3>เพิ่มวันหยุด</h3><p>เลือกวันที่ต้องการเพิ่มในปฏิทินบริษัทตัวอย่าง</p></div>
+              <button type="button" className="hr-icon-button" aria-label="ปิดฟอร์มวันหยุด"
+                onClick={() => setShowHolidayForm(false)}><X size={20} /></button>
+            </div>
+            <form className="hr-form" onSubmit={addHoliday}>
+              <div className="hr-form-grid hr-form-grid--two">
+                <label>วันที่<input type="date" name="holiday" defaultValue={today} required /></label>
+              </div>
+              <div className="hr-inline-actions">
+                <button type="button" className="hr-secondary" onClick={() => setShowHolidayForm(false)}>ยกเลิก</button>
+                <button type="submit" className="hr-primary"><Plus size={18} /> บันทึกวันหยุด</button>
+              </div>
+            </form>
+          </section>}
+          <p className="hr-helper-note">ปฏิทินบริษัทจาก Google Calendar ยังไม่ได้เชื่อมต่อ — รายการนี้เป็นข้อมูลทดลองเท่านั้น</p>
         </>}
         {tab === 'leave' && <>
           <details className="hr-card hr-disclosure"><summary><span><Plus size={19} /> สร้างใบลาทดลอง</span><ChevronDown size={20} /></summary>
