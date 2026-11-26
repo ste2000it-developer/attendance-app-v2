@@ -147,6 +147,23 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
   const confirmCloseRef = useRef<HTMLButtonElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dragRef = useRef<SheetDrag | null>(null);
+  const dragTargetRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    const reset = () => {
+      const drag = dragRef.current;
+      const target = dragTargetRef.current;
+      dragRef.current = null;
+      dragTargetRef.current = null;
+      if (drag && target?.hasPointerCapture(drag.pointerId)) target.releasePointerCapture(drag.pointerId);
+      for (const panel of [modalPanelRef.current, pickerPanelRef.current]) {
+        if (!panel) continue;
+        panel.style.transition = '';
+        panel.style.transform = '';
+      }
+    };
+    document.addEventListener('employee-rotation-reset', reset);
+    return () => document.removeEventListener('employee-rotation-reset', reset);
+  }, []);
 
   const visibleRequests = requests.filter((request) => filter === 'all' || request.status === filter);
   const selectedRequest = requests.find((request) => request.id === selectedId);
@@ -281,6 +298,7 @@ export default function LeavePage({ now, onBack }: { now: Date; onBack: () => vo
     if (!panel || panel.getAnimations().some((animation) => animation.playState === 'running')) return;
     panel.style.transition = 'none';
     dragRef.current = { pointerId: event.pointerId, startY: event.clientY, lastY: 0, startedAt: performance.now(), kind };
+    dragTargetRef.current = event.currentTarget;
     event.currentTarget.setPointerCapture(event.pointerId);
   };
   const moveSheetDrag = (event: ReactPointerEvent<HTMLElement>) => {
