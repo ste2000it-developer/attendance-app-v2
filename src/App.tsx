@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth';
 import { auth, googleProvider } from './firebase';
 import {
@@ -26,6 +26,7 @@ import HistoryPage from './HistoryPage';
 import CalendarPage from './CalendarPage';
 import { useSheetSwipe } from './useSheetSwipe';
 import { installEmployeeZoomGuard } from './domain/employeeZoomGuard';
+import { installRotationRecovery } from './domain/employeeRotationRecovery';
 import LeavePage from './LeavePage';
 import ProfilePage from './ProfilePage';
 import {
@@ -88,6 +89,10 @@ function App() {
   const [dialog, setDialog] = useState<Dialog>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const shellRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    if (shellRef.current) return installRotationRecovery(shellRef.current);
+  }, []);
   const [activeTab, setActiveTab] = useState<'home' | 'history' | 'leave' | 'profile'>('home');
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
@@ -332,7 +337,8 @@ function App() {
   );
 
   return (
-    <div className="app-shell" data-period={period} data-view={activeTab} data-calendar-open={calendarOpen ? 'true' : undefined}>
+    <>
+    <div ref={shellRef} className="app-shell" data-period={period} data-view={activeTab} data-calendar-open={calendarOpen ? 'true' : undefined}>
       {/* Remount the fixed color source when theme OR screen changes so iOS
           resamples it without changing the hero or safe-area layout. */}
       <div key={period + '-' + activeTab + (calendarOpen ? '-dimmed' : '')} className="status-bar-tint" aria-hidden="true" />
@@ -570,17 +576,17 @@ function App() {
           </section>
         </div>
       )}
-      {/* Browser tabs cannot reliably lock iPhone rotation. The web-app
-          manifest requests portrait mode when installed; this unobtrusive
-          fallback prevents unusable landscape layouts on phones only. */}
+    </div>
+      {/* Keep the notice outside the shell during viewport recovery. */}
       <div className="portrait-orientation-notice" role="status">
         <span className="portrait-orientation-notice__icon" aria-hidden="true">
           <RotateCcw size={36} strokeWidth={2} />
         </span>
-        <strong>กรุณาหมุนโทรศัพท์เป็นแนวตั้ง</strong>
-        <p>แอปตอกบัตรใช้งานได้ดีที่สุดในแนวตั้ง</p>
+        <strong className="portrait-orientation-notice__landscape">กรุณาหมุนโทรศัพท์เป็นแนวตั้ง</strong>
+        <p className="portrait-orientation-notice__landscape">แอปตอกบัตรใช้งานได้ดีที่สุดในแนวตั้ง</p>
+        <strong className="portrait-orientation-notice__recovering">กำลังจัดหน้าจอใหม่</strong>
       </div>
-    </div>
+    </>
   );
 }
 
