@@ -14,26 +14,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&amp;family=Oxanium:wght@800&amp;display=swap" rel="stylesheet" />
     <title>Attendance — ระบบบันทึกเวลาทำงาน</title>
     <style>
-      #startup-splash{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;overflow:hidden;background:#fff;color:#073b39;font-family:system-ui,-apple-system,sans-serif;isolation:isolate}
-      .startup-brand{position:relative;z-index:1;display:grid;justify-items:center;gap:6px;transform:translateY(-7vh)}
-      .startup-brand svg{width:clamp(108px,34vw,160px);height:auto;display:block}
-      .startup-brand strong{font-size:clamp(28px,7vw,38px);font-weight:750;letter-spacing:-.055em;line-height:1.2}
-      .startup-waves{position:absolute;bottom:0;left:0;width:100%;height:32%;pointer-events:none}
-      .startup-dots{position:absolute;bottom:max(6%,calc(env(safe-area-inset-bottom,0px) + 20px));display:flex;gap:8px}
-      .startup-dots i{display:block;width:7px;height:7px;border-radius:50%;background:#a5e7df;animation:startup-dot 1.05s ease-in-out infinite}
+      #startup-splash{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;overflow:hidden;background:#fff;color:#172d3a;font-family:'Noto Sans Thai',system-ui,-apple-system,sans-serif;isolation:isolate}
+      .startup-brand{position:relative;z-index:1;display:grid;justify-items:center;gap:16px;transform:translateY(-3vh)}
+      .startup-brand svg{width:clamp(140px,48vw,190px);height:auto;display:block}
+      .startup-brand strong{font-size:clamp(29px,8vw,36px);font-weight:800;letter-spacing:-.04em;line-height:1.2}
+
+      .startup-dots{position:absolute;bottom:max(11%,calc(env(safe-area-inset-bottom,0px) + 24px));display:flex;gap:8px}
+      .startup-dots i{display:block;width:7px;height:7px;border-radius:50%;background:#D5EAE3;animation:startup-dot 1.05s ease-in-out infinite}
       .startup-dots i:nth-child(2){animation-delay:.15s}.startup-dots i:nth-child(3){animation-delay:.3s}
-      @keyframes startup-dot{0%,70%,100%{background:#a5e7df}35%{background:#0b7a6b}}
-      @media(prefers-reduced-motion:reduce){.startup-dots i{animation:none}.startup-dots i:nth-child(2){background:#0b7a6b}}
+      @keyframes startup-dot{0%,70%,100%{background:#D5EAE3}35%{background:#078A78}}
+      @media(prefers-reduced-motion:reduce){.startup-dots i{animation:none}.startup-dots i:nth-child(2){background:#078A78}}
     </style>
   </head>
   <body>
     <div id="startup-splash" role="status" aria-label="กำลังเปิด Attendance">
-      <div class="startup-brand"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#008A7B"/><stop offset=".66" stop-color="#08796C"/><stop offset="1" stop-color="#39D9F4"/></linearGradient></defs><path d="M20 79 L44 33 Q50 22 56 33 L80 79" fill="none" stroke="url(#a)" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/><path d="M40 57l3 3m7-8v5m10 0-3 3" fill="none" stroke="#075C57" stroke-width="2.8" stroke-linecap="round"/><path d="m41 71 8 8 12-13" fill="none" stroke="#13D8B4" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/></svg><strong>Attendance</strong></div>
-      <svg class="startup-waves" viewBox="0 0 400 240" preserveAspectRatio="none" aria-hidden="true">
-        <defs><linearGradient id="sw1" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#70E3F0" stop-opacity=".65"/><stop offset="1" stop-color="#DDF9F7" stop-opacity=".25"/></linearGradient><linearGradient id="sw2" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#19BDAE" stop-opacity=".85"/><stop offset="1" stop-color="#E8FCF9" stop-opacity=".20"/></linearGradient></defs>
-        <path d="M0 142C152 196 225 48 400 0V240H0Z" fill="url(#sw1)"/>
-        <path d="M0 176C132 191 245 76 400 88V240H0Z" fill="url(#sw2)"/>
-      </svg>
+      <div class="startup-brand"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="-2 -1 214 161"><path d="M 18 158 C 3 158 -5 148 4 133 L 68 23 C 77 8 89 0 105 0 C 122 0 134 8 143 23 L 207 133 C 216 148 208 158 193 158 L 187 158 C 177 158 171 153 165 143 L 119 61 C 115 54 111 50 105 50 C 99 50 95 54 91 61 L 45 143 C 39 153 33 158 23 158 Z" fill="#078A78"/><path d="M 80 97 L 86 103 M 105 82 L 105 95 M 130 97 L 124 103" stroke="#086259" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M 83 133 L 99 149 L 133 118" stroke="#10CBA7" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg><strong>Attendance</strong></div>
       <div class="startup-dots" aria-hidden="true"><i></i><i></i><i></i></div>
     </div>
     <div id="root"></div>
