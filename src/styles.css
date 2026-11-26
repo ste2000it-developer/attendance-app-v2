@@ -144,7 +144,7 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   padding: calc(25px + env(safe-area-inset-top, 0px)) 23px 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   position: relative;
   gap: 12px;
 }
@@ -794,3 +794,8 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 /* Brand icon replaces the previous clock glyph without changing its geometry. */
 .brand__mark, .hr-brand__icon { overflow: hidden; }
 .brand__mark img, .hr-brand__icon img { display: block; width: 100%; height: 100%; object-fit: contain; }
+
+/* Keep the original home header row height after removing the wordmark. */
+.app-header .header-actions { min-height: 46px; }
+@media (max-width: 480px) { .app-header .header-actions { min-height: 42px; } }
+@media (max-width: 355px) { .app-header .header-actions { min-height: 38px; } }

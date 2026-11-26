@@ -349,13 +349,6 @@ function App() {
           <SkyScene period={period} />
 
           <header className="app-header">
-            <div className="brand">
-              <span className="brand__mark" aria-hidden="true"><img src={import.meta.env.BASE_URL + 'icon.svg'} alt="" /></span>
-              <div className="brand__identity">
-                <strong>Attendance</strong>
-                <span>ระบบบันทึกเวลาทำงาน</span>
-              </div>
-            </div>
             <div className="header-actions">
               <button
                 className="header-icon header-icon--preview"
