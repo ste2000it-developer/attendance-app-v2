@@ -7,14 +7,37 @@
     <meta name="description" content="Attendance App V2 — ระบบบันทึกเวลาทำงานที่ใช้งานง่ายสำหรับทุกวัย" />
     <meta name="apple-mobile-web-app-title" content="Attendance" />
     <link rel="manifest" href="%BASE_URL%manifest.webmanifest" />
-    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%icon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="%BASE_URL%apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&amp;family=Oxanium:wght@800&amp;display=swap" rel="stylesheet" />
     <title>Attendance — ระบบบันทึกเวลาทำงาน</title>
+    <style>
+      #startup-splash{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;overflow:hidden;background:#fff;color:#073b39;font-family:system-ui,-apple-system,sans-serif;isolation:isolate}
+      .startup-brand{position:relative;z-index:1;display:grid;justify-items:center;gap:6px;transform:translateY(-7vh)}
+      .startup-brand svg{width:clamp(108px,34vw,160px);height:auto;display:block}
+      .startup-brand strong{font-size:clamp(28px,7vw,38px);font-weight:750;letter-spacing:-.055em;line-height:1.2}
+      .startup-waves{position:absolute;bottom:0;left:0;width:100%;height:32%;pointer-events:none}
+      .startup-dots{position:absolute;bottom:max(6%,calc(env(safe-area-inset-bottom,0px) + 20px));display:flex;gap:8px}
+      .startup-dots i{display:block;width:7px;height:7px;border-radius:50%;background:#a5e7df;animation:startup-dot 1.05s ease-in-out infinite}
+      .startup-dots i:nth-child(2){animation-delay:.15s}.startup-dots i:nth-child(3){animation-delay:.3s}
+      @keyframes startup-dot{0%,70%,100%{background:#a5e7df}35%{background:#0b7a6b}}
+      @media(prefers-reduced-motion:reduce){.startup-dots i{animation:none}.startup-dots i:nth-child(2){background:#0b7a6b}}
+    </style>
   </head>
   <body>
+    <div id="startup-splash" role="status" aria-label="กำลังเปิด Attendance">
+      <div class="startup-brand"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#008A7B"/><stop offset=".66" stop-color="#08796C"/><stop offset="1" stop-color="#39D9F4"/></linearGradient></defs><path d="M20 79 L44 33 Q50 22 56 33 L80 79" fill="none" stroke="url(#a)" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/><path d="M40 57l3 3m7-8v5m10 0-3 3" fill="none" stroke="#075C57" stroke-width="2.8" stroke-linecap="round"/><path d="m41 71 8 8 12-13" fill="none" stroke="#13D8B4" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/></svg><strong>Attendance</strong></div>
+      <svg class="startup-waves" viewBox="0 0 400 240" preserveAspectRatio="none" aria-hidden="true">
+        <defs><linearGradient id="sw1" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#70E3F0" stop-opacity=".65"/><stop offset="1" stop-color="#DDF9F7" stop-opacity=".25"/></linearGradient><linearGradient id="sw2" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#19BDAE" stop-opacity=".85"/><stop offset="1" stop-color="#E8FCF9" stop-opacity=".20"/></linearGradient></defs>
+        <path d="M0 142C152 196 225 48 400 0V240H0Z" fill="url(#sw1)"/>
+        <path d="M0 176C132 191 245 76 400 88V240H0Z" fill="url(#sw2)"/>
+      </svg>
+      <div class="startup-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+    </div>
     <div id="root"></div>
+    <noscript>กรุณาเปิด JavaScript เพื่อใช้งาน Attendance</noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

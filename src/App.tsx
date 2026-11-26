@@ -350,7 +350,7 @@ function App() {
 
           <header className="app-header">
             <div className="brand">
-              <span className="brand__mark" aria-hidden="true"><Clock3 size={27} strokeWidth={2.2} /></span>
+              <span className="brand__mark" aria-hidden="true"><img src={import.meta.env.BASE_URL + 'icon.svg'} alt="" /></span>
               <div className="brand__identity">
                 <strong>Attendance</strong>
                 <span>ระบบบันทึกเวลาทำงาน</span>

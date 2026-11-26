@@ -210,7 +210,7 @@ export default function HRPreview() {
     <div className="hr-page">
       <aside className="hr-sidebar" aria-label="เมนูจัดการ HR">
         <div className="hr-brand">
-          <span className="hr-brand__icon"><Clock3 size={23} strokeWidth={2.2} /></span>
+          <span className="hr-brand__icon" aria-hidden="true"><img src={import.meta.env.BASE_URL + 'icon.svg'} alt="" /></span>
           <div><strong>Attendance</strong><small>ระบบลงเวลาพนักงาน</small></div>
         </div>
         <div className="hr-sidebar__label">งานประจำวัน</div>
