@@ -5,7 +5,6 @@
  * an input-blocking notice until the portrait viewport has settled.
  */
 const PHONE_LANDSCAPE = '(orientation: landscape) and (max-height: 600px) and (pointer: coarse)';
-const SETTLE_MS = 320;
 type Phase = 'landscape' | 'recovering' | null;
 
 export function isPhoneLandscape(win: Window): boolean {
@@ -26,14 +25,12 @@ export function installRotationRecovery(shell: HTMLElement, win: Window = window
   const viewport = win.visualViewport;
   const screenOrientation = win.screen.orientation;
   let phase: Phase = null;
-  let timer = 0;
   let frame = 0;
   let disposed = false;
 
   const cancelPending = () => {
-    win.clearTimeout(timer);
     win.cancelAnimationFrame(frame);
-    timer = frame = 0;
+    frame = 0;
   };
   const setPhase = (next: Phase) => {
     if (phase === next) return;
@@ -56,32 +53,45 @@ export function installRotationRecovery(shell: HTMLElement, win: Window = window
     viewport?.offsetTop,
   ].join(':');
 
+  // No fixed timeout: restore on the first stable portrait paint.
+  // Orientation events can precede the actual viewport resize on iOS.
   const settle = () => {
-    cancelPending();
     if (disposed) return;
     if (isPhoneLandscape(win)) {
+      cancelPending();
       setPhase('landscape');
       return;
     }
-    if (!phase) return;
+    if (!phase || frame) return;
     setPhase('recovering');
-    // Portrait CSS must be applied while touch is still blocked. Wait for
-    // visualViewport/resize bursts, and verify the layout over two frames.
-    timer = win.setTimeout(() => {
+    let previous: string | null = null;
+
+    const checkFrame = () => {
+      frame = 0;
       if (disposed) return;
       if (isPhoneLandscape(win)) { settle(); return; }
+
+      // Do not release touch while the screen angle reports portrait but
+      // WebKit still exposes landscape geometry. The focused input was
+      // blurred at rotation start, so this also allows the keyboard to close.
+      if (win.innerWidth > win.innerHeight || root.clientWidth > root.clientHeight) {
+        previous = null;
+        frame = win.requestAnimationFrame(checkFrame);
+        return;
+      }
+
       win.scrollTo(0, 0);
-      const before = signature();
       shell.getBoundingClientRect();
-      frame = win.requestAnimationFrame(() => {
-        shell.getBoundingClientRect();
-        frame = win.requestAnimationFrame(() => {
-          if (disposed) return;
-          if (isPhoneLandscape(win) || signature() !== before) { settle(); return; }
-          setPhase(null);
-        });
-      });
-    }, SETTLE_MS);
+      const current = signature();
+      if (current === previous) {
+        setPhase(null);
+        return;
+      }
+      previous = current;
+      frame = win.requestAnimationFrame(checkFrame);
+    };
+
+    frame = win.requestAnimationFrame(checkFrame);
   };
 
   const onResize = () => {
