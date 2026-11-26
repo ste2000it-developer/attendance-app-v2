@@ -39,7 +39,7 @@ function BootReady({ children }: { children: React.ReactNode }) {
         splash.addEventListener('transitionend', onFadeEnd);
         splash.classList.add('is-exiting');
         // Safari can skip transitionend when the app is backgrounded.
-        fadeTimer = window.setTimeout(removeSplash, 300);
+        fadeTimer = window.setTimeout(removeSplash, 420);
       };
       if (remaining > 0) timer = window.setTimeout(finish, remaining);
       else finish();
