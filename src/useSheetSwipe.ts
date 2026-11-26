@@ -1,10 +1,25 @@
-import { useRef, type PointerEvent as ReactPointerEvent } from 'react';
+import { useEffect, useRef, type PointerEvent as ReactPointerEvent } from 'react';
 
 type Gesture = { pointerId: number; startY: number; lastY: number; startTime: number };
 
 /** Dismiss a bottom sheet by dragging its marked handle or heading downward. */
 export function useSheetSwipe(onDismiss: () => void, disabled = false) {
   const gestureRef = useRef<Gesture | null>(null);
+  const activeSheetRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    const reset = () => {
+      const sheet = activeSheetRef.current;
+      const gesture = gestureRef.current;
+      gestureRef.current = null;
+      if (!sheet) return;
+      if (gesture && sheet.hasPointerCapture(gesture.pointerId)) sheet.releasePointerCapture(gesture.pointerId);
+      sheet.style.transition = '';
+      sheet.style.transform = '';
+      activeSheetRef.current = null;
+    };
+    document.addEventListener('employee-rotation-reset', reset);
+    return () => document.removeEventListener('employee-rotation-reset', reset);
+  }, []);
 
   const onPointerDown = (event: ReactPointerEvent<HTMLElement>) => {
     if (disabled || (event.pointerType === 'mouse' && event.button !== 0)) return;
@@ -13,6 +28,7 @@ export function useSheetSwipe(onDismiss: () => void, disabled = false) {
       target.closest('button, a, input, textarea, select, [role="button"]')) return;
     const sheet = event.currentTarget;
     if (sheet.getAnimations().some((animation) => animation.playState === 'running')) return;
+    activeSheetRef.current = sheet;
     sheet.style.transition = 'none';
     gestureRef.current = {
       pointerId: event.pointerId, startY: event.clientY,
