@@ -719,51 +719,58 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
   .app-shell .brand__identity span { display: none; }
 }
 
-/* Normal portrait mode stays pixel-for-pixel unchanged. iOS Safari cannot
-   promise orientation lock from web content; an installed web-app manifest
-   requests portrait, and in landscape phone mode this blocks the rearranged
-   layout with a single clear device-rotation instruction. */
+/* Rotation notice is a sibling of the app; no interactive layers survive
+   the landscape layout. Restore the same React tree before releasing input. */
 .portrait-orientation-notice { display: none; }
-@media screen and (orientation: landscape) and (max-height: 600px) and (pointer: coarse) {
-  .app-shell .portrait-orientation-notice {
-    position: fixed;
-    inset: 0;
-    z-index: 200;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    width: 100vw;
-    height: 100dvh;
-    padding: max(18px, env(safe-area-inset-top, 0px)) max(22px, env(safe-area-inset-right, 0px))
-      max(18px, env(safe-area-inset-bottom, 0px)) max(22px, env(safe-area-inset-left, 0px));
-    background: #f5faf7;
-    color: #234751;
-    text-align: center;
-    overflow: hidden;
-    overscroll-behavior: none;
-  }
-  .portrait-orientation-notice__icon {
-    width: 64px;
-    height: 64px;
-    display: grid;
-    place-items: center;
-    border-radius: 21px;
-    color: #078a78;
-    background: #e2f5ee;
-  }
-  .portrait-orientation-notice strong {
-    font-size: clamp(16px, 2.5vw, 20px);
-    line-height: 1.5;
-    font-weight: 800;
-  }
-  .portrait-orientation-notice p {
-    margin: 0;
-    font-size: 13px;
-    line-height: 1.55;
-    color: #617b80;
-  }
+:root[data-employee-rotation] { overflow: hidden; }
+:root[data-employee-rotation] body { padding: 0; overflow: hidden; }
+:root[data-employee-rotation="landscape"] .app-shell { display: none; }
+:root[data-employee-rotation="recovering"] .app-shell {
+  visibility: hidden;
+  pointer-events: none;
+}
+:root[data-employee-rotation] .portrait-orientation-notice {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 100dvh;
+  padding: max(18px, env(safe-area-inset-top, 0px)) max(22px, env(safe-area-inset-right, 0px))
+    max(18px, env(safe-area-inset-bottom, 0px)) max(22px, env(safe-area-inset-left, 0px));
+  background: #f5faf7;
+  color: #234751;
+  text-align: center;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+  pointer-events: auto;
+}
+:root[data-employee-rotation="landscape"] .portrait-orientation-notice__recovering,
+:root[data-employee-rotation="recovering"] .portrait-orientation-notice__landscape { display: none; }
+.portrait-orientation-notice__icon {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border-radius: 21px;
+  color: #078a78;
+  background: #e2f5ee;
+}
+.portrait-orientation-notice strong {
+  font-size: clamp(16px, 2.5vw, 20px);
+  line-height: 1.5;
+  font-weight: 800;
+}
+.portrait-orientation-notice p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #617b80;
 }
 
 /* Stop the browser from interpreting two-finger gestures as page zoom.
