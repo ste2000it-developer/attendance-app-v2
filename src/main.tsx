@@ -8,7 +8,7 @@ const showHRPreview = new URLSearchParams(window.location.search).get('hr-previe
 
 // Brief brand reveal, counted from the first splash frame rather than
 // adding a fixed delay after the application has loaded.
-const MIN_SPLASH_MS = 800;
+const MIN_SPLASH_MS = 1800;
 function BootReady({ children }: { children: React.ReactNode }) {
   React.useLayoutEffect(() => {
     const splash = document.getElementById('startup-splash');
