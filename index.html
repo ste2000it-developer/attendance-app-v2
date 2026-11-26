@@ -38,6 +38,12 @@
     </div>
     <div id="root"></div>
     <noscript>กรุณาเปิด JavaScript เพื่อใช้งาน Attendance</noscript>
+    <script>
+      requestAnimationFrame(function () {
+        var splash = document.getElementById('startup-splash');
+        if (splash) splash.dataset.firstFrame = String(performance.now());
+      });
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

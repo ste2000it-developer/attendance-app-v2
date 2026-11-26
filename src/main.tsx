@@ -6,10 +6,33 @@ import './styles.css';
 const HRPreview = React.lazy(() => import('./HRPreview'));
 const showHRPreview = new URLSearchParams(window.location.search).get('hr-preview') === '1';
 
-// Remove the static splash on the first real application commit, not a timer.
+// Brief brand reveal, counted from the first splash frame rather than
+// adding a fixed delay after the application has loaded.
+const MIN_SPLASH_MS = 800;
 function BootReady({ children }: { children: React.ReactNode }) {
   React.useLayoutEffect(() => {
-    document.getElementById('startup-splash')?.remove();
+    const splash = document.getElementById('startup-splash');
+    if (!splash) return;
+    const appRoot = document.getElementById('root');
+    if (appRoot) appRoot.inert = true;
+    let timer = 0;
+    const frame = window.requestAnimationFrame(() => {
+      const now = performance.now();
+      const recorded = Number(splash.dataset.firstFrame);
+      const started = Number.isFinite(recorded) ? recorded : now;
+      const remaining = Math.max(0, MIN_SPLASH_MS - (now - started));
+      const finish = () => {
+        splash.remove();
+        if (appRoot) appRoot.inert = false;
+      };
+      if (remaining > 0) timer = window.setTimeout(finish, remaining);
+      else finish();
+    });
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+      if (appRoot) appRoot.inert = false;
+    };
   }, []);
   return <>{children}</>;
 }
