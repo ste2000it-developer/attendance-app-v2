@@ -42,7 +42,9 @@ export function installRotationRecovery(shell: HTMLElement, win: Window = window
       root.dataset.employeeRotation = next;
       shell.inert = true;
       const focused = doc.activeElement;
-      if (focused instanceof HTMLElement && shell.contains(focused)) focused.blur();
+      if (focused && shell.contains(focused) && typeof (focused as HTMLElement).blur === 'function') (focused as HTMLElement).blur();
+      // Cancel in-flight sheet drags before hiding their layout.
+      doc.dispatchEvent(new Event('employee-rotation-reset'));
     } else {
       delete root.dataset.employeeRotation;
       shell.inert = false;
