@@ -12,14 +12,14 @@ function setup({ width = 402, height = 874, angle = 0, coarse = true } = {}) {
   const media = new EventTarget();
   const vv = new EventTarget();
   Object.assign(vv, { width, height, scale: 1, offsetLeft: 0, offsetTop: 0 });
-  const timers = new Map(), frames = new Map();
+  const frames = new Map();
   let id = 0;
   Object.assign(win, {
     innerWidth: width, innerHeight: height, orientation: angle,
     screen: { width, height }, visualViewport: vv,
     matchMedia: query => query === '(pointer: coarse)' ? { matches: coarse } : media,
-    setTimeout: fn => { timers.set(++id, fn); return id; },
-    clearTimeout: key => timers.delete(key),
+    setTimeout: () => { throw new Error('Rotation recovery must not use a fixed timer'); },
+    clearTimeout: () => {},
     requestAnimationFrame: fn => { frames.set(++id, fn); return id; },
     cancelAnimationFrame: key => frames.delete(key),
     scrollTo: () => {},
@@ -32,9 +32,9 @@ function setup({ width = 402, height = 874, angle = 0, coarse = true } = {}) {
     win.dispatchEvent(new Event('orientationchange'));
     win.dispatchEvent(new Event('resize'));
   };
-  return { win, doc, root, shell, vv, timers, frames, rotate,
-    settle: () => { flush(timers); flush(frames); flush(frames); },
-    tick: () => flush(timers), frame: () => flush(frames) };
+  return { win, doc, root, shell, vv, frames, rotate,
+    settle: () => { flush(frames); flush(frames); },
+    frame: () => flush(frames) };
 }
 
 test('landscape blocks the shell; portrait keeps input inert until a stable layout', () => {
@@ -47,7 +47,7 @@ test('landscape blocks the shell; portrait keeps input inert until a stable layo
   t.rotate(0, 402, 874);
   assert.equal(t.root.dataset.employeeRotation, 'recovering');
   assert.equal(t.shell.inert, true);
-  t.tick(); t.frame();
+  t.frame();
   assert.equal(t.shell.inert, true);
   t.frame();
   assert.equal(t.shell.inert, false);
@@ -60,7 +60,7 @@ test('a second rotation cancels pending restoration', () => {
   const stop = installRotationRecovery(t.shell, t.win);
   t.rotate(90, 874, 402);
   t.rotate(0, 402, 874);
-  t.tick(); t.frame();
+  t.frame();
   t.rotate(-90, 874, 402);
   t.settle();
   assert.equal(t.root.dataset.employeeRotation, 'landscape');
@@ -85,4 +85,35 @@ test('initial landscape, cleanup, keyboard and desktop behavior', () => {
   assert.equal(isPhoneLandscape(phone.win), false);
   const desktop = setup({ width: 1400, height: 800, angle: 90, coarse: false });
   assert.equal(isPhoneLandscape(desktop.win), false);
+});
+
+test('portrait orientation event cannot unlock the old landscape viewport', () => {
+  const t = setup();
+  const stop = installRotationRecovery(t.shell, t.win);
+  t.rotate(90, 874, 402);
+  t.win.orientation = 0;
+  t.win.dispatchEvent(new Event('orientationchange'));
+  t.frame(); t.frame(); t.frame();
+  assert.equal(t.shell.inert, true);
+  t.rotate(0, 402, 874);
+  t.frame();
+  t.vv.height = 810;
+  t.vv.dispatchEvent(new Event('resize'));
+  t.frame();
+  assert.equal(t.shell.inert, true);
+  t.frame();
+  assert.equal(t.shell.inert, false);
+  stop();
+});
+test('unchanged resize events do not restart the recovery', () => {
+  const t = setup();
+  const stop = installRotationRecovery(t.shell, t.win);
+  t.rotate(90, 874, 402);
+  t.rotate(0, 402, 874);
+  t.frame();
+  t.win.dispatchEvent(new Event('resize'));
+  t.vv.dispatchEvent(new Event('resize'));
+  t.frame();
+  assert.equal(t.shell.inert, false);
+  stop();
 });
