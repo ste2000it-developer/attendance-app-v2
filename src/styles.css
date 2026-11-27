@@ -799,3 +799,58 @@ button:focus-visible { outline: 3px solid #f1ad30; outline-offset: 3px; }
 .app-header .header-actions { min-height: 46px; }
 @media (max-width: 480px) { .app-header .header-actions { min-height: 42px; } }
 @media (max-width: 355px) { .app-header .header-actions { min-height: 38px; } }
+
+
+/* Employee visual polish — do not change Home geometry or time-aware theme. */
+.app-shell:not([data-period="night"]) .leave-page,
+.app-shell:not([data-period="night"]) .profile-page {
+  --lv-bg: #ffffff;
+  --pf-bg: #ffffff;
+  --lv-line: #dce8e5;
+  --pf-line: #dce8e5;
+  --lv-muted: #536d77;
+  --pf-muted: #536d77;
+  --lv-accent: #087d78;
+  --pf-accent: #087d78;
+}
+.app-shell :is(.history-heading, .leave-heading, .profile-heading) h1 {
+  font-size: 20px; line-height: 1.4; font-weight: 800;
+}
+.app-shell :is(.history-heading, .leave-heading, .profile-heading) p { line-height: 1.5; }
+.app-shell :is(.history-heading__back,.leave-heading__back,.profile-heading__back,
+.history-heading__icon,.leave-heading__icon,.profile-heading__icon) {
+  width: 44px; height: 44px; flex: 0 0 44px; border-radius: 12px;
+}
+.app-shell .profile-hero, .app-shell .leave-hero { box-shadow: none; }
+.app-shell .profile-details__row strong { min-width: 0; overflow-wrap: anywhere; }
+.app-shell .profile-shortcut__body strong { font-size: 14px; }
+.app-shell .profile-shortcut__body small { font-size: 12px; }
+.app-shell .history-timecard__stamp { font-variant-numeric: tabular-nums; }
+.app-shell .history-timecard__row--entry { min-width: 0; }
+.app-shell .leave-request__main strong { overflow-wrap: anywhere; }
+.app-shell .leave-filter { min-height: 42px; }
+.app-shell .bottom-nav__item:focus-visible,
+.app-shell :is(.history-page,.calendar-page,.leave-page,.profile-page) button:focus-visible,
+.app-shell [role="dialog"] :is(button,input,select,textarea):focus-visible {
+  outline: 2px solid var(--accent, #078a78); outline-offset: 2px;
+}
+.app-shell [role="dialog"] { overscroll-behavior: contain; }
+.app-shell :is(.calendar-popup-overlay,.calendar-day-overlay,.leave-modal-overlay,
+.leave-picker-overlay,.leave-type-overlay,.leave-confirm-overlay,.history-popup-overlay,.dialog-backdrop) {
+  overscroll-behavior: contain;
+}
+@supports selector(:has(*)) {
+  /* Overlays may be siblings of the scroller or inside a page.
+     Preserve the current scroll position, and keep background taps/scroll locked. */
+  .app-shell:has(:is(.calendar-popup-overlay,.leave-modal-overlay,.dialog-backdrop,.history-popup-overlay)) .app-scroll {
+    overflow-y: hidden;
+    overscroll-behavior: none;
+  }
+  .app-shell:has(:is(.calendar-popup-overlay,.leave-modal-overlay,.dialog-backdrop,.history-popup-overlay)) .bottom-nav {
+    pointer-events: none;
+  }
+  .app-shell:has(.calendar-day-overlay) .calendar-popup { overflow-y: hidden; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-shell { transition: none; }
+}

@@ -520,3 +520,111 @@ body.hr-admin-active, body.hr-admin-active #root { background: #f7faf8 !importan
 @media (min-width: 1051px) {
   .hr-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
+
+
+/* Final polish — shared visual rhythm, readable data and responsive workspace.
+   Keep the original routes, forms and business rules intact. */
+html.hr-admin-active,
+body.hr-admin-active,
+body.hr-admin-active #root {
+  height: auto;
+  min-height: 100%;
+  overflow: visible;
+  overscroll-behavior-y: auto;
+  background: #ffffff !important;
+}
+body.hr-admin-active #root { min-height: 100dvh; }
+.hr-page {
+  --hr-bg: #ffffff;
+  --hr-muted: #526b75;
+  --hr-border: #dbe5e2;
+  background: var(--hr-bg);
+}
+.hr-page .hr-workspace, .hr-page .hr-content-area,
+.hr-page .hr-content, .hr-page .hr-card { min-width: 0; }
+.hr-page .hr-card { border-color: var(--hr-border); box-shadow: none; }
+.hr-page .hr-today { background: #edf8f3; border-radius: 16px; }
+.hr-page .hr-task-grid button { box-shadow: none; }
+.hr-page .hr-brand__icon { box-shadow: none; }
+.hr-page .hr-card-heading > div { min-width: 0; overflow-wrap: anywhere; }
+.hr-page .hr-header > div:first-child { min-width: 0; overflow-wrap: anywhere; }
+.hr-page .hr-card h3 { line-height: 1.45; }
+.hr-page .hr-card label { color: #354f59; font-size: 14px; min-width: 0; }
+.hr-page .hr-card input:not([type="checkbox"]):not([type="radio"]),
+.hr-page .hr-card select {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  font-size: 16px;
+  font-weight: 550;
+  border-color: #ccdcd7;
+}
+.hr-page .hr-card select,
+.hr-page .hr-card select:focus {
+  appearance: none;
+  background-color: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%234f7b77' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 18px 18px;
+  padding-right: 40px;
+}
+.hr-page .hr-card input::placeholder { color: #697e85; }
+.hr-page .hr-primary, .hr-page .hr-secondary { min-height: 48px; font-size: 15px; }
+.hr-page .hr-text-button { min-height: 40px; font-size: 13px; }
+.hr-page .hr-icon-button { width: 44px; height: 44px; }
+.hr-page .hr-table-wrap {
+  border: 1px solid #dbe5e2;
+  border-radius: 12px;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: auto;
+}
+.hr-page .hr-table-wrap table { font-size: 14px; font-variant-numeric: tabular-nums; }
+.hr-page .hr-table-wrap th {
+  background: #eff6f2;
+  color: #3c5962;
+  font-size: 13px;
+  border-top: 0;
+  border-bottom: 1px solid #dbe5e2;
+  border-radius: 0;
+}
+.hr-page .hr-table-wrap td { border-color: #e1e9e6; padding: 13px 12px; }
+.hr-page .hr-table-wrap th:not(:last-child),
+.hr-page .hr-table-wrap td:not(:last-child) { border-right: 1px solid #e1e9e6; }
+.hr-page .hr-table-wrap tbody tr:nth-child(even) { background: #f9fcfa; }
+.hr-page .hr-table-wrap tbody tr:hover { background: #eff8f3; }
+.hr-page .hr-table-wrap td small { color: #596f79; }
+.hr-page .hr-table-wrap:focus-visible { outline: 2px solid #078a78; outline-offset: 2px; }
+.hr-page .hr-table-actions { min-width: 125px; }
+.hr-page .hr-empty-state { background: #fbfdfc; }
+.hr-page .hr-inline-tip { flex-wrap: wrap; }
+.hr-page .hr-header__actions { flex-wrap: wrap; }
+.hr-page .hr-year-months button { min-width: 0; }
+.hr-page .hr-year-months strong { overflow-wrap: anywhere; }
+@media (min-width: 781px) and (max-width: 1050px) {
+  .hr-page .hr-detail-grid, .hr-page .hr-day-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 780px) {
+  .hr-page .hr-mobile-tabs { top: env(safe-area-inset-top, 0px); }
+  .hr-page .hr-header { padding-top: calc(23px + env(safe-area-inset-top, 0px)); }
+  .hr-page .hr-content-area { padding-bottom: env(safe-area-inset-bottom, 0px); }
+}
+@media (max-width: 540px) {
+  .hr-page .hr-header { flex-wrap: wrap; gap: 10px; padding-top: calc(18px + env(safe-area-inset-top, 0px)); }
+  .hr-page .hr-header__actions { padding: 0; }
+  .hr-page .hr-card-heading--actions { flex-wrap: wrap; }
+  .hr-page .hr-card-heading--actions > .hr-primary,
+  .hr-page .hr-card-heading--actions > .hr-secondary { max-width: 100%; }
+  .hr-page .hr-mobile-tabs {
+    display: grid; grid-template-columns: repeat(3,minmax(0,1fr));
+    gap: 5px; padding: 8px 12px;
+  }
+  .hr-page .hr-mobile-tabs button { min-width: 0; min-height: 44px; padding: 8px 4px; gap: 4px; justify-content: center; font-size: 12px; }
+  .hr-page .hr-mobile-tabs button svg { flex-shrink: 0; width: 16px; height: 16px; }
+  .hr-page .hr-mobile-tabs .hr-nav-count { min-width: 18px; height: 18px; font-size: 10px; padding: 0 3px; }
+  .hr-page .hr-stats { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; }
+  .hr-page .hr-stats article { min-width: 0; padding: 11px 7px; }
+  .hr-page .hr-stats article > span { font-size: 11px; overflow-wrap: anywhere; }
+}

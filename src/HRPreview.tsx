@@ -52,8 +52,12 @@ function showShift(shift: DayShift): string {
 }
 export default function HRPreview() {
   useEffect(() => {
+    document.documentElement.classList.add('hr-admin-active');
     document.body.classList.add('hr-admin-active');
-    return () => document.body.classList.remove('hr-admin-active');
+    return () => {
+      document.documentElement.classList.remove('hr-admin-active');
+      document.body.classList.remove('hr-admin-active');
+    };
   }, []);
   const [tab, setTab] = useState<Tab>('overview');
   const [showEmployeeForm, setShowEmployeeForm] = useState(false);
@@ -355,7 +359,7 @@ export default function HRPreview() {
             </div> : !filteredEmployees.length ? <div className="hr-empty-state">
               <Search size={25} /><strong>ไม่พบพนักงานที่ค้นหา</strong>
               <button type="button" className="hr-secondary" onClick={() => setEmployeeQuery('')}>ล้างคำค้นหา</button>
-            </div> : <div className="hr-table-wrap">
+            </div> : <div className="hr-table-wrap" role="region" aria-label="รายชื่อพนักงาน" tabIndex={0}>
               <table><thead><tr><th>พนักงาน</th><th>แผนก / ตำแหน่ง</th><th>เวลาทำงาน</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
                 <tbody>{filteredEmployees.map(employee => <tr key={employee.id}>
                   <td><strong className="hr-table-main">{employee.firstName} {employee.lastName}</strong>
@@ -478,7 +482,7 @@ export default function HRPreview() {
             {!shifts.length ? <div className="hr-empty-state"><CalendarDays size={26} />
               <strong>ยังไม่ได้กำหนดตารางเพิ่มเติม</strong>
               <p>เลือกพนักงานด้านบน แล้วกดกำหนดตารางวันนี้</p></div> :
-              <div className="hr-table-wrap"><table>
+              <div className="hr-table-wrap" role="region" aria-label="ตารางงาน" tabIndex={0}><table>
                 <thead><tr><th>พนักงาน</th><th>วันที่</th><th>ตาราง</th><th>จัดการ</th></tr></thead>
                 <tbody>{shifts.map(item => <tr key={item.employeeId + item.shift.date}>
                   <td>{selectedName(item.employeeId)}</td><td>{prettyDate(item.shift.date)}</td>
@@ -551,7 +555,7 @@ export default function HRPreview() {
                 'เมื่อมีคำขอลา รายการจะแสดงที่นี่เพื่อให้ตรวจสอบได้'}</p>
               {leaveFilter === 'pending' && leaves.length > 0 &&
                 <button type="button" className="hr-secondary" onClick={() => setLeaveFilter('all')}>ดูใบลาทั้งหมด</button>}
-            </div> : <div className="hr-table-wrap">
+            </div> : <div className="hr-table-wrap" role="region" aria-label="คำขอลา" tabIndex={0}>
               <table><thead><tr><th>พนักงาน</th><th>ประเภท</th><th>ช่วงวันที่</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
                 <tbody>{filteredLeaves.map(request => <tr key={request.id}>
                   <td><strong className="hr-table-main">{selectedName(request.employeeId)}</strong></td>
@@ -699,7 +703,7 @@ export default function HRPreview() {
                   onClick={() => setShowPunchForm(true)}><Plus size={17} /> เพิ่มเวลาทดลอง</button>
               </div>
               {!selected ? <div className="hr-empty-state"><Users size={25} />
-                <strong>เลือกพนักงานก่อน</strong></div> : <div className="hr-table-wrap">
+                <strong>เลือกพนักงานก่อน</strong></div> : <div className="hr-table-wrap" role="region" aria-label="บัตรตอกเวลาประจำเดือน" tabIndex={0}>
                 <table><thead><tr><th>วันที่</th><th>เข้า</th><th>ออก</th><th>สาย (นาที)</th><th>OT</th></tr></thead>
                   <tbody>{monthlyTimecard(year, month, filteredPunches).map(row => {
                   const shift = effectiveShift(row.date, selected.workPattern, holidaySet,
